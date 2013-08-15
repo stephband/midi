@@ -5,6 +5,12 @@ implementation that provides filtering for incoming MIDI messages to make
 routing a little easier.
 
 
+## Warning
+
+MIDI is at version 0.1. Only some of what is described below actually works.
+And it may change.
+
+
 ### MIDI()
 
     MIDI().then(function(midi) {
