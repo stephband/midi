@@ -28,7 +28,6 @@ To listen to a single MIDI port, pass in the port's name or index.
 
 
 ### input.on(fn)
-### input.on(filterObj, fn)
 
 Subscibes to incoming MIDI messages, firing a callback function when a message
 is received.
@@ -36,6 +35,8 @@ is received.
     input.on(function(e) {
     	// Do something
     });
+
+### input.on(filterObj, fn)
 
 To filter incoming messages, pass in a filter object as the first argument:
 
@@ -80,7 +81,6 @@ Sends a message to the output port.
 
 
 ### midi.route(inputFilter, outputDefinition)
-### midi.route(inputFilter, fn)
 
 Routes MIDI messages from the filtered input to the defined output. Messages not
 matching the input filter are ignored. Parameters not defined in the output
@@ -99,6 +99,8 @@ definition are passed through unaltered.
     
     // Take notes from Port 1, Channel 1, route them to the IAC 1, Channel 2
     midi.route(inputFilter, outputDefinition);
+
+### midi.route(inputFilter, fn)
 
 Where a callback function is given, the callback's first argument is the
 incoming event, and it's return value is sent to the output. Where the
