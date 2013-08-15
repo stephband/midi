@@ -10,6 +10,8 @@ routing a little easier.
 MIDI is at version 0.1. Only some of what is described below actually works.
 And it may change.
 
+Also, at this point only Chrome Canary has native MIDI support.
+
 
 ### MIDI()
 
