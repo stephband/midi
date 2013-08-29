@@ -267,7 +267,7 @@ var MIDI = (function(undefined) {
 	    	'F',
 	    	'F♯',
 	    	'G',
-	    	'A♯',
+	    	'G♯',
 	    	'A',
 	    	'B♭',
 	    	'B'
