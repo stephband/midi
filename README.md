@@ -28,8 +28,20 @@ Subscribe to all incoming MIDI messages on all ports, firing the callback
 handler when a message is received:
 
     midi.on(function(e) {
-    	// Do something
+    	// Do something with the midimessage
     });
+
+The event object <code>e</code> is an enhanced version of the standard WebMIDI
+event object. Using the standard object as a prototype, it also exposes the
+properties:
+
+    {
+        port:    alias to e.target, the incoming MIDI port
+        channel: number (1-16)
+        message: string (MIDI message type)
+        data1:   number (0-127)
+        data2:   number (0-127)
+    }
 
 To filter incoming messages, pass in a filter object as the first argument:
 
