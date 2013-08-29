@@ -1,5 +1,7 @@
 var MIDI = (function(undefined) {
-	var eventNames = [
+	var debug = true;
+
+	var types = [
 	    	'noteoff',
 	    	'noteon',
 	    	'polytouch',
@@ -9,105 +11,248 @@ var MIDI = (function(undefined) {
 	    	'pitch'
 	    ],
 
-	    observers = [];
+	    empty = {},
+
+	    // Maintain a list of listeners for each input, indexed by input id.
+	    listeners = {},
+
+	    // Keep a reference to the MIDIAccess promise.
+	    promise;
 
 
-	function findType(n, v) {
-		var name = eventNames[Math.floor(n / 16) - 8]
+	function returnType(data) {
+		var name = types[Math.floor(data[0] / 16) - 8];
 	
-		// Catch noteons with zero velocity and rename them as noteoffs
-		return name === eventNames[1] && v === 0 ?
-			eventNames[0] :
+		// Catch type noteon with zero velocity and rename it as noteoff
+		return name === types[1] && data[2] === 0 ?
+			types[0] :
 			name ;
 	}
 
-	function findChannel(n) {
-		return n % 16 + 1;
+	function returnChannel(data) {
+		return data[0] % 16 + 1;
 	}
 
-	function logMessage(e) {
-		console.log(e.data, e);
+	function onNoteOff(fn) {
+		var input = this.target,
+		    data = this.data;
+		
+		function noteoff(e) {
+			if (data[1] === e.data[1] &&
+			    returnType(e.data) === types[0]) {
+				fn();
+				input.removeEventListener('midimessage', noteoff);
+			}
+		}
+
+		input.addEventListener('midimessage', noteoff);
 	}
 
-	function routeMessage(e) {
-		//console.log(e);
-
-		var type = findType(e.data[0], e.data[2]);
-		var ch = findChannel(e.data[0]);
-		var time = e.receivedTime;
-
-		trigger(type, ch, e.data[1], e.data[2], time);
+	function note() {
+		var number = this.data[1];
+		return MIDI.numberToNote(number) + MIDI.numberToOctave(number);
 	}
 
-	function listen(input) {
-		input.onmidimessage = route_message;
+	function createFilter(input, listeners, undefined) {
+		return function(e) {
+			var l = listeners.length,
+			    n = -1,
+			    data = e.data,
+			    pair, channel, type, event;
+
+			// Loop through filter/fn pairs and test the incoming event data
+			// against the filters, caching channel and type for speed. Only
+			// create an event object at the point that it is needed.
+			while (++n < l) {
+				pair = listeners[n];
+				filter = pair[0];
+
+				if (filter.channel) {
+					if (channel === undefined) {
+						channel = returnChannel(data);
+					}
+
+					if (typeof filter.channel === 'number') {
+						if (filter.channel !== channel) {
+							continue;
+						}
+					}
+					else {
+						if (!filter.channel(channel)) {
+							continue;
+						}
+					}
+				}
+
+				if (filter.message) {
+					if (type === undefined) {
+						type = returnType(data);
+					}
+
+					if (typeof filter.message === 'string') {
+						if (filter.message !== type) {
+							continue;
+						}
+					}
+					else {
+						if (!filter.message(type)) {
+							continue;
+						}
+					}
+				}
+
+				if (filter.data1) {
+					if (typeof filter.data1 === 'number') {
+						if (filter.data1 !== data[1]) {
+							continue;
+						}
+					}
+					else {
+						if (!filter.data1(data[1])) {
+							continue;
+						}
+					}
+				}
+
+				if (filter.data2) {
+					if (typeof filter.data2 === 'number') {
+						if (filter.data2 !== data[2]) {
+							continue;
+						}
+					}
+					else {
+						if (!filter.data2(data[2])) {
+							continue;
+						}
+					}
+				}
+
+				if (!event) {
+					event = Object.create(e);
+
+					event.port = input;
+					event.data1 = data[1];
+					event.data2 = data[2];
+					event.channel = channel = channel || returnChannel(data);
+					event.message = type    = type    || returnType(data);
+
+					if (type === types[1]) {
+						event.note = note;
+						event.velocity = data[2];
+						event.noteoff = onNoteOff;
+					}
+				}
+
+				// Call the filtered callback
+				pair[1](event);
+			}
+		};
 	}
 
-	function pass(midi) {
-		console.log(midi, midi.inputs());
 
-		var inputs = midi.inputs();
+	function addEvent(input, filter, fn) {
+		// Only bind once to each input, then maintain a list of filter/fn
+		// listeners that we loop through on incoming events.
+		if (!listeners[input.id]) {
+			listeners[input.id] = [];
+			input.addEventListener('midimessage', createFilter(input, listeners[input.id]));
+		}
 
-		inputs.forEach(listen);
+		listeners[input.id].push([filter, fn]);
 	}
 
-	function fail(msg) {
-		console.log( "Failed to get MIDI access - " + msg );
+	function createMidi(midiAccess) {
+		return {
+			inputs: midiAccess.inputs.bind(midiAccess),
+			outputs: midiAccess.outputs.bind(midiAccess),
+
+			input: function(name) {
+				var inputs = midiAccess.inputs(),
+				    i = inputs.length;
+
+				if (typeof name === 'number') {
+					return inputs[name];
+				}
+
+				while (i--) {
+					if (inputs[i].name === name) {
+						return inputs[i];
+					}
+				}
+			},
+
+			output: function(name) {
+				var inputs = midiAccess.inputs(),
+				    i = inputs.length;
+
+				if (typeof name === 'number') {
+					return inputs[name];
+				}
+
+				while (i--) {
+					if (inputs[i].name === name) {
+						return inputs[i];
+					}
+				}
+			},
+
+			on: function(filter, fn) {
+				if (!fn) {
+					fn = filter;
+					filter = empty;
+				}
+
+				if (filter.port) {
+					addEvent(this.input(filter.port), filter, fn);
+				}
+				else {
+					this.inputs().forEach(function(input) {
+						addEvent(input, filter, fn);
+					});
+				}
+
+				return this;
+			},
+
+			send: function(fn) {
+				return this;
+			}
+		};
+	}
+
+	function request(resolver) {
+		function resolve(midiAccess) {
+			var midi = createMidi(midiAccess);
+			resolver.resolve(midi);
+		}
+
+		function reject(error) {
+			console.log( "MIDI access rejected", error);
+			resolver.reject(error);
+		}
+
+		navigator
+		.requestMIDIAccess()
+		.then(resolve, reject);
 	}
 
 	function MIDI() {
-		navigator.requestMIDIAccess().then(pass, fail);
+		// While DOM Promise is behind a flag, requestMIDIAccess doesn't return
+		// an object that has chainable .then()s, as a real promise should, so
+		// wrap it in a real promise.
+		promise = promise || new Promise(request);
+
+		return promise;
 	}
 
-	function isMatch(val, con) {
-		// Test for equality, otherwise if con is not a number or string 
-		// assume it's a function and call it.
-		return val === con || (!/^num|str/.test(typeof con) && con(val));
-	}
-
-	function trigger(type, chan, num, val, time) {
-		var args = arguments;
-
-		observers.forEach(function(observer) {
-			var l = observer.length - 1,
-			    i = -1;
-
-			while (++i < l) {
-				if (!isMatch(args[i], observer[i])) {
-					return;
-				};
-			}
-
-			return observer[i](type, chan, num, val, time);
-		});
-	};
-
-	MIDI.on = function(type, chan, num, val, fn) {
-		var args = Array.prototype.slice.apply(arguments);
-		observers.push(args);
-	};
-
-	MIDI.off = function(type, chan, num, val, fn) {
-		var args = arguments;
-
-		observers = observers.filter(function(observer) {
-			var l = observer.length,
-			    i = -1;
-
-			while (++i < l) {
-				if (!isMatch(args[i], observer[i])) {
-					return false;
-				};
-			}
-		});
-	};
-
-	MIDI.settings = {
-		eventNames: eventNames
-	};
+	MIDI.eventTypes = types;
 
 	return MIDI;
 })();
+
+
+
+
 
 
 // Extend MIDI with some helper functions for handling notes.
@@ -158,30 +303,30 @@ var MIDI = (function(undefined) {
 		return Math.round(n * factor) / factor;
 	}
 
-	function nameToNote(str) {
+	function noteToNumber(str) {
 		var r = rnote.exec(str);
 		return parseInt(r[2]) * 12 + noteTable[r[1]];
 	}
 
-	function noteToName(n) {
-		return note_names[n % 12];
+	function numberToNote(n) {
+		return noteNames[n % 12];
 	}
 
-	function noteToOctave(n) {
+	function numberToOctave(n) {
 		return Math.floor(n / 12) - (5 - middle);
 	}
 
-	function noteToFrequency(n) {
+	function numberToFrequency(n) {
 		return round(pitch * Math.pow(1.059463094359, (n + 3 - (middle + 2) * 12)));
 	}
 
-	MIDI.settings.pitch = 440;
-	MIDI.settings.middle = 3;
+	MIDI.pitch = 440;
+	MIDI.middle = 3;
 
 	//MIDI.noteNames = noteNames;
 	//MIDI.noteTable = noteTable;
-	MIDI.nameToNote = nameToNote;
-	MIDI.noteToName = noteToName;
-	MIDI.noteToOctave = noteToOctave;
-	MIDI.noteToFrequency = noteToFrequency;
+	MIDI.noteToNumber = noteToNumber;
+	MIDI.numberToNote = numberToNote;
+	MIDI.numberToOctave = numberToOctave;
+	MIDI.numberToFrequency = numberToFrequency;
 })(MIDI);
