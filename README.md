@@ -64,7 +64,7 @@ The filter object can take functions as properties:
     });
 
 
-The full list of properties a filter object takes is:
+A filter object understands the following properties:
 
     {
         port:    number (port number) | string (port name)
@@ -82,30 +82,34 @@ Sends a message.
 
 ### midi.input([string | number])
 
-Returns an object that represents an incoming MIDI port. Pass in the port's name
-or index.
+Returns an object that represents an incoming MIDI port. Pass in the port's
+name:
 
     var input = midi.input('Port 1');
+
+or index:
 
     var input = midi.input(0);
 
 
 ### midi.output([string | number])
 
-Returns an object that represents an outgoing MIDI port. Pass in the port's name
-or index.
+Returns an object that represents an outgoing MIDI port. Pass in the port's
+name:
 
     var output = midi.output('IAC 1');
+
+or index:
 
     var output = midi.output(0);
 
 
 ### Event names
 
-    noteoff
-    noteon
-    polytouch
-    cc
-    pc
-    channeltouch
-    pitch
+    'noteoff'
+    'noteon'
+    'polytouch'
+    'cc'
+    'pc'
+    'channeltouch'
+    'pitch'
