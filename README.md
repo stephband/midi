@@ -22,8 +22,7 @@ the browser's MIDI bridge becomes available.
     });
 
 
-### midi.on(fn)
-### midi.on(filterObj, fn)
+### midi.on(fn)<br/>midi.on(filterObj, fn)
 
 Subscibes to all incoming MIDI messages on all ports, firing the callback
 handler when a message is received.
