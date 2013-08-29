@@ -13,12 +13,12 @@ Promises or a suitable polyfill to be enabled.
 
 ### MIDI()
 
+MIDI() returns a DOM Promise that is given the value of <code>midi</code> when
+the browser's MIDI bridge becomes available.
+
     MIDI()
     .then(function(midi) {
         // Do something with midi
-    })
-    .catch(function(error) {
-        // Catch errors
     });
 
 
