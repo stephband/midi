@@ -330,3 +330,8 @@ var MIDI = (function(undefined) {
 	MIDI.numberToOctave = numberToOctave;
 	MIDI.numberToFrequency = numberToFrequency;
 })(MIDI);
+
+
+if (!this.window) {
+	module.exports = MIDI;
+}
