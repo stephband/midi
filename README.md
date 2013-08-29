@@ -13,9 +13,13 @@ Promises or a suitable polyfill to be enabled.
 
 ### MIDI()
 
-    MIDI().then(function(midi) {
+    MIDI()
+    .then(function(midi) {
         // Do something with midi
-    }, errorFn);
+    })
+    .catch(function(error) {
+        // Catch errors
+    });
 
 
 ### midi.on(fn)
