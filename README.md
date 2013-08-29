@@ -23,6 +23,7 @@ the browser's MIDI bridge becomes available.
 
 
 ### midi.on(fn)
+### midi.on(filterObj, fn)
 
 Subscibes to all incoming MIDI messages on all ports, firing the callback
 handler when a message is received.
@@ -31,15 +32,13 @@ handler when a message is received.
     	// Do something
     });
 
-### midi.on(filterObj, fn)
-
 To filter incoming messages, pass in a filter object as the first argument:
 
-    input.on({ event: 'cc', channel: 1 }, function(e) {
+    midi.on({ message: 'cc', channel: 1 }, function(e) {
     	// Listen to CONTROL CHANGE messages on CHANNEL 1
     });
 
-    input.on({ port: 1, event: 'noteon' }, function(e) {
+    midi.on({ port: 1, message: 'noteon' }, function(e) {
         // Listen to NOTE ON messages coming from PORT 1
     });
 
@@ -49,7 +48,7 @@ The filter object can take functions as properties:
     	return n > 60;
     }
     
-    input.on({ event: 'noteon', data1: isGreater60 }, function(e) {
+    midi.on({ message: 'noteon', data1: isGreater60 }, function(e) {
     	// Only receives NOTE ON messages for notes above C3
     });
 
@@ -57,11 +56,11 @@ The filter object can take functions as properties:
 The full list of properties a filter object takes is:
 
     {
-        port:    number | string (port name)
+        port:    number (port number) | string (port name)
         channel: number (1-16) | fn
-        message: string (MIDI message name) | fn
-        data1:   number | fn
-        data2:   number | fn
+        message: string (MIDI message type) | fn
+        data1:   number (0-127) | fn
+        data2:   number (0-127) | fn
     }
 
 
