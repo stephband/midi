@@ -101,7 +101,7 @@ var MIDI = (function(undefined) {
 					}
 				}
 
-				if (filter.data1) {
+				if (filter.data1 !== undefined) {
 					if (typeof filter.data1 === 'number') {
 						if (filter.data1 !== data[1]) {
 							continue;
@@ -114,7 +114,7 @@ var MIDI = (function(undefined) {
 					}
 				}
 
-				if (filter.data2) {
+				if (filter.data2 !== undefined) {
 					if (typeof filter.data2 === 'number') {
 						if (filter.data2 !== data[2]) {
 							continue;
