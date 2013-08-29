@@ -22,10 +22,10 @@ the browser's MIDI bridge becomes available.
     });
 
 
-### midi.on(fn)<br/>midi.on(filterObj, fn)
+### midi.on(fn)<br/>midi.on(filter, fn)
 
-Subscibes to all incoming MIDI messages on all ports, firing the callback
-handler when a message is received.
+Subscribe to all incoming MIDI messages on all ports, firing the callback
+handler when a message is received:
 
     midi.on(function(e) {
     	// Do something
@@ -33,12 +33,12 @@ handler when a message is received.
 
 To filter incoming messages, pass in a filter object as the first argument:
 
-    midi.on({ message: 'cc', channel: 1 }, function(e) {
-    	// Listen to CONTROL CHANGE messages on CHANNEL 1
-    });
-
     midi.on({ port: 1, message: 'noteon' }, function(e) {
         // Listen to NOTE ON messages coming from PORT 1
+    });
+
+    midi.on({ message: 'cc', channel: 1 }, function(e) {
+    	// Listen to CONTROL CHANGE messages on CHANNEL 1
     });
 
 The filter object can take functions as properties:
