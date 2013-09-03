@@ -237,6 +237,14 @@ var MIDI = (function(undefined) {
 	}
 
 	function MIDI() {
+		if (!window.Promise || !navigator.requestMIDIAccess) {
+			alert('MIDI Monitor relies on experimental features. \n\n' +
+			      'Currently only Chrome Canary has support for the WebMIDI API, ' +
+			      'and for MIDI Monitor to work, it needs both the WebMIDI API and ' +
+			      'Experimental Web Platform Features enabled in chrome://flags.');
+			return;
+		}
+
 		// While DOM Promise is behind a flag, requestMIDIAccess doesn't return
 		// an object that has chainable .then()s, as a real promise should, so
 		// wrap it in a real promise.
