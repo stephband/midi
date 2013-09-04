@@ -1,3 +1,4 @@
+
 var MIDI = (function(undefined) {
 	var debug = true;
 
@@ -340,6 +341,11 @@ var MIDI = (function(undefined) {
 })(MIDI);
 
 
-if (!this.window) {
+
+if (!this.window || window.module) {
+	module.name = 'MIDI';
 	module.exports = MIDI;
+}
+else {
+	window.MIDI = MIDI;
 }
