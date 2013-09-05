@@ -254,6 +254,131 @@ var MIDI = (function(undefined) {
 		return promise;
 	}
 
+	MIDI.channel = function(e, channel)  {
+		var diff = channel - returnChannel(e.data);
+
+		e.data[0] += diff;
+		e.channel = channel;
+	};
+
+	MIDI.createOut = function(node) {
+		var listeners = [];
+
+		function send(e) {
+			var l = listeners.length,
+			    i = -1;
+
+			while (++i < l) {
+				listeners[i](e);
+			}
+		}
+
+		node.out = function(fn) {
+			listeners.push(fn);
+		};
+
+		node.unplug = function(fn1) {
+			listeners = listeners.filter(function(fn2) {
+				return fn1 !== fn2;
+			});
+		};
+
+		return send;
+	};
+
+	MIDI.Node = function() {
+		var node = {};
+		node.in = MIDI.createOut(node);
+		return node;
+	}
+
+	MIDI.Input = function(option) {
+		var input, node;
+
+		MIDI().then(function(midi) {
+			if (!midi) { return; }
+
+			var inputs = midi.inputs(),
+			    l;
+
+			if (option === undefined) {
+				input = inputs[0];
+				node.port = input;
+			}
+
+			if (typeof option === 'number') {
+				input = inputs[option];
+				node.port = input;
+				return;
+			}
+
+			l = inputs.length;
+
+			while (l--) {
+				if (option === inputs[l].name) {
+					input = inputs[l];
+					node.port = input;
+					return;
+				}
+			}
+
+			input = undefined;
+		});
+
+		node = {
+			out: function(fn) {
+				if (!input) { return; }
+				input.addEventListener('midimessage', fn);
+			}
+		};
+
+		return node;
+	}
+
+	MIDI.Output = function(option) {
+		var output, node;
+
+		MIDI().then(function(midi) {
+			if (!midi) { return; }
+
+			var outputs = midi.outputs(),
+			    l;
+
+			if (option === undefined) {
+				output = outputs[0];
+				node.port = output;
+			}
+
+			if (typeof option === 'number') {
+				output = outputs[option];
+				node.port = output;
+				return;
+			}
+
+			l = outputs.length;
+
+			while (l--) {
+				if (option === outputs[l].name) {
+					output = outputs[l];
+					node.port = output;
+					return;
+				}
+			}
+
+			output = undefined;
+		});
+
+		node = {
+			in: function(e) {
+				if (!output) { return; }
+				console.log('Send', output);
+				output.send(e.data);
+			}
+		}
+
+		return node;
+	}
+
 	MIDI.messageTypes = types;
 
 	return MIDI;
