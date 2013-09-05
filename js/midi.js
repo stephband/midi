@@ -254,7 +254,7 @@ var MIDI = (function(undefined) {
 		return promise;
 	}
 
-	MIDI.eventTypes = types;
+	MIDI.messageTypes = types;
 
 	return MIDI;
 })();
@@ -332,7 +332,7 @@ var MIDI = (function(undefined) {
 	MIDI.pitch = 440;
 	MIDI.middle = 3;
 
-	//MIDI.noteNames = noteNames;
+	MIDI.notes = noteNames;
 	//MIDI.noteTable = noteTable;
 	MIDI.noteToNumber = noteToNumber;
 	MIDI.numberToNote = numberToNote;
@@ -342,10 +342,11 @@ var MIDI = (function(undefined) {
 
 
 
-if (!this.window || window.module) {
-	module.name = 'MIDI';
-	module.exports = MIDI;
+// Export
+if (this.window && !window.exports) {
+	window.MIDI = MIDI;
 }
 else {
-	window.MIDI = MIDI;
+	module.name = 'midi';
+	exports = MIDI;
 }
