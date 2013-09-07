@@ -1,392 +1,209 @@
+(function() {
+	var prototype = {
+		in: returnThis,
+		out: out
+	};
 
-var MIDI = (function(undefined) {
-	var debug = true;
+	function noop() {}
 
-	var types = [
-	    	'noteoff',
-	    	'noteon',
-	    	'polytouch',
-	    	'cc',
-	    	'pc',
-	    	'channeltouch',
-	    	'pitch'
-	    ],
-
-	    empty = {},
-
-	    // Maintain a list of listeners for each input, indexed by input id.
-	    listeners = {},
-
-	    // Keep a reference to the MIDIAccess promise.
-	    promise;
-
-
-	function returnType(data) {
-		var name = types[Math.floor(data[0] / 16) - 8];
-	
-		// Catch type noteon with zero velocity and rename it as noteoff
-		return name === types[1] && data[2] === 0 ?
-			types[0] :
-			name ;
+	function returnThis() {
+		return this;
 	}
 
-	function returnChannel(data) {
-		return data[0] % 16 + 1;
-	}
+	function out(fn) {
+		var wrap = fn;
 
-	function onNoteOff(fn) {
-		var input = this.target,
-		    data = this.data;
-		
-		function noteoff(e) {
-			if (data[1] === e.data[1] &&
-			    returnType(e.data) === types[0]) {
-				fn();
-				input.removeEventListener('midimessage', noteoff);
-			}
+		function input(e) {
+			wrap(e);
+			return this;
 		}
 
-		input.addEventListener('midimessage', noteoff);
+		function output(fn) {
+			wrap = createWrap(wrap, fn);
+			return this;
+		}
+
+		this.in = input;
+		this.out = output;
+
+		return this;
 	}
 
-	function note() {
-		var number = this.data[1];
-		return MIDI.numberToNote(number) + MIDI.numberToOctave(number);
-	}
-
-	function createFilter(input, listeners, undefined) {
+	function createWrap(wrap, fn) {
 		return function(e) {
-			var l = listeners.length,
-			    n = -1,
-			    data = e.data,
-			    pair, channel, type, event;
-
-			// Loop through filter/fn pairs and test the incoming event data
-			// against the filters, caching channel and type for speed. Only
-			// create an event object at the point that it is needed.
-			while (++n < l) {
-				pair = listeners[n];
-				filter = pair[0];
-
-				if (filter.channel) {
-					if (channel === undefined) {
-						channel = returnChannel(data);
-					}
-
-					if (typeof filter.channel === 'number') {
-						if (filter.channel !== channel) {
-							continue;
-						}
-					}
-					else {
-						if (!filter.channel(channel)) {
-							continue;
-						}
-					}
-				}
-
-				if (filter.message) {
-					if (type === undefined) {
-						type = returnType(data);
-					}
-
-					if (typeof filter.message === 'string') {
-						if (filter.message !== type) {
-							continue;
-						}
-					}
-					else {
-						if (!filter.message(type)) {
-							continue;
-						}
-					}
-				}
-
-				if (filter.data1 !== undefined) {
-					if (typeof filter.data1 === 'number') {
-						if (filter.data1 !== data[1]) {
-							continue;
-						}
-					}
-					else {
-						if (!filter.data1(data[1])) {
-							continue;
-						}
-					}
-				}
-
-				if (filter.data2 !== undefined) {
-					if (typeof filter.data2 === 'number') {
-						if (filter.data2 !== data[2]) {
-							continue;
-						}
-					}
-					else {
-						if (!filter.data2(data[2])) {
-							continue;
-						}
-					}
-				}
-
-				if (!event) {
-					event = Object.create(e);
-
-					event.port = input;
-					event.data1 = data[1];
-					event.data2 = data[2];
-					event.channel = channel = channel || returnChannel(data);
-					event.message = type    = type    || returnType(data);
-
-					if (type === types[1]) {
-						event.note = note;
-						event.velocity = data[2];
-						event.noteoff = onNoteOff;
-					}
-				}
-
-				// Call the filtered callback
-				pair[1](event);
-			}
+			wrap(e);
+			fn(e);
 		};
-	}
-
-
-	function addEvent(input, filter, fn) {
-		// Only bind once to each input, then maintain a list of filter/fn
-		// listeners that we loop through on incoming events.
-		if (!listeners[input.id]) {
-			listeners[input.id] = [];
-			input.addEventListener('midimessage', createFilter(input, listeners[input.id]));
-		}
-
-		listeners[input.id].push([filter, fn]);
-	}
-
-	function createMidi(midiAccess) {
-		return {
-			inputs: midiAccess.inputs.bind(midiAccess),
-			outputs: midiAccess.outputs.bind(midiAccess),
-
-			input: function(name) {
-				var inputs = midiAccess.inputs(),
-				    i = inputs.length;
-
-				if (typeof name === 'number') {
-					return inputs[name];
-				}
-
-				while (i--) {
-					if (inputs[i].name === name) {
-						return inputs[i];
-					}
-				}
-			},
-
-			output: function(name) {
-				var inputs = midiAccess.inputs(),
-				    i = inputs.length;
-
-				if (typeof name === 'number') {
-					return inputs[name];
-				}
-
-				while (i--) {
-					if (inputs[i].name === name) {
-						return inputs[i];
-					}
-				}
-			},
-
-			on: function(filter, fn) {
-				if (!fn) {
-					fn = filter;
-					filter = empty;
-				}
-
-				if (filter.port) {
-					addEvent(this.input(filter.port), filter, fn);
-				}
-				else {
-					this.inputs().forEach(function(input) {
-						addEvent(input, filter, fn);
-					});
-				}
-
-				return this;
-			},
-
-			send: function(fn) {
-				return this;
-			}
-		};
-	}
-
-	function request(resolver) {
-		function resolve(midiAccess) {
-			var midi = createMidi(midiAccess);
-			resolver.resolve(midi);
-		}
-
-		function reject(error) {
-			console.log( "MIDI access rejected", error);
-			resolver.reject(error);
-		}
-
-		navigator
-		.requestMIDIAccess()
-		.then(resolve, reject);
 	}
 
 	function MIDI() {
-		if (!window.Promise || !navigator.requestMIDIAccess) {
-			alert('MIDI Monitor relies on experimental features. \n\n' +
-			      'Currently only Chrome Canary has support for the WebMIDI API, ' +
-			      'and for MIDI Monitor to work, it needs both the WebMIDI API and ' +
-			      'Experimental Web Platform Features enabled in chrome://flags.');
-			return;
-		}
-
-		// While DOM Promise is behind a flag, requestMIDIAccess doesn't return
-		// an object that has chainable .then()s, as a real promise should, so
-		// wrap it in a real promise.
-		promise = promise || new Promise(request);
-
-		return promise;
+		return Object.create(prototype);
 	}
 
-	MIDI.channel = function(e, channel)  {
-		var diff = channel - returnChannel(e.data);
+	function createMethod(Node) {
+		function method(options) {
+			var node = new Node(options);
 
-		e.data[0] += diff;
-		e.channel = channel;
-	};
+			function output(fn) {
+				var wrap = fn;
 
-	MIDI.createOut = function(node) {
-		var listeners = [];
+				function output(fn) {
+					wrap = createWrap(wrap, fn);
+					node.out(wrap);
+					
+					return this;
+				}
 
-		function send(e) {
-			var l = listeners.length,
-			    i = -1;
+				node.out(fn);
+				this.out = output;
 
-			while (++i < l) {
-				listeners[i](e);
-			}
-		}
-
-		node.out = function(fn) {
-			listeners.push(fn);
-		};
-
-		node.unplug = function(fn1) {
-			listeners = listeners.filter(function(fn2) {
-				return fn1 !== fn2;
-			});
-		};
-
-		return send;
-	};
-
-	MIDI.Node = function() {
-		var node = {};
-		node.in = MIDI.createOut(node);
-		return node;
-	}
-
-	MIDI.Input = function(option) {
-		var input, node;
-
-		MIDI().then(function(midi) {
-			if (!midi) { return; }
-
-			var inputs = midi.inputs(),
-			    l;
-
-			if (option === undefined) {
-				input = inputs[0];
-				node.port = input;
+				return this;
 			}
 
-			if (typeof option === 'number') {
-				input = inputs[option];
-				node.port = input;
-				return;
-			}
 
-			l = inputs.length;
-
-			while (l--) {
-				if (option === inputs[l].name) {
-					input = inputs[l];
-					node.port = input;
-					return;
+			// Set in() to the in() of the first node.
+			if (node.in && this.in === returnThis) {
+				this.in = function(e) {
+					node.in(e);
+					return this;
 				}
 			}
 
-			input = undefined;
-		});
-
-		node = {
-			out: function(fn) {
-				if (!input) { return; }
-				input.addEventListener('midimessage', fn);
-			}
-		};
-
-		return node;
-	}
-
-	MIDI.Output = function(option) {
-		var output, node;
-
-		MIDI().then(function(midi) {
-			if (!midi) { return; }
-
-			var outputs = midi.outputs(),
-			    l;
-
-			if (option === undefined) {
-				output = outputs[0];
-				node.port = output;
+			// Connect the out of the previous node to the in of this node.
+			if (node.in) {
+				this.out(node.in);
 			}
 
-			if (typeof option === 'number') {
-				output = outputs[option];
-				node.port = output;
-				return;
+			// Redefine out() to alias this node.
+			if (node.out) {
+				this.out = output;
 			}
 
-			l = outputs.length;
-
-			while (l--) {
-				if (option === outputs[l].name) {
-					output = outputs[l];
-					node.port = output;
-					return;
-				}
-			}
-
-			output = undefined;
-		});
-
-		node = {
-			in: function(e) {
-				if (!output) { return; }
-				console.log('Send', output);
-				output.send(e.data);
-			}
+			return this;
 		}
 
-		return node;
+		return method;
 	}
 
-	MIDI.messageTypes = types;
+	function registerNode(name, Node) {
+		prototype[name] = createMethod(Node);
+	}
 
-	return MIDI;
+	MIDI.register = registerNode;
+	MIDI.available = navigator.requestMIDIAccess;
+
+	window.MIDI = MIDI;
 })();
 
 
 
+(function() {
+	var debug = true;
 
+	function noop() {}
+
+	function fail(error) {
+		console.log( "MIDI access rejected", error);
+	}
+
+	function request(pass) {
+		navigator.requestMIDIAccess && navigator
+		.requestMIDIAccess()
+		.then(pass, fail);
+	}
+
+	function normalise(e) {
+		// If it's a noteon with 0 velocity, normalise it to a noteoff
+		if (e.data[2] === 0 && e.data[0] > 143 && e.data[0] < 160) {
+			e.data[0] += -16;
+		}
+	}
+
+	function find(array, id) {
+		var l = array.length,
+			item;
+
+		while (l--) {
+			item = array[l];
+
+			if (item.name === id || item.id === id || item === id) {
+				return array[l];
+			}
+		}
+
+		console.log('MIDI port \'' + id + '\' not found');
+		return;
+	}
+
+	function Input(id) {
+		var node = Object.create(Object.prototype),
+		    send;
+
+		function filter(input) {
+			return input.name === id || input.id === id || input === id;
+		}
+
+		node.out = function(fn) {
+			send = fn;
+		};
+
+		request(function(midi) {
+			var ports = id ? [find(midi.inputs(), id)] : midi.inputs() ;
+			var l = ports.length;
+
+			while (l--) {
+				ports[l].addEventListener('midimessage', function(e) {
+					// For some reason the connection is being dropped unless we
+					// log all events.
+					if (debug) { console.log(e.data, 'input'); }
+					normalise(e);
+					send(e);
+				});
+			}
+		});
+
+		return node;
+	}
+
+	function Output(id) {
+		var node = Object.create(Object.prototype);
+		var port;
+
+		node.in = function(e) {
+			if (!port) { return; }
+			if (debug) { console.log(e.data, 'output'); }
+			port.send(e.data, e.time);
+		};
+
+		request(function(midi) {
+			port = id ? find(midi.outputs(), id) : midi.outputs()[0] ;
+		});
+
+		return node;
+	}
+
+	MIDI.Input = Input;
+	MIDI.Output = Output;
+	MIDI.register('input', Input);
+	MIDI.register('output', Output);
+})();
+
+
+
+(function(MIDI) {
+	function LogNode() {
+		var node = Object.create(Object.prototype);
+
+		node.in = function(e) {
+			console.log(e.data);
+		};
+
+		return node;
+	}
+
+	MIDI.Log = LogNode;
+	MIDI.register('log', LogNode);
+})(MIDI);
 
 
 // Extend MIDI with some helper functions for handling notes.
@@ -457,21 +274,10 @@ var MIDI = (function(undefined) {
 	MIDI.pitch = 440;
 	MIDI.middle = 3;
 
-	MIDI.notes = noteNames;
+	//MIDI.noteNames = noteNames;
 	//MIDI.noteTable = noteTable;
 	MIDI.noteToNumber = noteToNumber;
 	MIDI.numberToNote = numberToNote;
 	MIDI.numberToOctave = numberToOctave;
 	MIDI.numberToFrequency = numberToFrequency;
 })(MIDI);
-
-
-
-// Export
-if (this.window && !window.exports) {
-	window.MIDI = MIDI;
-}
-else {
-	module.name = 'midi';
-	exports = MIDI;
-}
