@@ -375,7 +375,8 @@ var MIDI = (function(undefined) {
 			in: function(e) {
 				if (!output) { return; }
 				console.log('Send', output, e);
-				output.send(e.data);
+				// At some point it got turned into an object
+				output.send([e.data[0], e.data[1], e.data[2]]);
 			}
 		}
 
