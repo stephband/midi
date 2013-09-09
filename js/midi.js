@@ -300,10 +300,11 @@ var MIDI = (function(undefined) {
 
 			var inputs = midi.inputs(),
 			    l;
-
+			
 			if (option === undefined) {
 				input = inputs[0];
 				node.port = input;
+				return;
 			}
 
 			if (typeof option === 'number') {
@@ -327,7 +328,9 @@ var MIDI = (function(undefined) {
 
 		node = {
 			out: function(fn) {
+				console.log('out()', input);
 				if (!input) { return; }
+
 				input.addEventListener('midimessage', fn);
 			}
 		};
