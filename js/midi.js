@@ -301,26 +301,32 @@ var MIDI = (function(undefined) {
 			var inputs = midi.inputs(),
 			    l;
 
-			if (option === undefined) {
-				input = inputs[0];
-				node.port = input;
-				return;
-			}
-
-			if (typeof option === 'number') {
-				input = inputs[option];
-				node.port = input;
-				return;
-			}
-
+//			if (option === undefined) {
+//				input = inputs[0];
+//				node.port = input;
+//				return;
+//			}
+//
+//			if (typeof option === 'number') {
+//				input = inputs[option];
+//				node.port = input;
+//				return;
+//			}
+//
 			l = inputs.length;
 
 			while (l--) {
-				if (option === inputs[l].name) {
+				if (inputs[l].name !== 'Bus 1') {
 					input = inputs[l];
 					node.port = input;
 					return;
 				}
+
+				//if (option === inputs[l].name) {
+				//	input = inputs[l];
+				//	node.port = input;
+				//	return;
+				//}
 			}
 
 			input = undefined;
