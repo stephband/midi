@@ -300,7 +300,7 @@ var MIDI = (function(undefined) {
 
 			var inputs = midi.inputs(),
 			    l;
-			
+
 			if (option === undefined) {
 				input = inputs[0];
 				node.port = input;
@@ -374,7 +374,7 @@ var MIDI = (function(undefined) {
 		node = {
 			in: function(e) {
 				if (!output) { return; }
-				console.log('Send', output);
+				console.log('Send', output, e);
 				output.send(e.data);
 			}
 		}
