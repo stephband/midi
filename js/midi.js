@@ -353,25 +353,32 @@ var MIDI = (function(undefined) {
 			var outputs = midi.outputs(),
 			    l;
 
-			if (option === undefined) {
-				output = outputs[0];
-				node.port = output;
-			}
-
-			if (typeof option === 'number') {
-				output = outputs[option];
-				node.port = output;
-				return;
-			}
+//			if (option === undefined) {
+//				output = outputs[0];
+//				node.port = output;
+//			}
+//
+//			if (typeof option === 'number') {
+//				output = outputs[option];
+//				node.port = output;
+//				return;
+//			}
 
 			l = outputs.length;
 
 			while (l--) {
-				if (option === outputs[l].name) {
+				if (outputs[l].name === 'Bus 1') {
 					output = outputs[l];
 					node.port = output;
 					return;
 				}
+
+				//if (option === outputs[l].name) {
+				//	output = outputs[l];
+				//	node.port = output;
+				//	return;
+				//}
+
 			}
 
 			output = undefined;
