@@ -349,16 +349,18 @@ var MIDI = (function(undefined) {
 	MIDI.Output = function(options) {
 		var output, node;
 
-		navigator
-		.requestMIDIAccess()
-		.then(function(midi) {
-			var outputs = midi.outputs(),
-			    l;
-
-			outputs.forEach(function(output) {
-				MIDI.outputs[output.name] = output;
-			});
-		}, console.log);
+		if (navigator.requestMIDIAccess) {
+			navigator
+			.requestMIDIAccess()
+			.then(function(midi) {
+				var outputs = midi.outputs(),
+				    l;
+	
+				outputs.forEach(function(output) {
+					MIDI.outputs[output.name] = output;
+				});
+			}, console.log);
+		}
 
 		node = {
 			in: function(e) {
