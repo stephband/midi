@@ -20,7 +20,6 @@ var MIDI = (function(undefined) {
 	    // Keep a reference to the MIDIAccess promise.
 	    promise;
 
-
 	function returnType(data) {
 		var name = types[Math.floor(data[0] / 16) - 8];
 	
@@ -254,12 +253,7 @@ var MIDI = (function(undefined) {
 		return promise;
 	}
 
-	MIDI.channel = function(e, channel)  {
-		var diff = channel - returnChannel(e.data);
-
-		e.data[0] += diff;
-		e.channel = channel;
-	};
+	MIDI.channel = returnChannel;
 
 	MIDI.createOut = function(node) {
 		var listeners = [];
@@ -292,14 +286,20 @@ var MIDI = (function(undefined) {
 		return node;
 	}
 
+	MIDI.inputs = {};
+
 	MIDI.Input = function(option) {
 		var input, node;
 
-		MIDI().then(function(midi) {
-			if (!midi) { return; }
-
+		navigator
+		.requestMIDIAccess()
+		.then(function(midi) {
 			var inputs = midi.inputs(),
 			    l;
+
+			inputs.forEach(function(obj) {
+				MIDI.inputs[obj.name] = obj;
+			});
 
 //			if (option === undefined) {
 //				input = inputs[0];
@@ -330,7 +330,7 @@ var MIDI = (function(undefined) {
 			}
 
 			input = undefined;
-		});
+		}, console.log);
 
 		node = {
 			out: function(fn) {
@@ -344,50 +344,29 @@ var MIDI = (function(undefined) {
 		return node;
 	}
 
-	MIDI.Output = function(option) {
+	MIDI.outputs = {};
+
+	MIDI.Output = function(options) {
 		var output, node;
 
-		MIDI().then(function(midi) {
-			if (!midi) { return; }
-
+		navigator
+		.requestMIDIAccess()
+		.then(function(midi) {
 			var outputs = midi.outputs(),
 			    l;
 
-//			if (option === undefined) {
-//				output = outputs[0];
-//				node.port = output;
-//			}
-//
-//			if (typeof option === 'number') {
-//				output = outputs[option];
-//				node.port = output;
-//				return;
-//			}
-
-			l = outputs.length;
-
-			while (l--) {
-				if (outputs[l].name === 'Bus 1') {
-					output = outputs[l];
-					node.port = output;
-					return;
-				}
-
-				//if (option === outputs[l].name) {
-				//	output = outputs[l];
-				//	node.port = output;
-				//	return;
-				//}
-
-			}
-
-			output = undefined;
-		});
+			outputs.forEach(function(output) {
+				MIDI.outputs[output.name] = output;
+			});
+		}, console.log);
 
 		node = {
 			in: function(e) {
+				var name = options.port;
+				var output = MIDI.outputs[options.port];
+
 				if (!output) { return; }
-				console.log('Send', output, e);
+
 				// At some point it got turned into an object
 				output.send([e.data[0], e.data[1], e.data[2]]);
 			}
