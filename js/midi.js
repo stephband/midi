@@ -220,20 +220,20 @@ var MIDI = (function(undefined) {
 		};
 	}
 
-	function request(resolver) {
-		function resolve(midiAccess) {
+	function request(resolve, reject) {
+		function res(midiAccess) {
 			var midi = createMidi(midiAccess);
-			resolver.resolve(midi);
+			resolve(midi);
 		}
 
-		function reject(error) {
+		function rej(error) {
 			console.log( "MIDI access rejected", error);
-			resolver.reject(error);
+			reject(error);
 		}
 
 		navigator
 		.requestMIDIAccess()
-		.then(resolve, reject);
+		.then(res, rej);
 	}
 
 	function MIDI() {
