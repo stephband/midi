@@ -10,6 +10,8 @@ Currently only Chrome Canary has native MIDI support.
 
 ## Quick example
 
+See this example at: <a href="http://stephband.github.com/midi/index.html">stephband.github.com/midi/index.html</a>.
+
 Take midi events from all inputs, filter them to <code>noteon</code>,
 <code>noteoff</code> and <code>pitch</code> messages, draw the result on a
 canvas and output the midi event and an OSC-like array. Record the arrays in a
@@ -30,8 +32,6 @@ canvas and output the midi event and an OSC-like array. Record the arrays in a
         console.log(message);
         tape.push(message);
     });
-
-See this example here: <a href="http://stephband.github.com/midi/index.html">stephband.github.com/midi/index.html</a>.
 
 
 ## Getting started
