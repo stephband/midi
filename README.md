@@ -241,9 +241,34 @@ A constructor that creates a filter node.
 
     var node = MIDI.Filter({ channel: 1 });
 
-Exposed to a route as:
+Exposed to a router as:
 
     MIDI().filter(options);
+
+#### Options
+
+    {
+        port:    number | string | target
+        channel: number (1-16) | fn
+        message: string | regex | fn
+        data1:   number (0-127) | fn
+        data2:   number (0-127) | fn
+    }
+
+If <code>port</code> is a number, the message is filtered by <code>e.target.id</code>.
+If <code>port</code> is a string, the message is filtered by <code>e.target.name</code>.
+If <code>port</code> is an object, the message is filtered by <code>e.target</code>.
+If <code>message</code> is a string it should be one of:
+
+    'noteoff'
+    'noteon'
+    'polytouch'
+    'cc'
+    'pc'
+    'channeltouch'
+    'pitch'
+
+Functions should return a boolean.
 
 
 ### MIDI.Modifier(options)
@@ -252,9 +277,33 @@ A constructor that creates an modify node.
 
     var node = MIDI.Modifier({ channel: 1 });
 
-Exposed to a route as:
+Exposed to a router as:
 
     MIDI().modify(options);
+
+#### Options
+
+A modifier understands the options:
+
+    {
+        port:    number | string | target
+        channel: number (1-16) | fn
+        message: string
+        data1:   number (0-127) | fn
+        data2:   number (0-127) | fn
+    }
+
+The string <code>message</code> should be one of:
+
+    'noteoff'
+    'noteon'
+    'polytouch'
+    'cc'
+    'pc'
+    'channeltouch'
+    'pitch'
+
+Functions should return a number.
 
 
 ### MIDI.OSC(fn)

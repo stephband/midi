@@ -1,0 +1,106 @@
+<h1>MIDI Filter</h1>
+
+<p>Open the console to see tests</p>
+
+<script src="js/midi-filter.js"></script>
+<script>
+
+console.group('Testing MIDIFilter...');
+
+(function() {
+	console.log('Testing no options.');
+
+	var filter = MIDIFilter({});
+	var count = 0;
+
+	filter.out(function(e) {
+		++count;
+	});
+
+	filter.in({ data: [146, 20, 40] });
+	filter.in({ data: [145, 21, 40] });
+	filter.in({ data: [145, 20, 41] });
+	filter.in({ data: [145, 20, 40] });
+
+	console.assert(count === 4, '4 messages should have been transmitted.');
+})();
+
+(function() {
+	console.log('Testing empty options.');
+
+	var filter = MIDIFilter({});
+	var count = 0;
+
+	filter.out(function(e) {
+		++count;
+	});
+
+	filter.in({ data: [146, 20, 40] });
+	filter.in({ data: [145, 21, 40] });
+	filter.in({ data: [145, 20, 41] });
+	filter.in({ data: [145, 20, 40] });
+
+	console.assert(count === 4, '4 messages should have been transmitted.');
+})();
+
+(function() {
+	console.log('Testing property filters.');
+
+	var filter = MIDIFilter({
+		channel: 2,
+		message: 'noteon',
+		data1: 20,
+		data2: 40
+	});
+
+	var count = 0;
+
+	filter.out(function(e) {
+		++count;
+		console.assert(e.channel === 2,        '.channel should be 2');
+		console.assert(e.message === 'noteon', '.message should be noteon');
+		console.assert(e.data[1] === 20,       '.data[1] should be 20');
+		console.assert(e.data[2] === 40,       '.data[2] should be 40');
+	});
+
+	filter.in({ data: [146, 20, 40] });
+	filter.in({ data: [145, 21, 40] });
+	filter.in({ data: [145, 20, 41] });
+	filter.in({ data: [145, 20, 40] });
+
+	console.assert(count === 1, '1 message should have been transmitted.');
+})();
+
+
+(function() {
+	console.log('Testing function filters and noteons with velocity 0.');
+
+	var filter = MIDIFilter({
+		port: 'Port 1',
+		channel: function(n) { return n < 2; },
+		message: function(n) { return n === 'noteoff'; },
+		data1:   function(n) { return n === 20; }
+	});
+
+	var count = 0;
+
+	filter.out(function(e) {
+		++count;
+		console.assert(e.target.name === 'Port 1', '.target should be Port 1');
+		console.assert(e.channel === 1,            '.channel should be 1');
+		console.assert(e.message === 'noteoff',    '.message should be noteon');
+		console.assert(e.data[1] === 20,           '.data[1] should be 20');
+	});
+
+	filter.in({ data: [145, 20, 0], target: { id: 300, name: 'Port 1' } });
+	filter.in({ data: [145, 20, 0] });
+	filter.in({ data: [144, 21, 0] });
+	filter.in({ data: [144, 20, 0], target: { id: 300, name: 'Port 2' } });
+	filter.in({ data: [144, 20, 0], target: { id: 300, name: 'Port 1' } });
+
+	console.assert(count === 1, '1 message should have been transmitted.');
+})();
+
+console.log('...tests complete');
+console.groupEnd();
+</script>
