@@ -101,7 +101,7 @@
 
     function Destination(fn) {
         var node = Node(fn);
-        node.send = noop;
+        node.out = noop;
         return node;
     }
 
@@ -113,15 +113,18 @@
         };
     }
 
-    function createMethod(Node) {
+    function createMethod(name, Node) {
         return function method(options) {
             var node = Node(options);
             
-            this.out(node.in);
+            console.log('name >', name, node.in !== noop ? 'in' : '', node.out !== noop ? 'out' : '');
+            
+            this.out(node.in.bind(node));
             
             if (node.out !== noop) {
-                this.out = function() {
-                    node.out.apply(node, arguments);	
+                this.out = function(fn) {
+                    node.out(fn);
+                    return this;
                 };
             }
             
@@ -130,7 +133,7 @@
     }
 
     function register(name, Node) {
-        prototype[name] = createMethod(Node);
+        prototype[name] = createMethod(name, Node);
     }
 
 	function log(error) {
@@ -215,10 +218,10 @@
 	//}
 
 	function returnMessage(data) {
-		var name = types[Math.floor(data[0] / 16) - 8];
+		var name = MIDI.messages[Math.floor(data[0] / 16) - 8];
 	
 		// Catch type noteon with zero velocity and rename it as noteoff
-		return name === types[1] && data[2] === 0 ?
+		return name === MIDI.messages[1] && data[2] === 0 ?
 			types[0] :
 			name ;
 	}

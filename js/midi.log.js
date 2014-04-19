@@ -4,7 +4,7 @@
 	function Log() {
 		// We deliberately make Log() a destination node
 		// so that folks don't put it in a critical path. Hmm.
-		return MIDI.DestinationNode(function(e) {
+		return MIDI.Destination(function(e) {
 			console.log(e.data);
 		});
 	}

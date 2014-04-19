@@ -20,34 +20,46 @@
 	<link rel="stylesheet" href="/css/bolt.forms.css" />
 	<link rel="stylesheet" href="/css/bolt.classes.css" /-->
 
-	<!--link rel="stylesheet" href="css/bolt.debug.css" /-->
+	<link rel="stylesheet" href="css/midi-graph.css" />
 </head>
 
 <body>
 	<h1>MIDI</h1>
 
-	<p>Test MIDI()</p>
+	<pre><code>
+	</code></pre>
 
-	<div class="" id="midi-graph" />
-		<canvas></canvas>
-		<ul></ul>
-	</div>
+	<canvas class="midi-graph" id="midi-graph" width="960"></canvas>
+
+	<ul class="index">
+		<li>repo: <a href="http://github.com/stephband/midi">github.com/stephband/midi</a></li>
+		<li>author: <a href="https://cruncher.ch/en/about-us/">stephband</a></li>
+	</ul>
 
 	<script src="js/midi.js"></script>
 	<script src="js/midi.log.js"></script>
 	<script src="js/midi.input.js"></script>
 	<script src="js/midi.output.js"></script>
 	<script src="js/midi.filter.js"></script>
-	<script src="js/midi.modifier.js"></script>
+	<script src="js/midi.modify.js"></script>
 	<script src="js/midi.graph.js"></script>
-	<script src="js/midi.toOSC.js"></script>
+	<script src="js/midi.array.js"></script>
 	<!--script src="js/test.js"></script-->
 
-	<script>
+	<script class="block">
+		var tape = [];
+	
 		MIDI()
-		.input('Port 1')
+		.input()
+		//.log()
+		.filter({ message: /^note|^pitch/ })
 		.graph({
 			node: document.getElementById('midi-graph')
+		})
+		.array(function(message) {
+			console.log(message);
+			
+			tape.push(message);
 		});
 	</script>
 </body>

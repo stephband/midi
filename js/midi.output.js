@@ -8,19 +8,6 @@
 		console.log(error);
 	}
 
-	function request(fn) {
-		if (!navigator.requestMIDIAccess) {
-			console.log('Navigator does not support MIDI.');
-			return;
-		}
-
-		navigator
-		.requestMIDIAccess()
-		.then(fn, log);
-	}
-
-	MIDI.request = request;
-
 	function find(array, id) {
 		var l = array.length,
 			item;
@@ -46,7 +33,7 @@
 			port.send(e.data, e.time);
 		});
 
-		request(function(midi) {
+		MIDI.request(function(midi) {
 			port = id ? find(midi.outputs(), id) : midi.outputs()[0] ;
 		});
 

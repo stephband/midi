@@ -1,4 +1,6 @@
 (function(MIDI) {
+	"use strict";
+	
 	var types = MIDI.messages;
 
 	var filters = {
@@ -14,8 +16,10 @@
 
 		channel: function(e, filter) {
 			if (e.channel === undefined) {
-				e.channel = returnChannel(e.data);
+				e.channel = MIDI.channel(e.data);
 			}
+
+			//return typeOf(filter);
 
 			return typeof filter === 'number' ?
 				filter === e.channel :
@@ -24,11 +28,13 @@
 
 		message: function(e, filter) {
 			if (e.message === undefined) {
-				e.message = returnType(e.data);
+				e.message = MIDI.message(e.data);
 			}
 
 			return typeof filter === 'string' ?
 				filter === e.message :
+				Object.prototype.toString.apply(filter) === '[object RegExp]' ?
+				filter.test(e.message) :
 				filter(e.message) ;
 		},
 
@@ -44,6 +50,23 @@
 				filter(e.data[2]) ;
 		}
 	};
+
+	//var objectTypes = {
+	//	'[object String]': equals,
+	//	'[object Number]': equals,
+	//	
+	//	'[object RegExp]': function(regexp, value) {
+	//		return regexp.test(value);
+	//	}
+	//};
+//
+	//function equals(val1, val2) {
+	//	return val1 === val2;
+	//}
+//
+	//function typeOf(object) {
+	//	return objectTypes[Object.prototype.toString.apply(object)];
+	//}
 
 	function Node(options) {
 		//var filters = {};
