@@ -31,7 +31,7 @@ canvas and output the midi event and an OSC-like array. Record the arrays in a
         tape.push(message);
     });
 
-Run this example here: <a her=""></a>.
+See this example here: <a her="http://stephband.github.com/midi/index.html">stephband.github.com/midi/index.html</a>.
 
 
 ## Getting started
@@ -130,7 +130,7 @@ Typically, you might want to send one route's out to another route's in:
 
 ### .input(options)
 
-Add an input node to the route. Automatically requests MIDI access and
+Add a MIDI input node to the route. Automatically requests MIDI access and
 finds the relevant port, if it exists.
 
     var route = MIDI().input({ port: 'Port 1' });
@@ -138,7 +138,7 @@ finds the relevant port, if it exists.
 
 ### .output(options)
 
-Add an output node to the route. Automatically requests MIDI access and
+Add a MIDI output node to the route. Automatically requests MIDI access and
 finds the relevant port, if it exists.
 
     var route = MIDI().output({ port: 'Port 1' });
@@ -150,7 +150,7 @@ Add a filter node to the route.
 
     var route = MIDI().filter(options);
 
-#### Options
+Options
 
     {
         port:    number | string | target
@@ -183,7 +183,7 @@ Adds a modify node to the route.
     var route = MIDI().modify(options);
 
 
-#### Options
+Options
 
 A modifier understands the options:
 
@@ -216,7 +216,7 @@ Adds a canvas graph node to the route.
         canvas: document.getElementById('midi-graph')
     });
 
-#### Options
+Options
 
     {
         canvas:       DOM node, required - a <canvas> element, or an id of a <canvas> element 
