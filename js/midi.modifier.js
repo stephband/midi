@@ -89,5 +89,5 @@
 	}
 
 	MIDI.Modifier = Modifier;
-	MIDI.register('modifier', Modifier);
+	MIDI.register('modify', Modifier);
 })(MIDI);
