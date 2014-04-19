@@ -316,6 +316,10 @@ Exposed to a router as:
 
     MIDI().graph(options);
 
+Creates an instance of MIDI.Grapher and adds it to the route.
+
+Draws MIDI notes and control change messages onto a &lt;canvas&gt;.
+
 #### Options
 
     {
