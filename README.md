@@ -87,6 +87,7 @@ WebMIDI API, the first call to <code>MIDI.request(fn)</code> will alert the user
         // Do something with midi object
     });
 
+
 ### .channel(data)
 
 Returns the MIDI channel of the data as a number 1-16.
@@ -151,10 +152,15 @@ A function that does nothing.
 
 ## MIDI node constructors
 
-Under the bonnet, a <code>MIDI()</code> route manages a chain of MIDI nodes that
+This section is of interest if you want to write your own MIDI processes.
+
+Under the bonnet, a <code>MIDI()</code> router manages a chain of MIDI nodes that
 messages are passed through. For example, <code>MIDI().modify(options)</code>
 creates a route with an instance of the MIDI.Modifier node in the chain.
-Node constructors are exposed on the <code>MIDI</code> object for convenience.
+Node constructors are exposed on the <code>MIDI</code> object for convenience
+(they don't have to be) and registered as a method for the router with:
+
+    MIDI.register(name, Node);
 
 
 ### MIDI.Node(fn)
@@ -183,6 +189,10 @@ The function <code>fn</code> is a process to perform on an event.
 
 Where <code>fn</code> is undefined, events are passed straight from
 <code>.in(e)</code> to <code>.send(e)</code>.
+
+MIDI nodes go to some effort to keep processes efficient. Both <code>.out()</code>
+and <code>.send()</code> are dynamically reassigned depending on the number of
+handlers they have to serve.
 
 
 ### MIDI.Source()
