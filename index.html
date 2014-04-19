@@ -42,10 +42,15 @@
 	<script src="js/midi.filter.js"></script>
 	<script src="js/midi.modify.js"></script>
 	<script src="js/midi.graph.js"></script>
-	<script src="js/midi.array.js"></script>
+	<script src="js/midi.out-array.js"></script>
 	<!--script src="js/test.js"></script-->
 
-	<p class="block">That comes from:</p>
+	<p class="block">
+		Take midi events from all inputs, filter them to <code>noteon</code>,
+		<code>noteoff</code> and <code>pitch</code> messages, draw the result on
+		a canvas and output as midi events and OSC-normalised arrays. Record the
+		arrays in a <code>tape</code>.
+	</p>
 
 	<script class="block">
 var tape = [];
@@ -53,19 +58,19 @@ var tape = [];
 MIDI()
 .input()
 .filter({ message: /^note|^pitch/ })
-.log()
 .graph({
-    node: document.getElementById('midi-graph')
+    canvas: document.getElementById('midi-graph')
 })
-.array(function(message) {
+.out(function(e) {
+    console.log(e.data);
+})
+.outArray(function(message) {
     console.log(message);
     tape.push(message);
 });
 	</script>
 	
-	<p>Open the console. To see what you've recorded:</p>
-
-<pre><code>console.log(tape)</code></pre>
-	
+	<p>Open the console to see what you've recorded:</p>
+	<pre><code>console.log(tape)</code></pre>
 </body>
 </html>

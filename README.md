@@ -1,27 +1,46 @@
 # MIDI
 
-MIDI is library of functions for routing and transforming MIDI data, and an
-interface for the browser's native navigator.requestMIDIAccess().
+MIDI is library of functions for routing and transforming MIDI data.
 
 
 ## Warning
 
-Currently only Chrome Canary has native MIDI support. MIDI also requires DOM
-Promises or a suitable polyfill to be enabled. Also, early days, and this API
-will change.
+Currently only Chrome Canary has native MIDI support.
+
+
+## Quick example
+
+Take midi events from all inputs, filter them to <code>noteon</code>,
+<code>noteoff</code> and <code>pitch</code> messages, draw the result on a
+canvas and output the midi event and an OSC-like array. Record the arrays in a
+<code>tape</code>.
+
+    var tape = [];
+
+    MIDI()
+    .input()
+    .filter({ message: /^note|^pitch/ })
+    .graph({
+        canvas: document.getElementById('midi-graph')
+    })
+    .out(function(e) {
+        console.log(e.data);
+    })
+    .outArray(function(message) {
+        console.log(message);
+        tape.push(message);
+    });
+
+Run this example here: <a her=""></a>.
 
 
 ## Getting started
 
-Take notes from port 'Bus 1' and send them to port 'IAC 2'.
-
-    function isNote(m) {
-        return m === 'noteon' || m === 'noteoff';
-    }
+Take noteons and noteoffs from port 'Bus 1' and send them to port 'IAC 2'.
 
     MIDI()
     .input({ port: 'Bus 1' })
-    .filter({ message: isNote })
+    .filter({ message: /^note/ })
     .output({ port: 'IAC 2' });
 
 
@@ -66,6 +85,172 @@ Because <code>.out()</code> takes a function, routes can be connected together.
     route1.out(route2.in);
 
 
+## MIDI() routes
+
+    var route = MIDI();
+
+A MIDI() route is an easy way to plot a MIDI node graph. Each method
+on a route adds a processing node to the route, with two exceptions:
+
+- <code>node.in(e)</code> call to pass an event to the route
+- <code>node.out(fn)</code> call to bind a handler to the route's output
+
+A MIDI() route is itself a node. Here are the standard route methods:
+
+
+### .in(e)
+
+Send a midi event into the route.
+
+    var route = MIDI();
+    
+    route.in({ data: [144,80,80] });
+
+
+### .out(fn)
+
+Bind a handler to the route's MIDI out.
+
+    var route = MIDI().out(function(e) {
+            console.log(e);
+        });
+
+Typically, you might want to send one route's out to another route's in:
+
+    var route1 = MIDI()
+        .input({ port: 'Bus 1' })
+        .filter({ message: isNote });
+    
+    var route2 = MIDI()
+        .modify({ channel: 1 })
+        .output({ port: 'IAC 2' });
+    
+    route1.out(route2.in);
+
+
+### .input(options)
+
+Add an input node to the route. Automatically requests MIDI access and
+finds the relevant port, if it exists.
+
+    var route = MIDI().input({ port: 'Port 1' });
+
+
+### .output(options)
+
+Add an output node to the route. Automatically requests MIDI access and
+finds the relevant port, if it exists.
+
+    var route = MIDI().output({ port: 'Port 1' });
+
+
+### .filter(options)
+
+Add a filter node to the route.
+
+    var route = MIDI().filter(options);
+
+#### Options
+
+    {
+        port:    number | string | target
+        channel: number (1-16) | fn
+        message: string | regexp | fn
+        data1:   number (0-127) | fn
+        data2:   number (0-127) | fn
+    }
+
+If <code>port</code> is a number, the message is filtered by <code>e.target.id</code>.
+If <code>port</code> is a string, the message is filtered by <code>e.target.name</code>.
+If <code>port</code> is an object, the message is filtered by <code>e.target</code>.
+If <code>message</code> is a string it should be one of:
+
+    'noteoff'
+    'noteon'
+    'polytouch'
+    'cc'
+    'pc'
+    'channeltouch'
+    'pitch'
+
+Functions should return <code>true</code> to allow the event to pass.
+
+
+### .modify(options)
+
+Adds a modify node to the route.
+
+    var route = MIDI().modify(options);
+
+
+#### Options
+
+A modifier understands the options:
+
+    {
+        port:    number | string | target
+        channel: number (1-16) | fn
+        message: string
+        data1:   number (0-127) | fn
+        data2:   number (0-127) | fn
+    }
+
+The string <code>message</code> should be one of:
+
+    'noteoff'
+    'noteon'
+    'polytouch'
+    'cc'
+    'pc'
+    'channeltouch'
+    'pitch'
+
+Functions should return a number.
+
+
+### .graph(options)
+
+Adds a canvas graph node to the route.
+
+    MIDI().graph({
+        canvas: document.getElementById('midi-graph')
+    });
+
+#### Options
+
+    {
+        canvas:       DOM node, required - a <canvas> element, or an id of a <canvas> element 
+        paddingLeft:  number, 0-1 - ratio of the canvas width to start drawing at
+        paddingRight: number, 0-1 - ratio of the canvas width to stop drawing at
+        paddingTop:   number, 0-1 - ratio of the canvas height to start drawing at
+        ease:         number, 0-1 
+        fadeDuration: number, in ms
+        fadeLimit:    number, 0-1
+        gridColor1:   string, 'hsla(0, 0%, 60%, 0.24)'
+        gridColor2:   string, 'hsla(0, 0%, 40%, 0.12)'
+        colors: [     Sixteen colors, one for each channel, in hsla arrays
+            [220, 56, 68, 1],
+            [232, 57, 66, 1],
+            [244, 58, 65, 1],
+            ...
+        ]
+    }
+
+
+### .outArray(fn)
+
+Adds an out node that formats MIDI data in an OSC-like array.
+
+    var route = MIDI().outArray(function(message) {
+        console.log(message);
+    });
+
+
+### .log()
+
+For debugging. Adds a node that logs midi event.data to the console.
+
+    MIDI().log();
 
 
 ## MIDI utility functions
@@ -150,34 +335,37 @@ The reference tuning is A = 440Hz by default. Change the tuning by assigning MID
 A function that does nothing.
 
 
-## MIDI node constructors
+## MIDI nodes
 
-This section is of interest if you want to write your own MIDI processes.
+This section is of interest if you want to write your own MIDI process nodes.
 
 Under the bonnet, a <code>MIDI()</code> router manages a chain of MIDI nodes that
 messages are passed through. For example, <code>MIDI().modify(options)</code>
-creates a route with an instance of the MIDI.Modifier node in the chain.
+creates a route with an instance of the MIDI.Modify node in the chain.
 Node constructors are exposed on the <code>MIDI</code> object for convenience
-(they don't have to be) and registered as a method for the router with:
+(they don't have to be) and are registered as a method for the router with:
 
-    MIDI.register(name, Node);
+    MIDI.register(methodName, Node);
+
+First up, <code>MIDI.Node(fn)</code>. All other node constructors inherit from
+<code>MIDI.Node()</code>.
 
 
 ### MIDI.Node(fn)
 
 A constructor that creates a MIDI node.
 
-All other node constructors inherit from <code>MIDI.Node()</code>. MIDI nodes
-have three important methods: <code>.in(e)</code>, <code>.out(fn)</code> and
-<code>.send(e)</code>.
+    var node = MIDI.Node();
 
-Call <code>node.in(e)</code> to pass an event to the node.
-Call <code>node.out(fn)</code> to bind a handler to the node's output.
-Call <code>node.send(e)</code> to send an event to the node's out handlers.
+MIDI nodes have three important methods:
+
+    node.in(e)    // pass an event in to the node for processing.
+    node.out(fn)  // bind a handler to the node's out.
+    node.send(e)  // send an event to the node's out handlers.
 
 The function <code>fn</code> is a process to perform on an event.
 <code>fn</code> is called with a MIDI event object, and will typically call
-<code>this.send(e)</code> to pass the event to node.out handlers.
+<code>this.send(e)</code> to pass the event to node.out handlers:
 
     var node = MIDI.Node(function(e) {
         // Do something with e
@@ -216,11 +404,11 @@ A constructor that creates a destination node. For a destination node,
 A constructor that creates an input node. Automatically requests MIDI access and
 finds the relevant port, if it exists.
 
+    // Create a node
     var node = MIDI.Input({ port: 'Port 1' });
-
-Exposed to a route as:
-
-    MIDI().input(options);
+    
+    // Or create it on a route as
+    MIDI().input({ port: 'Port 1' });
 
 
 ### MIDI.Output(options)
@@ -228,126 +416,63 @@ Exposed to a route as:
 A constructor that creates an output node. Automatically requests MIDI access and
 finds the relevant port, if it exists.
 
+    // Create a node
     var node = MIDI.Output({ port: 'Port 1' });
-
-Exposed to a route as:
-
-    MIDI().output(options);
+    
+    // Or create it on a route as
+    MIDI().output({ port: 'Port 1' });
 
 
 ### MIDI.Filter(options)
 
 A constructor that creates a filter node.
 
+    // Create a node
     var node = MIDI.Filter({ channel: 1 });
-
-Exposed to a router as:
-
-    MIDI().filter(options);
-
-#### Options
-
-    {
-        port:    number | string | target
-        channel: number (1-16) | fn
-        message: string | regex | fn
-        data1:   number (0-127) | fn
-        data2:   number (0-127) | fn
-    }
-
-If <code>port</code> is a number, the message is filtered by <code>e.target.id</code>.
-If <code>port</code> is a string, the message is filtered by <code>e.target.name</code>.
-If <code>port</code> is an object, the message is filtered by <code>e.target</code>.
-If <code>message</code> is a string it should be one of:
-
-    'noteoff'
-    'noteon'
-    'polytouch'
-    'cc'
-    'pc'
-    'channeltouch'
-    'pitch'
-
-Functions should return a boolean.
+    
+    // Or create it on a route as
+    MIDI().filter({ channel: 1 });
 
 
-### MIDI.Modifier(options)
+### MIDI.Modify(options)
 
 A constructor that creates an modify node.
 
+    // Create a node
     var node = MIDI.Modifier({ channel: 1 });
-
-Exposed to a router as:
-
+    
+    // Or create it on a route as
     MIDI().modify(options);
 
-#### Options
 
-A modifier understands the options:
-
-    {
-        port:    number | string | target
-        channel: number (1-16) | fn
-        message: string
-        data1:   number (0-127) | fn
-        data2:   number (0-127) | fn
-    }
-
-The string <code>message</code> should be one of:
-
-    'noteoff'
-    'noteon'
-    'polytouch'
-    'cc'
-    'pc'
-    'channeltouch'
-    'pitch'
-
-Functions should return a number.
-
-
-### MIDI.Grapher(options)
+### MIDI.Graph(options)
 
 A constructor that creates a graph node.
 
+    // Create a node
     var node = MIDI.Graph({ node: 'my-canvas' });
-
-Exposed to a router as:
-
+    
+    // Or create it on a route as
     MIDI().graph(options);
 
-Creates an instance of MIDI.Grapher and adds it to the route.
 
-Draws MIDI notes and control change messages onto a &lt;canvas&gt;.
-
-#### Options
-
-    {
-        node:          requires a <canvas> element, or an id of a <canvas> element 
-        paddingLeft:
-        paddingRight:
-    }
-
-
-### MIDI.OSC(fn)
+### MIDI.outArray(fn)
 
 A constructor that creates an OSC destination node.
 
-    var node = MIDI.OSC(function(messageOSC) {
-        // Do something with OSC message bundle
-    });
-
-Exposed to a route as:
-
-    MIDI().osc(fn);
+    // Create a node
+    var node = MIDI.OutArray(fn);
+    
+    // Or create it on a route as
+    MIDI().outArray(fn);
 
 
-### MIDI.Logger()
+### MIDI.Log()
 
-A constructor that creates a log node.
+A constructor that creates a node that logs midi event.data to the console.
 
-    var input = MIDI.Logger();
-
-Exposed to a route as:
-
-    MIDI().log();
+    // Create a node
+    var node = MIDI.OSC(fn);
+    
+    // Or create it on a route as
+    MIDI().outArray(fn);

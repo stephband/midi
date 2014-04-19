@@ -26,6 +26,6 @@
 		return node;
 	}
 
-	MIDI.Array = Node;
-	MIDI.register('array', Node);
+	MIDI.OutArray = Node;
+	MIDI.register('outArray', Node);
 })(MIDI);

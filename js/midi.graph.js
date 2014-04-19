@@ -318,13 +318,10 @@
 	}
 
 	function MIDIGraph(options) {
-		var node = options.node ?
-				typeof options.node === 'string' ?
-				document.querySelector(options.node) : 
-				options.node :
-				document.getElementById('midi-graph') ;
+		var canvasNode = typeof options.canvas === 'string' ?
+		    	document.querySelector(options.canvas) : 
+		    	options.canvas;
 		
-		var canvasNode = node;
 		//var canvasNode = node.querySelector('canvas');
 		//var notesNode  = node.querySelector('.note_index');
 		//var noteNodes = notesNode.querySelectorAll('li');
