@@ -18,6 +18,7 @@
         // listener function is specified.
         this.send = fn;
         this.out = out2;
+        return this;
     }
 
     function out2(fn) {
@@ -31,10 +32,12 @@
 
         // Fall back to prototype send
         delete this.send;
+        return this;
     }
 
     function out3(fn) {
         this.listeners.push(fn);
+        return this;
     }
 
     function send(message) {
@@ -46,9 +49,11 @@
         while (++l < length) {
             this.listeners[l](message);
         }
+        
+        return this;
     }
     
-    function passThru() {
+    function passThru(e, send) {
         this.send.apply(this, arguments);
     }
     

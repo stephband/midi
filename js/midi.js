@@ -52,21 +52,6 @@
 })(window);
 
 
-
-(function(MIDI) {
-	MIDI.messages = [
-		'noteoff',
-		'noteon',
-		'polytouch',
-		'cc',
-		'pc',
-		'channeltouch',
-		'pitch'
-	];
-})(MIDI);
-
-
-
 (function(MIDI) {
 	var noteNames = [
 	    	'C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G♯', 'A', 'B♭', 'B'

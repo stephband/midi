@@ -81,13 +81,13 @@
 		normalise(e);
 	}
 
-	function Modify(options) {
+	function Modifier(options) {
 		return MIDI.Node(function(e) {
 			modify(e, options);
 			this.send(e);
 		});
 	}
 
-	MIDI.Modify = Modify;
-	MIDI.register('modify', Modify);
+	MIDI.Modifier = Modifier;
+	MIDI.register('modifier', Modifier);
 })(MIDI);

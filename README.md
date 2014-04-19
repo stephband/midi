@@ -16,9 +16,9 @@ will change.
 Listen to incoming volume change messages on Port 1. Flatten their values, log
 them to the console and send them to IAC 1.
 
-    var midiroute = MIDI();
+    var route = MIDI();
     
-    midiroute
+    route
     .input('Port 1')
     .filter({ channel: 1, message: 'cc', data1: 7 })
     .modify({ data2: 80 })
