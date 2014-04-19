@@ -1,3 +1,31 @@
+// Core MIDI module.
+// 
+// Write MIDI routes like so:
+// 
+// MIDI()
+// .input({ name: 'Bus 1' })
+// .filter({ message: 'note' })
+// .modify({ channel: 2 })
+// .out(function(e) {
+//     // Do something with event e
+// });
+// 
+// A MIDI() object has a few special methods:
+// 
+// .in(e)      Can't be changed. Call it with a midi event.
+// .out(fn)    Returns this so multiple outs from the same
+//             MIDI node can be chained.
+// .send(e)    Used internally, but also for debugging. Call
+//             .send() to send a message to the out.
+// 
+// A MIDI(fn) object takes a function. This function is
+// attached to the node as it's 'in' method. Typically, an
+// 'in' function calls this.send(e) to trigger the node.out.
+// 
+// var midi = MIDI(function(e) {
+//     this.send(e);
+// });
+
 (function (window) {
     'use strict';
 
@@ -87,18 +115,36 @@
         prototype[name] = createMethod(Node);
     }
 
+	function log(error) {
+		console.log(error);
+	}
+
+	function request(fn) {
+		if (!navigator.requestMIDIAccess) {
+			console.log('Navigator does not support MIDI.');
+			return;
+		}
+
+		return navigator.requestMIDIAccess().then(fn, log);
+	}
+
     function MIDI(fn) {
         return MIDI.Node(fn);
     }
 
+    MIDI.ready = request;
+    MIDI.register = register;
+
     MIDI.Node = Node;
     MIDI.Source = Source;
     MIDI.Destination = Destination;
-    MIDI.register = register;
 
     window.MIDI = MIDI;
 })(window);
 
+
+
+// Declare constants and utility functions on the MIDI object.
 
 (function(MIDI) {
 	var noteNames = [
@@ -198,21 +244,4 @@
 	MIDI.normaliseNoteOff = normaliseNoteOff;
 	MIDI.pitchToInt = pitchToInt;
 	MIDI.pitchToFloat = pitchToFloat;
-
-	function log(error) {
-		console.log(error);
-	}
-
-	function request(fn) {
-		if (!navigator.requestMIDIAccess) {
-			console.log('Navigator does not support MIDI.');
-			return;
-		}
-
-		navigator
-		.requestMIDIAccess()
-		.then(fn, log);
-	}
-
-	MIDI.request = request;
 })(MIDI);

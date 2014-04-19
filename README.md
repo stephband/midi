@@ -67,6 +67,12 @@ them to the console and send them to IAC 1.
     .output('IAC 1');
 
 
+## Request access to the browser's midi object
+
+    MIDI.ready(function(midi) {
+        // Do something with midi object
+    });
+
 ## MIDI nodes
 
 ### MIDI.Input
