@@ -9,7 +9,7 @@
 
 	function createMethod(Node) {
 		return function(options) {
-			var node = new Node(options);
+			var node = Node(options);
 
 			// Set in() to the in() of the first node.
 			if (node.in && this.in === send) {

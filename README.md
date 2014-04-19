@@ -11,6 +11,47 @@ Promises or a suitable polyfill to be enabled. Also, early days, and this API
 will change.
 
 
+    function isNote(m) {
+        return m === 'noteon' || m === 'noteoff';
+    }
+
+
+    
+        var modifier = MIDIModify(options);
+        var output = MIDI.Output(options);
+    
+        inputFilter.out(modifier.in);
+        modifier.out(midiOutput.in);
+    
+        // From input
+
+        var input = MIDI.Input();
+        var output = MIDI.Output();
+    
+        var filterNotes    = MIDI.Filter({ message: isNote });
+        var filterControls = MIDI.Filter({ message: 'cc' });
+        var filterPitch    = MIDI.Filter({ message: 'pitch' });
+        
+        MIDI.route()
+        .input()
+        .modifer({ channel: 1 })
+        .out(filterNotes)
+        .out(filterControls)
+        .out(filterPitch);
+
+
+        // Send to socket
+    
+        var midiThrottle = MIDIThrottle();
+    
+        midiFilterControls.out(midiThrottle.in);
+        midiFilterPitch.out(midiThrottle.in);
+    
+        midiFilterNotes.out(midiSocket.in);
+        midiThrottle.out(midiSocket.in);
+
+    });
+
 ## Easily set up a MIDI route
 
 Listen to incoming volume change messages on Port 1. Flatten their values, log
