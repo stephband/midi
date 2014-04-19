@@ -1,115 +1,99 @@
 # MIDI
 
-MIDI is a thin wrapper around the browser's native navigator.requestMIDIAccess()
-implementation that provides filtering for incoming MIDI messages, making
-listening for particular MIDI messages easy.
+MIDI is library of functions for routing and transforming MIDI data, and an
+interface for the browser's native navigator.requestMIDIAccess().
 
 
 ## Warning
 
 Currently only Chrome Canary has native MIDI support. MIDI also requires DOM
-Promises or a suitable polyfill to be enabled.
+Promises or a suitable polyfill to be enabled. Also, early days, and this API
+will change.
 
 
-### MIDI()
+## Easily set up a MIDI route
 
-MIDI() returns a DOM Promise that is given the value of <code>midi</code> when
-the browser's MIDI bridge becomes available.
+Listen to incoming volume change messages on Port 1. Flatten their values, log
+them to the console and send them to IAC 1.
 
-    MIDI()
-    .then(function(midi) {
-        // Do something with midi
-    });
-
-
-### midi.on(fn)<br/>midi.on(filter, fn)
-
-Subscribe to all incoming MIDI messages on all ports, firing the callback
-handler when a message is received:
-
-    midi.on(function(e) {
-    	// Do something with the midimessage
-    });
-
-The event object <code>e</code> is an enhanced version of the standard WebMIDI
-event object. Using the standard object as a prototype, it also exposes the
-properties:
-
-    {
-        port:    alias to e.target, the incoming MIDI port
-        channel: number (1-16)
-        message: string (MIDI message type)
-        data1:   number (0-127)
-        data2:   number (0-127)
-    }
-
-To filter incoming messages, pass in a filter object as the first argument:
-
-    midi.on({ port: 1, message: 'noteon' }, function(e) {
-        // Listen to NOTE ON messages coming from PORT 1
-    });
-
-    midi.on({ message: 'cc', channel: 1 }, function(e) {
-    	// Listen to CONTROL CHANGE messages on CHANNEL 1
-    });
-
-The filter object can take functions as properties:
-
-    function isGreater60(n) {
-    	return n > 60;
-    }
+    var midiroute = MIDI();
     
-    midi.on({ message: 'noteon', data1: isGreater60 }, function(e) {
-    	// Only receives NOTE ON messages for notes above C3
-    });
+    midiroute
+    .input('Port 1')
+    .filter({ channel: 1, message: 'cc', data1: 7 })
+    .modify({ data2: 80 })
+    .out(function(e) { console.log(e); })
+    .output('IAC 1');
 
 
-A filter object understands the following properties:
+## MIDI nodes
 
-    {
-        port:    number (port number) | string (port name)
-        channel: number (1-16) | fn
-        message: string (MIDI message type) | fn
-        data1:   number (0-127) | fn
-        data2:   number (0-127) | fn
-    }
+### MIDI.Input
+
+A constructor that creates an input node.
+
+    var input = MIDI.Input('Port 1');
 
 
-### midi.send(e)
+### MIDI.Output
 
-Sends a message.
+A constructor that creates an output node.
 
-
-### midi.input([string | number])
-
-Returns an object that represents an incoming MIDI port. Pass in the port's
-name:
-
-    var input = midi.input('Port 1');
-
-or index:
-
-    var input = midi.input(0);
+    var input = MIDI.Output('Port 1');
 
 
-### midi.output([string | number])
-
-Returns an object that represents an outgoing MIDI port. Pass in the port's
-name:
-
-    var output = midi.output('IAC 1');
-
-or index:
-
-    var output = midi.output(0);
+## MIDI helper functions
 
 
-### Event names
+### .channel(data)
 
-    'noteoff'
-    'noteon'
-    'polytouch'
-    'cc'
-    'pc'
-    'channeltouch'
-    'pitch'
+Returns the MIDI channel of the data as a number 1-16.
+
+    MIDI.channel([145,80,20]);            // 2
+
+
+### .message(data)
+
+Returns message name of the data.
+
+    MIDI.message([145,80,20])             // 'noteon'
+
+
+### .normaliseNote(data)
+
+Many keyboards transmit <code>noteon</code> with velocity 0 rather than
+<code>noteoff</code>s. <code>normaliseNote</code> converts <code>noteon</code>
+messages with velocity 0 to <code>noteoff</code> messages. A new array is
+not created – the existing array is modified and returned.
+
+    MIDI.normaliseNote([145,80,0]);       // [129,80,0]
+
+
+### .pitchToFloat(data, range)
+
+Returns the pitch bend value in semitones. Range is the bend range up or down,
+in semitones. Where range is not given it defaults to <code>2</code>.
+
+    MIDI.pitchToFloat([xxx,xx,xxx], 2);  // -1.625
+
+
+### .numberToNote(n)
+
+Given a note number between 0 and 127, returns a note name as a string.
+
+    MIDI.numberToNote(66);                // 'F♯'
+
+
+### .numberToOctave(n)
+
+Given a note number between 0 and 127, returns the octave the note is in as a number. 
+
+    MIDI.numberToNote(66);                // 3
+
+
+### .numberToFrequency(n)
+
+Given a note number between 0 and 127, returns the frequency of the fundamental tone.
+
+    MIDI.numberToFrequency(66);           // 
+
