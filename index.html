@@ -28,7 +28,27 @@
 
 	<p>Test MIDI()</p>
 
+	<div class="" id="midi-graph" />
+		<canvas></canvas>
+		<ul></ul>
+	</div>
+
 	<script src="js/midi.js"></script>
-	<script src="js/test.js"></script>
+	<script src="js/midi.log.js"></script>
+	<script src="js/midi.input.js"></script>
+	<script src="js/midi.output.js"></script>
+	<script src="js/midi.filter.js"></script>
+	<script src="js/midi.modifier.js"></script>
+	<script src="js/midi.graph.js"></script>
+	<script src="js/midi.toOSC.js"></script>
+	<!--script src="js/test.js"></script-->
+
+	<script>
+		MIDI()
+		.input('Port 1')
+		.graph({
+			node: document.getElementById('midi-graph')
+		});
+	</script>
 </body>
 </html>
