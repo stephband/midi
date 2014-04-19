@@ -31,7 +31,7 @@ canvas and output the midi event and an OSC-like array. Record the arrays in a
         tape.push(message);
     });
 
-See this example here: <a her="http://stephband.github.com/midi/index.html">stephband.github.com/midi/index.html</a>.
+See this example here: <a href="http://stephband.github.com/midi/index.html">stephband.github.com/midi/index.html</a>.
 
 
 ## Getting started
