@@ -306,6 +306,25 @@ The string <code>message</code> should be one of:
 Functions should return a number.
 
 
+### MIDI.Grapher(options)
+
+A constructor that creates a graph node.
+
+    var node = MIDI.Graph({ node: 'my-canvas' });
+
+Exposed to a router as:
+
+    MIDI().graph(options);
+
+#### Options
+
+    {
+        node:          requires a <canvas> element, or an id of a <canvas> element 
+        paddingLeft:
+        paddingRight:
+    }
+
+
 ### MIDI.OSC(fn)
 
 A constructor that creates an OSC destination node.
