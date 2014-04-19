@@ -49,7 +49,7 @@ calling a listener.
 
     var route = MIDI()
         .filter({ message: 'cc' })
-        .modifer({ channel: 1 })
+        .modify({ channel: 1 })
         .out(function(e) {
             // Do something with midi note event e
             console.log(e);
@@ -63,7 +63,7 @@ Routes can have multiple outs:
 
     var route = MIDI()
         .filter({ message: 'cc' })
-        .modifer({ channel: 1 })
+        .modify({ channel: 1 })
         .out(function(e) {
             // Do something with midi note event e
         })
