@@ -53,7 +53,7 @@ Routes can have multiple outs:
         });
 
 
-Because <code>.out(fn)</code> takes a function, routes can be connected together.
+Because <code>.out()</code> takes a function, routes can be connected together.
 
     var route1 = MIDI()
         .input({ port: 'Bus 1' })
