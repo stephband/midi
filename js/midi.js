@@ -1,54 +1,102 @@
-(function(window) {
-	"use strict";
+(function (window) {
+    'use strict';
 
-	var prototype = {};
+    // Node prototype
 
-	function send(e) {
-		this._send(e);
-	}
+    var prototype = {
+        out: out1,
+        send: send
+    };
 
-	function createMethod(Node) {
-		return function(options) {
-			var node = Node(options);
+    function noop() {}
 
-			// Set in() to the in() of the first node.
-			if (node.in && this.in === send) {
-				this.in = node.in.bind(node);
-			}
+    function out1(fn) {
+        // Override send with this listener function. Because we want this
+        // thing to be fast in the most common case, where exactly one
+        // listener function is specified.
+        this.send = fn;
+        this.out = out2;
+        return this;
+    }
 
-			// Connect the out of the previous node to the in of this node.
-			if (node.in) {
-				this.out(node.in);
-			}
+    function out2(fn) {
+        var listeners = [this.send, fn];
 
-			// Redefine out() to alias this node.
-			if (node.out) {
-				this.out = function(fn) {
-					node.out(fn);
-					return this;
-				};
-			}
+        Object.defineProperty(this, 'listeners', {
+            value: listeners
+        });
 
-			return this;
-		}
-	}
+        this.out = out3;
 
-	function registerNode(name, Node) {
-		prototype[name] = createMethod(Node);
-	}
+        // Fall back to prototype send
+        delete this.send;
+        return this;
+    }
 
-	function MIDI() {
-		var route = Object.create(prototype);
+    function out3(fn) {
+        this.listeners.push(fn);
+        return this;
+    }
 
-		MIDI.Source.apply(route);
-		route.in = send;
+    function send(message) {
+        if (!this.listeners) { return; }
 
-		return route;
-	}
+        var length = this.listeners.length,
+            l = -1;
 
-	MIDI.register = registerNode;
+        while (++l < length) {
+            this.listeners[l](message);
+        }
+        
+        return this;
+    }
 
-	window.MIDI = MIDI;
+    function passThru(e) {
+        this.send.apply(this, arguments);
+    }
+
+    function Node(fn) {
+        return Object.create(prototype, {
+            in: {
+                value: fn || passThru,
+                enumerable: true
+            }
+        });
+    }
+
+    function Source(fn) {
+        var node = Node(noop);
+        return node;
+    }
+
+    function Destination(fn) {
+        var node = Node(fn);
+        node.send = noop;
+        return node;
+    }
+
+    function createMethod(Node) {
+        return function method(options) {
+            var node = Node(options);
+            this.out(node.in);
+            return node;
+        };
+    }
+
+    function register(name, Node) {
+        prototype[name] = createMethod(Node);
+    }
+
+    function MIDI(fn) {
+        return MIDI.Node(fn);
+    }
+
+    MIDI.Node = Node;
+    MIDI.Source = Source;
+    MIDI.Destination = Destination;
+    MIDI.register = register;
+
+    window.MIDI = MIDI;
 })(window);
 
 
