@@ -117,8 +117,6 @@
         return function method(options) {
             var node = Node(options);
             
-            console.log('name >', name, node.in !== noop ? 'in' : '', node.out !== noop ? 'out' : '');
-            
             this.out(node.in.bind(node));
             
             if (node.out !== noop) {
