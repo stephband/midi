@@ -37,7 +37,7 @@
 		setupConnection = noop;
 	}
 
-	function Input(port) {
+	function Input(options) {
 		var node = MIDI.Source();
 		var input;
 
@@ -57,8 +57,8 @@
 
 			// Where a port is specified, listen to it, otherwise listen to
 			// all ports.
-			if (port) {
-				listen(inputs[port]);
+			if (options && options.port) {
+				listen(inputs[options.port]);
 			}
 			else {
 				midi.inputs().forEach(listen);

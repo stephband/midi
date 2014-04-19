@@ -45,21 +45,13 @@
 		}
 	};
 
-
-	function returnType(data) {
-		var name = types[Math.floor(data[0] / 16) - 8];
-	
-		// Catch type noteon with zero velocity and rename it as noteoff
-		return name === types[1] && data[2] === 0 ?
-			types[0] :
-			name ;
-	}
-
-	function returnChannel(data) {
-		return data[0] % 16 + 1;
-	}
-
 	function Node(options) {
+		//var filters = {};
+		//
+		//for (key in options) {
+		//	filters[key] = filters[key](options[key]);
+		//}
+
 		return MIDI.Node(function(e) {
 			var data = e.data;
 			var key;
@@ -70,8 +62,8 @@
 				}
 			}
 
-			e.channel = e.channel || returnChannel(e.data);
-			e.message = e.message || returnType(e.data);
+			e.channel = e.channel || MIDI.channel(e.data);
+			e.message = e.message || MIDI.message(e.data);
 
 			this.send(e);
 		});

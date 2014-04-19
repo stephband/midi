@@ -29,6 +29,8 @@
 (function (window) {
     'use strict';
 
+    var alertFlag = false;
+
     // Node prototype
 
     var prototype = {
@@ -111,6 +113,22 @@
         };
     }
 
+    function createMethod(Node) {
+        return function method(options) {
+            var node = Node(options);
+            
+            this.out(node.in);
+            
+            if (node.out !== noop) {
+                this.out = function() {
+                    node.out.apply(node, arguments);	
+                };
+            }
+            
+            return this;
+        };
+    }
+
     function register(name, Node) {
         prototype[name] = createMethod(Node);
     }
@@ -121,18 +139,22 @@
 
 	function request(fn) {
 		if (!navigator.requestMIDIAccess) {
-			console.log('Navigator does not support MIDI.');
+			if (!alertFlag) {
+				alert('Your browser does not support MIDI via the navigator.requestMIDIAccess() API.');
+			}
+			
 			return;
 		}
 
 		return navigator.requestMIDIAccess().then(fn, log);
 	}
 
-    function MIDI(fn) {
-        return MIDI.Node(fn);
+    function MIDI() {
+        return MIDI.Node();
     }
 
-    MIDI.ready = request;
+    MIDI.noop = noop;
+    MIDI.request = request;
     MIDI.register = register;
 
     MIDI.Node = Node;
@@ -188,8 +210,17 @@
 		return data[0] % 16 + 1;
 	}
 
+	//function returnMessage(data) {
+	//	return MIDI.messages[Math.floor(data[0] / 16) - 8];
+	//}
+
 	function returnMessage(data) {
-		return MIDI.messages[Math.floor(data[0] / 16) - 8];
+		var name = types[Math.floor(data[0] / 16) - 8];
+	
+		// Catch type noteon with zero velocity and rename it as noteoff
+		return name === types[1] && data[2] === 0 ?
+			types[0] :
+			name ;
 	}
 
 	function normaliseNoteOff(data) {

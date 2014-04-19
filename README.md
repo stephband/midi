@@ -11,86 +11,81 @@ Promises or a suitable polyfill to be enabled. Also, early days, and this API
 will change.
 
 
+## Getting started
+
+Take notes from port 'Bus 1' and send them to port 'IAC 2'.
+
     function isNote(m) {
         return m === 'noteon' || m === 'noteoff';
     }
 
+    MIDI()
+    .input({ port: 'Bus 1' })
+    .filter({ message: isNote })
+    .output({ port: 'IAC 2' });
 
-    
-        var modifier = MIDIModify(options);
-        var output = MIDI.Output(options);
-    
-        inputFilter.out(modifier.in);
-        modifier.out(midiOutput.in);
-    
-        // From input
 
-        var input = MIDI.Input();
-        var output = MIDI.Output();
-    
-        var filterNotes    = MIDI.Filter({ message: isNote });
-        var filterControls = MIDI.Filter({ message: 'cc' });
-        var filterPitch    = MIDI.Filter({ message: 'pitch' });
-        
-        MIDI.route()
-        .input()
+Set up a route that takes control changes and coerces them to channel 1 before
+calling a listener.
+
+    var route = MIDI()
+        .filter({ message: 'cc' })
         .modifer({ channel: 1 })
-        .out(filterNotes)
-        .out(filterControls)
-        .out(filterPitch);
-
-
-        // Send to socket
+        .out(function(e) {
+            // Do something with midi note event e
+            console.log(e);
+        });
     
-        var midiThrottle = MIDIThrottle();
+    // Call the route input with a MIDI message 
+    route.in(message);
+
+
+Routes can have multiple outs:
+
+    var route = MIDI()
+        .filter({ message: 'cc' })
+        .modifer({ channel: 1 })
+        .out(function(e) {
+            // Do something with midi note event e
+        })
+        .out(function(e) {
+            // Do something else
+        });
+
+
+Because <code>.out(fn)</code> takes a function, routes can be connected together.
+
+    var route1 = MIDI()
+        .input({ port: 'Bus 1' })
+        .filter({ message: isNote });
     
-        midiFilterControls.out(midiThrottle.in);
-        midiFilterPitch.out(midiThrottle.in);
+    var route2 = MIDI()
+        .modify({ channel: 1 })
+        .output({ port: 'IAC 2' });
     
-        midiFilterNotes.out(midiSocket.in);
-        midiThrottle.out(midiSocket.in);
-
-    });
-
-## Easily set up a MIDI route
-
-Listen to incoming volume change messages on Port 1. Flatten their values, log
-them to the console and send them to IAC 1.
-
-    var route = MIDI();
-    
-    route
-    .input('Port 1')
-    .filter({ channel: 1, message: 'cc', data1: 7 })
-    .modify({ data2: 80 })
-    .out(function(e) { console.log(e); })
-    .output('IAC 1');
+    route1.out(route2.in);
 
 
-## Request access to the browser's midi object
 
-    MIDI.ready(function(midi) {
+
+## MIDI utility functions
+
+
+### .request(fn)
+
+Request access to the browser's midi API. Where the browser does not support The
+WebMIDI API, the first call to <code>MIDI.request(fn)</code> will alert the user.
+
+
+    MIDI.request(function(midi) {
         // Do something with midi object
     });
 
-## MIDI nodes
+<code>.request()</code> returns a promise, so this is equivalent:
 
-### MIDI.Input
-
-A constructor that creates an input node.
-
-    var input = MIDI.Input('Port 1');
-
-
-### MIDI.Output
-
-A constructor that creates an output node.
-
-    var input = MIDI.Output('Port 1');
-
-
-## MIDI helper functions
-
+    MIDI.request().then(function(midi) {
+        // Do something with midi object
+    });
 
 ### .channel(data)
 
@@ -135,12 +130,142 @@ Given a note number between 0 and 127, returns a note name as a string.
 
 Given a note number between 0 and 127, returns the octave the note is in as a number. 
 
-    MIDI.numberToNote(66);                // 3
+    MIDI.numberToOctave(66);                // 3
 
 
 ### .numberToFrequency(n)
 
-Given a note number between 0 and 127, returns the frequency of the fundamental tone.
+Given a note number between 0 and 127, returns the frequency of the fundamental tone of that note.
 
     MIDI.numberToFrequency(66);           // 
 
+The reference tuning is A = 440Hz by default. Change the tuning by assigning MIDI.pitch.
+
+    MIDI.pitch = 442;
+
+
+### .noop()
+
+A function that does nothing.
+
+
+## MIDI node constructors
+
+Under the bonnet, a <code>MIDI()</code> route manages a chain of MIDI nodes that
+messages are passed through. For example, <code>MIDI().modify(options)</code>
+creates a route with an instance of the MIDI.Modifier node in the chain.
+Node constructors are exposed on the <code>MIDI</code> object for convenience.
+
+
+### MIDI.Node(fn)
+
+A constructor that creates a MIDI node.
+
+All other node constructors inherit from <code>MIDI.Node()</code>. MIDI nodes
+have three important methods: <code>.in(e)</code>, <code>.out(fn)</code> and
+<code>.send(e)</code>.
+
+Call <code>node.in(e)</code> to pass an event to the node.
+Call <code>node.out(fn)</code> to bind a handler to the node's output.
+Call <code>node.send(e)</code> to send an event to the node's out handlers.
+
+The function <code>fn</code> is a process to perform on an event.
+<code>fn</code> is called with a MIDI event object, and will typically call
+<code>this.send(e)</code> to pass the event to node.out handlers.
+
+    var node = MIDI.Node(function(e) {
+        // Do something with e
+        console.log(e);
+        
+        // Pass the event to the out handler(s)
+        this.send(e);
+    });
+
+Where <code>fn</code> is undefined, events are passed straight from
+<code>.in(e)</code> to <code>.send(e)</code>.
+
+
+### MIDI.Source()
+
+A constructor that creates an source node. For a source node, <code>.in()</code>
+is a noop.
+
+    var node = MIDI.Source();
+
+
+### MIDI.Destination(fn)
+
+A constructor that creates a destination node. For a destination node,
+<code>.out()</code> is a noop.
+
+    var node = MIDI.Destination();
+
+
+### MIDI.Input(options)
+
+A constructor that creates an input node. Automatically requests MIDI access and
+finds the relevant port, if it exists.
+
+    var node = MIDI.Input({ port: 'Port 1' });
+
+Exposed to a route as:
+
+    MIDI().input(options);
+
+
+### MIDI.Output(options)
+
+A constructor that creates an output node. Automatically requests MIDI access and
+finds the relevant port, if it exists.
+
+    var node = MIDI.Output({ port: 'Port 1' });
+
+Exposed to a route as:
+
+    MIDI().output(options);
+
+
+### MIDI.Filter(options)
+
+A constructor that creates a filter node.
+
+    var node = MIDI.Filter({ channel: 1 });
+
+Exposed to a route as:
+
+    MIDI().filter(options);
+
+
+### MIDI.Modifier(options)
+
+A constructor that creates an modify node.
+
+    var node = MIDI.Modifier({ channel: 1 });
+
+Exposed to a route as:
+
+    MIDI().modify(options);
+
+
+### MIDI.OSC(fn)
+
+A constructor that creates an OSC destination node.
+
+    var node = MIDI.OSC(function(messageOSC) {
+        // Do something with OSC message bundle
+    });
+
+Exposed to a route as:
+
+    MIDI().osc(fn);
+
+
+### MIDI.Logger()
+
+A constructor that creates a log node.
+
+    var input = MIDI.Logger();
+
+Exposed to a route as:
+
+    MIDI().log();
