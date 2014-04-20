@@ -255,7 +255,6 @@ For debugging. Adds a node that logs midi event.data to the console.
 
 ## MIDI utility functions
 
-
 ### .request(fn)
 
 Request access to the browser's midi API. Where the browser does not support The
@@ -272,6 +271,17 @@ WebMIDI API, the first call to <code>MIDI.request(fn)</code> will alert the user
         // Do something with midi object
     });
 
+### .isNote(data)
+
+    MIDI.isNote([145,80,20]);             // true
+
+### .isPitch(data)
+
+    MIDI.isPitch([145,80,20]);            // false
+
+### .isControl(data)
+
+    MIDI.isControl([145,80,20]);          // false
 
 ### .channel(data)
 
@@ -279,13 +289,11 @@ Returns the MIDI channel of the data as a number 1-16.
 
     MIDI.channel([145,80,20]);            // 2
 
-
 ### .message(data)
 
 Returns message name of the data.
 
     MIDI.message([145,80,20])             // 'noteon'
-
 
 ### .normaliseNote(data)
 
@@ -296,7 +304,6 @@ not created – the existing array is modified and returned.
 
     MIDI.normaliseNote([145,80,0]);       // [129,80,0]
 
-
 ### .pitchToFloat(data, range)
 
 Returns the pitch bend value in semitones. Range is the bend range up or down,
@@ -304,20 +311,17 @@ in semitones. Where range is not given it defaults to <code>2</code>.
 
     MIDI.pitchToFloat([xxx,xx,xxx], 2);  // -1.625
 
-
 ### .numberToNote(n)
 
 Given a note number between 0 and 127, returns a note name as a string.
 
     MIDI.numberToNote(66);                // 'F♯'
 
-
 ### .numberToOctave(n)
 
 Given a note number between 0 and 127, returns the octave the note is in as a number. 
 
     MIDI.numberToOctave(66);                // 3
-
 
 ### .numberToFrequency(n)
 
@@ -329,13 +333,12 @@ The reference tuning is A = 440Hz by default. Change the tuning by assigning MID
 
     MIDI.pitch = 442;
 
-
 ### .noop()
 
 A function that does nothing.
 
 
-## MIDI nodes
+## MIDI node constructors
 
 This section is of interest if you want to write your own MIDI process nodes.
 
