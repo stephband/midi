@@ -60,9 +60,7 @@ var tape = [];
 MIDI()
 .input()
 .filter({ message: /^note|^pitch/ })
-.graph({
-    canvas: document.getElementById('midi-graph')
-})
+.graph({ canvas: document.getElementById('midi-graph') })
 .out(function(e) {
     console.log(e.data);
 })

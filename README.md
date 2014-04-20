@@ -22,9 +22,7 @@ canvas and output the midi event and an OSC-like array. Record the arrays in a
     MIDI()
     .input()
     .filter({ message: /^note|^pitch/ })
-    .graph({
-        canvas: document.getElementById('midi-graph')
-    })
+    .graph({ canvas: document.getElementById('midi-graph') })
     .out(function(e) {
         console.log(e.data);
     })
