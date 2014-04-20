@@ -73,7 +73,7 @@ Because <code>.out()</code> takes a function, routes can be connected together.
     
     route1.out(route2.in);
 
-## MIDI() routes
+## MIDI() route functions
 
     var route = MIDI();
 
