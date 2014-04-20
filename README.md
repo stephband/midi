@@ -135,6 +135,9 @@ finds the relevant port, if it exists.
 
     var route = MIDI().input({ port: 'Port 1' });
 
+An input node is a source node. It ignores calls to it's <code>.in()</code>.
+I'm not sure why that's important. Maybe we should change that to make it marge.
+
 
 ### .output(options)
 
@@ -236,7 +239,6 @@ Options
         ]
     }
 
-
 ### .outArray(fn)
 
 Adds an out node that formats MIDI data in an OSC-like array.
@@ -245,6 +247,13 @@ Adds an out node that formats MIDI data in an OSC-like array.
         console.log(message);
     });
 
+### .outMap(fn)
+
+Adds an out node that calls <code>fn</code> immediately and once only with an
+object representing the live state of the MIDI route. Use this as a model for
+observing changes on.
+
+    var route = MIDI().outMap(fn);
 
 ### .log()
 
