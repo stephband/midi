@@ -1,12 +1,8 @@
 # MIDI
 
-MIDI is library of functions for routing and transforming MIDI data.
+MIDI is library of functions for routing and transforming MIDI events.
 
-
-## Warning
-
-Currently only Chrome Canary has native MIDI support.
-
+Warning! Currently only Chrome Canary has native MIDI support.
 
 ## Quick example
 
@@ -30,7 +26,6 @@ canvas and output the midi event and an OSC-like array. Record the arrays in a
         tape.push(message);
     });
 
-
 ## Getting started
 
 Take noteons and noteoffs from port 'Bus 1' and send them to port 'IAC 2'.
@@ -39,7 +34,6 @@ Take noteons and noteoffs from port 'Bus 1' and send them to port 'IAC 2'.
     .input({ port: 'Bus 1' })
     .filter({ message: /^note/ })
     .output({ port: 'IAC 2' });
-
 
 Set up a route that takes control changes and coerces them to channel 1 before
 calling a listener.
@@ -55,7 +49,6 @@ calling a listener.
     // Call the route input with a MIDI message 
     route.in(message);
 
-
 Routes can have multiple outs:
 
     var route = MIDI()
@@ -67,7 +60,6 @@ Routes can have multiple outs:
         .out(function(e) {
             // Do something else
         });
-
 
 Because <code>.out()</code> takes a function, routes can be connected together.
 
@@ -81,7 +73,6 @@ Because <code>.out()</code> takes a function, routes can be connected together.
     
     route1.out(route2.in);
 
-
 ## MIDI() routes
 
     var route = MIDI();
@@ -94,7 +85,6 @@ on a route adds a processing node to the route, with two exceptions:
 
 A MIDI() route is itself a node. Here are the standard route methods:
 
-
 ### .in(e)
 
 Send a midi event into the route.
@@ -102,7 +92,6 @@ Send a midi event into the route.
     var route = MIDI();
     
     route.in({ data: [144,80,80] });
-
 
 ### .out(fn)
 
@@ -124,7 +113,6 @@ Typically, you might want to send one route's out to another route's in:
     
     route1.out(route2.in);
 
-
 ### .input(options)
 
 Add a MIDI input node to the route. Automatically requests MIDI access and
@@ -135,14 +123,12 @@ finds the relevant port, if it exists.
 An input node is a source node. It ignores calls to it's <code>.in()</code>.
 I'm not sure why that's important. Maybe we should change that to make it marge.
 
-
 ### .output(options)
 
 Add a MIDI output node to the route. Automatically requests MIDI access and
 finds the relevant port, if it exists.
 
     var route = MIDI().output({ port: 'Port 1' });
-
 
 ### .filter(options)
 
@@ -175,13 +161,11 @@ If <code>message</code> is a string it should be one of:
 
 Functions should return <code>true</code> to allow the event to pass.
 
-
 ### .modify(options)
 
 Adds a modify node to the route.
 
     var route = MIDI().modify(options);
-
 
 Options
 
@@ -206,7 +190,6 @@ The string <code>message</code> should be one of:
     'pitch'
 
 Functions should return a number.
-
 
 ### .graph(options)
 
@@ -391,7 +374,6 @@ MIDI nodes go to some effort to keep processes efficient. Both <code>.out()</cod
 and <code>.send()</code> are dynamically reassigned depending on the number of
 handlers they have to serve.
 
-
 ### MIDI.Source()
 
 A constructor that creates an source node. For a source node, <code>.in()</code>
@@ -399,14 +381,12 @@ is a noop.
 
     var node = MIDI.Source();
 
-
 ### MIDI.Destination(fn)
 
 A constructor that creates a destination node. For a destination node,
 <code>.out()</code> is a noop.
 
     var node = MIDI.Destination();
-
 
 ### MIDI.Input(options)
 
@@ -419,7 +399,6 @@ finds the relevant port, if it exists.
     // Or create it on a route as
     MIDI().input({ port: 'Port 1' });
 
-
 ### MIDI.Output(options)
 
 A constructor that creates an output node. Automatically requests MIDI access and
@@ -430,7 +409,6 @@ finds the relevant port, if it exists.
     
     // Or create it on a route as
     MIDI().output({ port: 'Port 1' });
-
 
 ### MIDI.Filter(options)
 
