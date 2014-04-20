@@ -372,7 +372,9 @@ Where <code>fn</code> is undefined, events are passed straight from
 
 MIDI nodes go to some effort to keep processes efficient. Both <code>.out()</code>
 and <code>.send()</code> are dynamically reassigned depending on the number of
-handlers they have to serve.
+handlers they have to serve. I mention this only so that you don't go storing your
+outs using something like bind <code>node.out.bind(node)</code>, because
+<code>node.out</code> will change out from under your feet.
 
 ### MIDI.Source()
 
