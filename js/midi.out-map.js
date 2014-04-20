@@ -1,4 +1,6 @@
 (function(MIDI) {
+	'use strict';
+	
 	var defaults = {
 	    	range: 2
 	    };

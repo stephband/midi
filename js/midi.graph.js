@@ -1,4 +1,6 @@
 (function(undefined) {
+    'use strict';
+    
 	var defaults = {
 	    	paddingLeft:  1 / 30,
 	    	paddingRight: 1 / 30,

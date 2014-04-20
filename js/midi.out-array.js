@@ -1,4 +1,6 @@
 (function(MIDI) {
+	'use strict';
+
 	function numberToFloat(n) {
 		return n / 127;
 	}

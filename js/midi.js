@@ -170,6 +170,8 @@
 // Declare constants and utility functions on the MIDI object.
 
 (function(MIDI) {
+	'use strict';
+
 	var noteNames = [
 	    	'C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G♯', 'A', 'B♭', 'B'
 	    ],

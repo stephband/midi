@@ -1,5 +1,7 @@
 
 (function() {
+	'use strict';
+	
 	var debug = true;
 
 	function noop() {}

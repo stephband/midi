@@ -1,4 +1,6 @@
 (function(MIDI) {
+	'use strict';
+
 	var types = MIDI.messages;
 
 	var modifiers = {
