@@ -233,7 +233,24 @@ Adds an out node that calls <code>fn</code> immediately and once only with an
 object representing the live state of the MIDI route. Use this as a model for
 observing changes on.
 
-    var route = MIDI().outMap(fn);
+    var route = MIDI().outMap(function(model) {
+        // Dreamcode, I know
+        Object.observe(model[0].notes, doSomething);    
+    });
+
+The map is structured by channel then message type:
+
+    [
+        {
+            notes: [],
+            pitch: 0,
+            ccs:   []
+        },
+        ...
+    ]
+
+where <code>map[0]</code> is MIDI channel 1. The map is updated live as MIDI
+events pass through the route.
 
 ### .log()
 
