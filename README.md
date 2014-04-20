@@ -241,6 +241,11 @@ For debugging. Adds a node that logs midi event.data to the console.
 
     MIDI().log();
 
+### More plugins
+
+- <a href="https://github.com/stephband/midi-monitor">github.com/stephband/midi-monitor</a>
+
+If you make a plugin, send a pull request adding it to this section.
 
 ## MIDI utility functions
 
