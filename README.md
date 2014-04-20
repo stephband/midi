@@ -27,7 +27,6 @@ canvas and output the midi event and an OSC-like array. Record the arrays in a
         console.log(e.data);
     })
     .outArray(function(message) {
-        console.log(message);
         tape.push(message);
     });
 
