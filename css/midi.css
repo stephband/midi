@@ -1,5 +1,5 @@
 body {
-	width: 92%;
+	width: 87.5%;
 	margin-left: auto;
 	margin-right: auto;
 	padding-top: 2.5rem;
@@ -20,6 +20,10 @@ script.block {
 	font-size: 0.9375rem;
 	white-space: pre;
 	color: #836FCD;
+}
+
+script.block {
+	line-height: 1.25rem;
 }
 
 .link-index {
