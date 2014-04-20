@@ -190,21 +190,16 @@
 
 	// Library functions
 
-	function noteToNumber(str) {
-		var r = rnote.exec(str);
-		return parseInt(r[2]) * 12 + noteTable[r[1]];
+	function isNote(data) {
+		return data[0] > 127 && data[0] < 160 ;
 	}
 
-	function numberToNote(n) {
-		return noteNames[n % 12];
+	function isControl(data) {
+		return data[0] > 175 && data[0] < 192 ;
 	}
 
-	function numberToOctave(n) {
-		return Math.floor(n / 12) - (5 - MIDI.middle);
-	}
-
-	function numberToFrequency(n) {
-		return round(MIDI.pitch * Math.pow(1.059463094359, (n + 3 - (MIDI.middle + 2) * 12)));
+	function isPitch(data) {
+		return data[0] > 223 && data[0] < 240 ;
 	}
 
 	function returnChannel(data) {
@@ -251,6 +246,23 @@
 		return (range === undefined ? 2 : range) * pitchToInt(data) / 8191 ;
 	}
 
+	function noteToNumber(str) {
+		var r = rnote.exec(str);
+		return parseInt(r[2]) * 12 + noteTable[r[1]];
+	}
+
+	function numberToNote(n) {
+		return noteNames[n % 12];
+	}
+
+	function numberToOctave(n) {
+		return Math.floor(n / 12) - (5 - MIDI.middle);
+	}
+
+	function numberToFrequency(n) {
+		return round(MIDI.pitch * Math.pow(1.059463094359, (n + 3 - (MIDI.middle + 2) * 12)));
+	}
+
 	MIDI.messages = [
 		'noteoff',
 		'noteon',
@@ -266,6 +278,9 @@
 
 	//MIDI.noteNames = noteNames;
 	//MIDI.noteTable = noteTable;
+	MIDI.isNote = isNote;
+	MIDI.isPitch = isPitch;
+	MIDI.isControl = isControl;
 	MIDI.noteToNumber = noteToNumber;
 	MIDI.numberToNote = numberToNote;
 	MIDI.numberToOctave = numberToOctave;
