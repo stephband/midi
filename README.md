@@ -445,7 +445,6 @@ A constructor that creates a filter node.
     // Or create it on a route as
     MIDI().filter({ channel: 1 });
 
-
 ### MIDI.Modify(options)
 
 A constructor that creates an modify node.
@@ -455,7 +454,6 @@ A constructor that creates an modify node.
     
     // Or create it on a route as
     MIDI().modify(options);
-
 
 ### MIDI.Graph(options)
 
@@ -467,10 +465,10 @@ A constructor that creates a graph node.
     // Or create it on a route as
     MIDI().graph(options);
 
+### MIDI.OutArray(fn)
 
-### MIDI.outArray(fn)
-
-A constructor that creates an OSC destination node.
+A constructor that creates an out node that calls <code>fn</code> with an
+OSC-like array.
 
     // Create a node
     var node = MIDI.OutArray(fn);
@@ -478,6 +476,17 @@ A constructor that creates an OSC destination node.
     // Or create it on a route as
     MIDI().outArray(fn);
 
+### MIDI.OutMap(fn)
+
+A constructor that creates an out node that calls <code>fn</code> once with a
+live object representing the state of the midi route. Observe this object
+for changes!
+
+    // Create a node
+    var node = MIDI.OutMap(fn);
+    
+    // Or create it on a route as
+    MIDI().outMap(fn);
 
 ### MIDI.Log()
 
