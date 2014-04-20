@@ -2,7 +2,9 @@
 
 MIDI is library of functions for routing and transforming MIDI events.
 
-Warning! Currently only Chrome Canary has native MIDI support.
+Warning! Currently only Chrome has native MIDI support, and then only behind a flag.
+If you're in Chrome, switch it on Web MIDI here
+<a href="chrome://flags/#enable-web-midi">chrome://flags/#enable-web-midi</a>.
 
 ## Quick example
 
