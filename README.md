@@ -199,9 +199,9 @@ Functions should return a number.
 
 Adds a convert node to the route. Convert changes continuous controller numbers
 to range 0 - 127 numbers. It applies the conversion to a filtered subset of
-events before sending all events to out. Convert options take the same filter
-types as .filter() does (above), plus the <code>type</code> option for choosing
-a conversion:
+events. Events that are not converted are passed straight through. Convert
+options take the same properties as .filter() does (above), plus the
+<code>type</code> option for choosing a conversion:
 
     {
         type:    'continuous' - required - the only type available at the moment
