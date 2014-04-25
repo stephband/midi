@@ -81,6 +81,7 @@
 
 			for (key in options) {
 				if (filters[key] && !filters[key](e, options[key])) {
+					if (options.reject) { options.reject(e); }
 					return;
 				}
 			}
