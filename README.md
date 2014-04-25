@@ -193,6 +193,25 @@ The string <code>message</code> should be one of:
 
 Functions should return a number.
 
+### .convert(options)
+
+    var route = MIDI().convert(options);
+
+Adds a convert node to the route. Convert changes continuous controller numbers
+to range 0 - 127 numbers. It applies the conversion to a filtered subset of
+events before sending all events to out. Convert options take the same filter
+types as .filter() does (above), plus the <code>type</code> option for choosing
+a conversion:
+
+    {
+        type:    'continuous' - required - the only type available at the moment
+        port:    number | string | target
+        channel: number (1-16) | fn
+        message: string | regexp | fn
+        data1:   number (0-127) | fn
+        data2:   number (0-127) | fn
+    }
+
 ### .graph(options)
 
 Adds a canvas graph node to the route.
@@ -451,10 +470,24 @@ A constructor that creates a filter node.
 A constructor that creates an modify node.
 
     // Create a node
-    var node = MIDI.Modifier({ channel: 1 });
+    var node = MIDI.Modify({ channel: 1 });
     
     // Or create it on a route as
     MIDI().modify(options);
+
+### MIDI.Convert(options)
+
+A constructor that creates a convert node.
+
+    // Create a node
+    var node = MIDI.Convert({
+        type: 'continuous',
+        message: 'cc'
+        data1: 3
+    });
+
+    // Or create it on a route as
+    MIDI().convert(options);
 
 ### MIDI.Graph(options)
 
