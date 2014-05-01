@@ -1,3 +1,7 @@
+// MIDI.ourtMap
+// 
+// Outputs a live updating map of MIDI state.
+
 (function(MIDI) {
 	'use strict';
 	

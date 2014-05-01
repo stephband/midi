@@ -1,3 +1,7 @@
+// MIDI.outArray
+// 
+// Outputs an OSC-like array of each MIDI event.
+
 (function(MIDI) {
 	'use strict';
 

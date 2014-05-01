@@ -1,3 +1,7 @@
+// MIDI.Filter
+// 
+// Filters MIDI messages to those that match the rules specified in options.
+
 (function(MIDI) {
 	"use strict";
 	
