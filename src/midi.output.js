@@ -1,3 +1,6 @@
+// MIDI.Output
+// 
+// Sends MIDI events to a navigator's output port(s)
 
 (function() {
 	'use strict';

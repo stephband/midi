@@ -1,3 +1,7 @@
+// MIDI.Modify
+// 
+// Modifies incoming MIDI events to match the rules in options.
+
 (function(MIDI) {
 	'use strict';
 

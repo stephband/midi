@@ -1,3 +1,7 @@
+// MIDI.Graph
+// 
+// Draws MIDI messages to a <canvas> element.
+
 (function(undefined) {
     'use strict';
     

@@ -1,3 +1,7 @@
+// MIDI.Log
+// 
+// Logs MIDI events to the console.
+
 (function(MIDI) {
 	"use strict";
 

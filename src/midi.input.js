@@ -1,9 +1,11 @@
+// MIDI.Input
+// 
+// Connects to a navigator's input port or ports.
+
 (function(MIDI) {
 	"use strict";
 
 	var inputs = {};
-
-	function noop() {}
 
 	function emptyObject(obj) {
 		var key;
@@ -34,7 +36,7 @@
 		updateInputs(midi);
 
 		// Guarantee this setup is only called once.
-		setupConnection = noop;
+		setupConnection = MIDI.noop;
 	}
 
 	function Input(options) {

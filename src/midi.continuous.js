@@ -1,3 +1,8 @@
+// Continuous
+// 
+// Converts matching continuous CC messages to absolute values, passing
+// unmatched MIDI messages straight through to the out.
+
 (function(MIDI) {
 	'use strict';
 
@@ -16,7 +21,7 @@
 		}
 		
 		value += e.data[2] - 63;
-		value = value < 0 ? 0 : value > 127 : 127 : value ;
+		value = value < 0 ? 0 : value > 127 ? 127 : value ;
 		e.data[2] = array[data[1]] = value;
 	}
 
