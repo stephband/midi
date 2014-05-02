@@ -431,94 +431,121 @@
 
 (function(MIDI) {
 	"use strict";
-	
-	var types = MIDI.messages;
 
-	var filters = {
-		port: function(e, filter) {
-			if (!e.target) { return false; }
+	var types = {
+		port: function(filter) {
+			var type = typeOf(filter);
 
-			return typeof filter === 'number' ?
-				filter === e.target.id :
-				typeof filter === 'string' ?
-				filter === e.target.name :
-				filter === e.target ;
+			return type === 'number' ? function(e) {
+					if (!e.target) { return false; }
+					return e.target.id === (filter + '');
+				} :
+				type === 'string' ? function(e) {
+					if (!e.target) { return false; }
+					return e.target.name === filter;
+				} :
+				type === 'regexp' ? function(e) {
+					if (!e.target) { return false; }
+					return filter.test(e.target.name);
+				} :
+				function(e) {
+					return e.target === filter;
+				} ;
 		},
 
-		channel: function(e, filter) {
-			if (e.channel === undefined) {
-				e.channel = MIDI.channel(e.data);
-			}
-
-			//return typeOf(filter);
-
-			return typeof filter === 'number' ?
-				filter === e.channel :
-				filter(e.channel) ;
+		channel: function(filter) {
+			var type = typeOf(filter);
+			
+			return type === 'number' ? function(e) {
+					return channel(e) === filter;
+				} :
+				type === 'function' ? function(e) {
+					return filter(channel(e));
+				} :
+				returnFalse ;
 		},
 
-		message: function(e, filter) {
-			if (e.message === undefined) {
-				e.message = MIDI.message(e.data);
-			}
-
-			return typeof filter === 'string' ?
-				filter === e.message :
-				Object.prototype.toString.apply(filter) === '[object RegExp]' ?
-				filter.test(e.message) :
-				filter(e.message) ;
+		message: function(filter) {
+			var type = typeOf(filter);
+			
+			return type === 'number' ? function(e) {
+					return message(e) === filter;
+				} :
+				type === 'regexp' ? function(e) {
+					return filter.test(message(e));
+				} :
+				type === 'function' ? function() {
+					return filter(message(e));
+				} :
+				returnFalse ;
 		},
 
 		data1: function(e, filter) {
-			return typeof filter === 'number' ?
-				filter === e.data[1] :
-				filter(e.data[1]) ;
+			var type = typeOf(filter);
+			
+			return type === 'number' ? function(e) {
+					return e.data[1] === filter;
+				} :
+				type === 'function' ? function(e) {
+					return filter(e.data[1]);
+				} :
+				returnFalse ;
 		},
 
 		data2: function(e, filter) {
-			return typeof filter === 'number' ?
-				filter === e.data[2] :
-				filter(e.data[2]) ;
+			var type = typeOf(filter);
+			
+			return type === 'number' ? function(e) {
+					return e.data[2] === filter;
+				} :
+				type === 'function' ? function(e) {
+					return filter(e.data[2]);
+				} :
+				returnFalse ;
 		}
 	};
 
-	//var objectTypes = {
-	//	'[object String]': equals,
-	//	'[object Number]': equals,
-	//	
-	//	'[object RegExp]': function(regexp, value) {
-	//		return regexp.test(value);
-	//	}
-	//};
-//
-	//function equals(val1, val2) {
-	//	return val1 === val2;
-	//}
-//
-	//function typeOf(object) {
-	//	return objectTypes[Object.prototype.toString.apply(object)];
-	//}
+	var rtype = /^\[object\s([A-Za-z]+)/;
+
+	function typeOf(object) {
+		var type = typeof object;
+
+		return type === 'object' ?
+			rtype.exec(Object.prototype.toString.apply(object))[1].toLowerCase() :
+			type ;
+	}
+
+	function returnFalse() {
+		return false;
+	}
+
+	function channel(e) {
+		return e.channel || (e.channel = MIDI.channel(e.data));
+	}
+
+	function message(e) {
+		return e.message || (e.message = MIDI.message(e.data));
+	}
 
 	function Node(options) {
-		//var filters = {};
-		//
-		//for (key in options) {
-		//	filters[key] = filters[key](options[key]);
-		//}
+		var filters = {};
+		
+		for (key in options) {
+			if (type[key]) {
+				filters[key] = types[key](options[key]);
+			}
+		}
 
 		return MIDI.Node(function(e) {
 			var data = e.data;
 			var key;
 
-			for (key in options) {
-				if (filters[key] && !filters[key](e, options[key])) {
+			for (key in filters) {
+				if (!filters[key](e)) {
 					if (options.reject) { options.reject(e); }
 					return;
 				}
 			}
-
-			e.channel = e.channel || MIDI.channel(e.data);
-			e.message = e.message || MIDI.message(e.data);
 
 			this.send(e);
 		});
