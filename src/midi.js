@@ -34,9 +34,9 @@
 	// Node prototype
 
 	var prototype = {
-	    	out: out1,
-	    	send: send
-	    };
+		out: out1,
+		send: send
+	};
 
 	function noop() {}
 
@@ -134,8 +134,12 @@
 		prototype[name] = createMethod(name, Node);
 	}
 
-	function log(error) {
-		console.log(error);
+	function log(e) {
+		console.log(e);
+	}
+	
+	function warn(e) {
+		console.warn(e);
 	}
 
 	function request(fn) {
@@ -146,8 +150,8 @@
 			
 			return;
 		}
-
-		return navigator.requestMIDIAccess().then(fn, log);
+		
+		return navigator.requestMIDIAccess().then(fn, warn);
 	}
 
 	function MIDI() {
