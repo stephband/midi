@@ -134,8 +134,12 @@
 		prototype[name] = createMethod(name, Node);
 	}
 
-	function log(error) {
-		console.log(error);
+	function log(e) {
+		console.log(e);
+	}
+	
+	function warn(e) {
+		console.warn(e);
 	}
 
 	function request(fn) {
@@ -146,8 +150,8 @@
 			
 			return;
 		}
-
-		return navigator.requestMIDIAccess().then(fn, log);
+		
+		return navigator.requestMIDIAccess().then(fn, warn);
 	}
 
 	function MIDI() {
@@ -217,7 +221,7 @@
 	
 		// Catch type noteon with zero velocity and rename it as noteoff
 		return name === MIDI.messages[1] && data[2] === 0 ?
-			types[0] :
+			MIDI.messages[0] :
 			name ;
 	}
 
