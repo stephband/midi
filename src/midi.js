@@ -34,9 +34,9 @@
 	// Node prototype
 
 	var prototype = {
-		out: out1,
-		send: send
-	};
+	    	out: out1,
+	    	send: send
+	    };
 
 	function noop() {}
 
