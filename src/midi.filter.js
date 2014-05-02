@@ -104,14 +104,13 @@
 		var filters = {}, key;
 		
 		for (key in options) {
-			if (type[key]) {
+			if (types[key]) {
 				filters[key] = types[key](options[key]);
 			}
 		}
 
 		return MIDI.Node(function(e) {
-			var data = e.data;
-			var key;
+			var data = e.data, key;
 
 			for (key in filters) {
 				if (!filters[key](e)) {
