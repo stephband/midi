@@ -16,7 +16,9 @@
 	}
 
 	function addInput(input) {
-		inputs[input.name] = input;
+		inputs[input.id] = {
+			input: input
+		};
 	}
 
 	function updateInputs(midi) {
@@ -39,6 +41,10 @@
 		setupConnection = MIDI.noop;
 	}
 
+	function call(listener) {
+		listener(this);
+	}
+
 	function Input(options) {
 		var node = MIDI.Source();
 		var input;
@@ -48,12 +54,25 @@
 		}
 
 		function listen(input) {
-			input.addEventListener('midimessage', send);
+			// WebMIDI is dropping multiple listeners.
+			// https://code.google.com/p/chromium/issues/detail?id=163795#c121
+			// To get round this, we distribute our own listeners. 
+			
+			var obj = inputs[input.id];
+			var listeners = obj.listeners;
+			
+			if (!listeners) {
+				listeners = obj.listeners = [send];
+				input.addEventListener('midimessage', function(e) {
+					listeners.forEach(call, e);
+				});
+			}
+			else {
+				obj.listeners.push(send);
+			}
 		}
 
 		MIDI.request(function(midi) {
-			//console.log('midi.inputs()', midi.inputs());
-
 			// Listen to connection.
 			setupConnection(midi);
 
