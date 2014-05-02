@@ -101,7 +101,7 @@
 	}
 
 	function Node(options) {
-		var filters = {};
+		var filters = {}, key;
 		
 		for (key in options) {
 			if (type[key]) {
