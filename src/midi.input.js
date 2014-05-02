@@ -16,7 +16,7 @@
 	}
 
 	function addInput(input) {
-		inputs[input.id] = {
+		inputs[input.name] = {
 			input: input
 		};
 	}
@@ -45,7 +45,7 @@
 		listener(this);
 	}
 
-	function Input(options) {
+	function Input(name) {
 		var node = MIDI.Source();
 		var input;
 
