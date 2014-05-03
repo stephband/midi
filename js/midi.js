@@ -499,7 +499,7 @@
 				returnFalse ;
 		},
 
-		data1: function(e, filter) {
+		data1: function(filter) {
 			var type = typeOf(filter);
 			
 			return type === 'number' ? function(e) {
@@ -511,7 +511,7 @@
 				returnFalse ;
 		},
 
-		data2: function(e, filter) {
+		data2: function(filter) {
 			var type = typeOf(filter);
 			
 			return type === 'number' ? function(e) {
