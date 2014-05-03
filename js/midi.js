@@ -359,7 +359,7 @@
 			// https://code.google.com/p/chromium/issues/detail?id=163795#c121
 			// To get round this, we distribute our own listeners. 
 			
-			var obj = inputs[input.id];
+			var obj = inputs[input.name];
 			var listeners = obj.listeners;
 			
 			if (!listeners) {
@@ -379,8 +379,8 @@
 
 			// Where a port is specified, listen to it, otherwise listen to
 			// all ports.
-			if (options && options.port) {
-				listen(inputs[options.port]);
+			if (name) {
+				listen(inputs[name].input);
 			}
 			else {
 				midi.inputs().forEach(listen);
