@@ -47,7 +47,7 @@
 				type === 'regexp' ? function(e) {
 					return filter.test(message(e));
 				} :
-				type === 'function' ? function() {
+				type === 'function' ? function(e) {
 					return filter(message(e));
 				} :
 				returnFalse ;
