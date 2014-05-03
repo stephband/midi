@@ -35,7 +35,8 @@
 
 	var prototype = {
 	    	out: out1,
-	    	send: send
+	    	send: send,
+	    	off: off
 	    };
 
 	function noop() {}
@@ -50,10 +51,8 @@
 	}
 
 	function out2(fn) {
-		var listeners = [this.send, fn];
-
 		Object.defineProperty(this, 'listeners', {
-			value: listeners
+			value: [this.send, fn]
 		});
 
 		this.out = out3;
@@ -65,6 +64,25 @@
 
 	function out3(fn) {
 		this.listeners.push(fn);
+		return this;
+	}
+
+	function off(fn) {
+		var listeners = this.listeners;
+		
+		if (listeners) {
+			var n = listeners.length;
+			
+			while (n--) {
+				if (listeners[n] === fn) {
+					listeners.splice(n, 1);
+				}
+			}
+		}
+		else {
+			delete this.send;
+		}
+		
 		return this;
 	}
 
