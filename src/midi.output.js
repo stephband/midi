@@ -38,7 +38,7 @@
 			port.send(e.data, e.time);
 		});
 
-		MIDI.request(function(midi) {
+		MIDI.request.then(function(midi) {
 			port = id ? find(midi.outputs(), id) : midi.outputs()[0] ;
 		});
 

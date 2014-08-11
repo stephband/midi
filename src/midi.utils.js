@@ -122,6 +122,8 @@
 	MIDI.numberToFrequency = numberToFrequency;
 	MIDI.channel = returnChannel;
 	MIDI.message = returnMessage;
+	MIDI.toChannel = returnChannel;
+	MIDI.toType = returnMessage;
 	MIDI.normaliseNoteOn = normaliseNoteOn;
 	MIDI.normaliseNoteOff = normaliseNoteOff;
 	MIDI.pitchToInt = pitchToInt;

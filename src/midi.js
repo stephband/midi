@@ -160,24 +160,18 @@
 		console.warn(e);
 	}
 
-	function request(fn) {
-		if (!navigator.requestMIDIAccess) {
-			if (!alertFlag) {
-				alert('Your browser does not support MIDI via the navigator.requestMIDIAccess() API.');
-			}
-			
-			return;
-		}
-		
-		return navigator.requestMIDIAccess().then(fn, warn);
-	}
-
 	function MIDI() {
 		return MIDI.Node();
 	}
 
+	MIDI = {};
+	MIDI.request = navigator.requestMIDIAccess ?
+		navigator.requestMIDIAccess() :
+		new Promise(function(accept, reject){
+			reject('Your browser does not support MIDI via the navigator.requestMIDIAccess() API.');
+		}) ;
+
 	MIDI.noop = noop;
-	MIDI.request = request;
 	MIDI.register = register;
 
 	MIDI.Node = Node;

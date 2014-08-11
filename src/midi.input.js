@@ -72,7 +72,7 @@
 			}
 		}
 
-		MIDI.request(function(midi) {
+		MIDI.request.then(function(midi) {
 			// Listen to connection.
 			setupConnection(midi);
 
