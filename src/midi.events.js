@@ -48,11 +48,11 @@
 		return set.apply(this, args);
 	}
 
-	function remove(list, object) {
+	function remove(list, fn) {
 		var n = list.length;
 		
 		while (n--) {
-			if (list[n][0] === object) {
+			if (list[n][0] === fn) {
 				list.splice(n, 1);
 			}
 		}
@@ -152,7 +152,12 @@
 			get(map, message[0], message[1]) ;
 
 		if (list) {
-			remove(list, fn);
+			if (fn) {
+				remove(list, fn);
+			}
+			else {
+				list.length = 0;
+			}
 		}
 		
 		return this;
