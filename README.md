@@ -10,8 +10,8 @@ If you're in Chrome, switch on Web MIDI at
 
 ### .on(query, fn)
 
-Registers an event handler for MIDI events who match the query. A query can be
-expressed as an object:
+Registers an event handler for MIDI events that match <code>query</code>. A
+query can be expressed as an object:
 
     MIDI.on({ channel: 1, message: 'cc' }, function(e) {
         // Called for all incoming MIDI Control Change
@@ -22,16 +22,6 @@ expressed as an object:
         // Called for all incoming MIDI Control Change 7
         // messages on all channels.
     });
-
-A query object has the optional properties:
-
-    {
-        port:    // Not curently implemented
-        channel: // number 1–16
-        message: // string 'note', 'noteon', 'noteoff', 'cc', 'pc', 'pitch', 'polytouch', 'channeltouch'
-        data1:   // number 0-127 or string note name, eg. 'C#3'
-        data2:   // number 0-127
-    }
 
 A query can alternatively be expressed as a MIDI message data array:
 
@@ -50,6 +40,17 @@ Where a query is not given, the handler is registered to all MIDI events.
     MIDI.on(function(e) {
         // Called for all incoming MIDI events.
     });
+
+A query object has the optional properties:
+
+    {
+        port:    // Not curently implemented
+        channel: // number 1–16
+        message: // string 'note', 'noteon', 'noteoff', 'cc', 'pc', 'pitch', 'polytouch', 'channeltouch'
+        data1:   // number 0-127
+                 // string note name, eg. 'C#3'
+        data2:   // number 0-127
+    }
 
 ### .off(query, fn)
 
