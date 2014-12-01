@@ -74,8 +74,7 @@ Removes an event handler from all MIDI events matching the query. If
 query. If <code>query</code> is not given, removes the handler from all events.
 
 
-### .normaliseEvent(e)
-### .normaliseEvent(e, timeOffset)
+### .normaliseEvent(e)<br/>.normaliseEvent(e, timeOffset)
 
 Takes a DOM MIDI event object and returns a
 <a href="https://github.com/sound-io/music-json-spec">Music JSON</a> formatted
