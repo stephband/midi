@@ -13,7 +13,7 @@
 	    	'C':  0, 'C♯': 1, 'D♭': 1, 'D': 2, 'D♯': 3, 'E♭': 3, 'E': 4,
 	    	'F':  5, 'F♯': 6, 'G♭': 6, 'G': 7, 'G♯': 8, 'A♭': 8, 'A': 9,
 	    	'A♯': 10, 'B♭': 10, 'B': 11
-	    }:
+	    };
 
 	var rnotename = /^([A-G][♭♯]?)(\d)$/;
 	var rshorthand = /[b#]/g;
@@ -22,7 +22,7 @@
 	    	noteoff:      128,
 	    	noteon:       144,
 	    	polytouch:    160,
-	    	cc:           176,
+	    	control:      176,
 	    	pc:           192,
 	    	channeltouch: 208,
 	    	pitch:        224
@@ -39,15 +39,19 @@
 		};
 	})({
 		pitch: function(e) {
-			return [e.receivedTime, 0, message, pitchToFloat(e.data, 2)];
+			return [e.receivedTime, 0, 'pitch', pitchToFloat(e.data, 2)];
 		},
 
 		pc: function(e) {
-			return [e.receivedTime, 0, message, e.data[1]];
+			return [e.receivedTime, 0, 'program', e.data[1]];
 		},
 
 		channeltouch: function(e) {
-			return [e.receivedTime, 0, message, e.data[1] / 127];
+			return [e.receivedTime, 0, 'aftertouch', 'all', e.data[1] / 127];
+		},
+
+		polytouch: function(e) {
+			return [e.receivedTime, 0, 'aftertouch', e.data[1], e.data[2] / 127];
 		}
 	});
 
@@ -108,7 +112,7 @@
 
 	function replaceSymbol($0, $1) {
 		return $1 === '#' ? '♯' :
-			$1 === 'b' ? : '♭' :
+			$1 === 'b' ? '♭' :
 			'' ;
 	}
 

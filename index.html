@@ -44,11 +44,24 @@
 		OSC-like arrays. The arrays are recorded in <code>tape</code>:
 	</p>
 
-	<script src="js/midi.js"></script>
+	<!--script src="js/midi.js"></script-->
+
+	<script src="src/midi.js"></script>
+	<script src="src/midi.utils.js"></script>
+	<script src="src/midi.input.js"></script>
+	<script src="src/midi.output.js"></script>
+	<script src="src/midi.filter.js"></script>
+	<script src="src/midi.modify.js"></script>
+	<script src="src/midi.continuous.js"></script>
+	<script src="src/midi.graph.js"></script>
+	<script src="src/midi.out-map.js"></script>
+	<script src="src/midi.out-array.js"></script>
+	<script src="src/midi.log.js"></script>
+
 	<script class="block">
 var tape = [];
 	
-MIDI()
+MIDI.Node()
 .input()
 .filter({ message: /^note|^pitch/ })
 .graph({ canvas: document.getElementById('midi-graph') })
