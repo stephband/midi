@@ -74,7 +74,7 @@ Removes an event handler from all MIDI events matching the query. If
 query. If <code>query</code> is not given, removes the handler from all events.
 
 
-### .normaliseEvent(e)
+### .normaliseEvent(e, timeOffset)
 
 Takes a DOM MIDI event object and returns a
 <a href="https://github.com/sound-io/music-json-spec">Music JSON</a> formatted
@@ -82,9 +82,11 @@ event array of the form:
 
     [timestamp, duration, type, data ... ]
 
-The timestamp is read from <code>e.receivedTime</code>. Duration is 0.
-Pitch bend data is normalised to semitones, and note velocities and
-aftertouch data is normalised to the range 0-1. Some examples:
+The timestamp is <code>e.receivedTime</code> - <code>timeOffset</code>. Where
+<code>timeOffset</code> is not given the timestamp is just
+<code>e.receivedTime</code>. Duration is 0. Pitch bend data is normalised
+to semitones, and note velocities and aftertouch data is normalised to the range
+0-1. Some examples:
 
     // Event object e:
     // { receivedTime: 1234, data: [145,80,20], ... }

@@ -29,12 +29,13 @@
 	    };
 
 	var normaliseEvent = (function(converters) {
-		return function normaliseEvent(e) {
+		return function normaliseEvent(e, timeOffset) {
 			var message = MIDI.toMessage(e.data);
+			var time = e.receivedTime - (timeOffset || 0);
 
 			return converters[message] ?
 				converters[message](e) :
-				[e.receivedTime, 0, message, e.data[1], e.data[2] / 127] ;
+				[time, 0, message, e.data[1], e.data[2] / 127] ;
 		};
 	})({
 		pitch: function(e) {
