@@ -7,6 +7,8 @@
 
 	var rtype = /^\[object\s([A-Za-z]+)/;
 
+	var empty = [];
+
 	var map = {
 	    	all: []
 	    };
@@ -125,19 +127,81 @@
 		updateInputs(midi);
 	}
 
-	MIDI.on = function(message, fn) {
-		if (typeOf(message) === 'function' || message.length === 0) {
-			fn = message;
-			map.all.push([fn, slice(arguments)]);
+	function createData(channel, message, data1, data2) {
+		var number = MIDI.messageToNumber(channel, message);
+		return data1 ? data2 ? [number, data1, data2] : [number, data1] : [number] ;
+	}
+
+	function createDatas(channel, message, data1, data2) {
+		var datas = [];
+
+		if (!message) {
+			for (message in MIDI.messages) {
+				datas.push.apply(this, createDatas(channel, message, data1, data2));
+			}
+			return datas;
+		}
+
+		if (channel && channel !== 'all') {
+			datas.push(createData(channel, message, data1, data2));
+			return datas;
+		}
+
+		var ch = 17;
+
+		while (--ch) {
+			datas.push(createData(ch + 1, message, data1, data2));
+		}
+
+		return datas;
+	}
+
+	function createQueries(query) {
+		var queries;
+
+		if (query.message === 'note') {
+			var noteons  = createDatas(query.channel, 'noteon', query.data1, query.data2);
+			var noteoffs = createDatas(query.channel, 'noteoff', query.data1, query.data2);
+
+			queries = noteons.concat(noteoffs);
+		}
+		else {
+			queries = createDatas(query.channel, query.message, query.data1, query.data2);
+		}
+
+		return queries;
+	}
+
+	function on(map, query, fn) {
+		var list = query.length === 0 ?
+				get(map, 'all') || set(map, 'all', []) :
+			query.length === 1 ?
+				get(map, query[0], 'all') || set(map, query[0], 'all', []) :
+				get(map, query[0], query[1]) || set(map, query[0], query[1], []) ;
+
+		list.push([fn, slice(arguments, 2)]);
+	}
+
+	MIDI.on = function(query, fn) {
+		var type = typeOf(query);
+		var queries;
+
+		if (type === 'object') {
+			queries = createQueries(query);
+
+			while (query = queries.pop()) {
+				on(map, query, fn);
+			}
+
 			return this;
 		}
 
-		var list = message.length === 1 ?
-			get(map, message[0], 'all') || set(map, message[0], 'all', []) :
-			get(map, message[0], message[1]) || set(map, message[0], message[1], []) ;
+		if (type === 'function') {
+			fn = query;
+			query = empty;
+		}
 
-		list.push([fn, slice(arguments, 1)]);
-
+		on(map, query, fn);
 		return this;
 	};
 

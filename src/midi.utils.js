@@ -7,15 +7,25 @@
 
 	var noteNames = [
 	    	'C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G♯', 'A', 'B♭', 'B'
-	    ],
+	    ];
 
-	    noteTable = {
+	var noteTable = {
 	    	'C':  0, 'C♯': 1, 'D♭': 1, 'D': 2, 'D♯': 3, 'E♭': 3, 'E': 4,
 	    	'F':  5, 'F♯': 6, 'G♭': 6, 'G': 7, 'G♯': 8, 'A♭': 8, 'A': 9,
 	    	'A♯': 10, 'B♭': 10, 'B': 11
-	    },
+	    }:
 
-	    rname = /^([A-G][♭♯]?)(\d)$/;
+	var rname = /^([A-G][♭♯]?)(\d)$/;
+
+	var messages = {
+	    	noteoff:      128,
+	    	noteon:       144,
+	    	polytouch:    160,
+	    	cc:           176,
+	    	pc:           192,
+	    	channeltouch: 208,
+	    	pitch:        224
+	    };
 
 	function round(n, d) {
 		var factor = Math.pow(10, d); 
@@ -98,16 +108,11 @@
 		return round(MIDI.pitch * Math.pow(1.059463094359, (n + 3 - (MIDI.middle + 2) * 12)));
 	}
 
-	MIDI.messages = [
-		'noteoff',
-		'noteon',
-		'polytouch',
-		'cc',
-		'pc',
-		'channeltouch',
-		'pitch'
-	];
+	function messageToNumber(channel, message) {
+		return messages[message] + (channel ? channel - 1 : 0 );
+	}
 
+	MIDI.messages = Object.keys(messages);
 	MIDI.pitch = 440;
 	MIDI.middle = 3;
 
@@ -116,6 +121,7 @@
 	MIDI.isNote = isNote;
 	MIDI.isPitch = isPitch;
 	MIDI.isControl = isControl;
+	MIDI.messageToNumber = messageToNumber;
 	MIDI.noteToNumber = noteToNumber;
 	MIDI.numberToNote = numberToNote;
 	MIDI.numberToOctave = numberToOctave;
