@@ -83,7 +83,7 @@ event array. Music JSON events have the form:
     [timestamp, duration, type, data ... ]
 
 The timestamp is <code>e.receivedTime</code>, or where <code>timeOffset</code>
-is given <code>e.receivedTime - timeOffset</code>. . Duration is 0. Pitch bend
+is given, <code>e.receivedTime - timeOffset</code>. . Duration is 0. Pitch bend
 data is normalised to floats representing semitones, and note velocities and
 aftertouch data is normalised to the range 0-1. So for example:
 
