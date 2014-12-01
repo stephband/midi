@@ -6,36 +6,55 @@ Warning! Currently only Chrome has native MIDI support, and then only behind a f
 If you're in Chrome, switch it on Web MIDI here
 <a href="chrome://flags/#enable-web-midi">chrome://flags/#enable-web-midi</a>.
 
-## Quick example
+## MIDI
+
+### .on(query, fn)
+
+Registers an event handler for MIDI events who match the query. A query can be
+expressed as an object:
 
     MIDI.on({ channel: 1, message: 'cc' }, function(e) {
         // Called for all incoming MIDI Control Change
-        // messages on channel 1
+        // messages on channel 1.
     });
+
+    MIDI.on({ message: 'cc', data1: 7 }, function(e) {
+        // Called for all incoming MIDI Control Change 7
+        // messages on all channels.
+    });
+
+A query can alternatively be expressed as a MIDI message data array:
 
     MIDI.on([145, 80], function(e) {
-        // Called for all incoming MIDI Note On A4 messages
-        // on channel 2
+        // Called for incoming MIDI NoteOn A4 messages on
+        // channel 2.
     });
 
+Where a query is not given, the handler is registered to all MIDI events.
 
-## MIDI utility functions
+    MIDI.on(function(e) {
+        // Called for all incoming MIDI events.
+    });
 
-### .request(fn)
+### .off(query, fn)
 
-Request access to the browser's midi API. Where the browser does not support The
-WebMIDI API, the first call to <code>MIDI.request(fn)</code> will alert the user.
+Removes an event handler from all MIDI events matching the query. If
+<code>fn</code> is not given, removes all handlers from events matching the
+query. If <code>query</code> is not given, removes the handler from all events.
 
+### .request
 
-    MIDI.request(function(midi) {
+A promise. Where MIDI is supported, this is the promise returned by
+<code>navigator.requestMIDIAcess()</code>. Where MIDI is not supported, it is a
+promise in rejected state.
+
+    MIDI.request.then(function(midi) {
         // Do something with midi object
     });
 
-<code>.request()</code> returns a promise, so this is equivalent:
+The MIDI library requests access to the browser's midi API and sets
+<code>MIDI.request</code> with a promise as soon as it loads.
 
-    MIDI.request().then(function(midi) {
-        // Do something with midi object
-    });
 
 ### .isNote(data)
 
