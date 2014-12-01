@@ -46,7 +46,7 @@ expressed as an object:
     });
 
 A query can alternatively be expressed as an array that incoming MIDI event data
-is compared against:
+is compared&nbsp;against:
 
     MIDI.on([145, 80], function(e) {
         // Called for incoming MIDI NoteOn A4 messages on
