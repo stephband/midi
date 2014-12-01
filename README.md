@@ -41,6 +41,8 @@ Where a query is not given, the handler is registered to all MIDI events.
         // Called for all incoming MIDI events.
     });
 
+#### The query object
+
 A query object has the optional properties:
 
     {
