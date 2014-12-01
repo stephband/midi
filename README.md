@@ -11,9 +11,9 @@ If you're in Chrome, switch on Web MIDI at
 ### .request
 
 A promise. Where MIDI is supported, the library requests access to the browser's
-midi API and sets <code>MIDI.request</code> with a promise as soon as it loads.
-This is the promise returned by <code>navigator.requestMIDIAcess()</code>. Where
-MIDI is not supported, <code>.request</code> is a promise in rejected state.
+midi API as soon as it loads. <code>MIDI.request</code> is the promise returned
+by <code>navigator.requestMIDIAcess()</code>. Where MIDI is not supported,
+<code>MIDI.request</code> is a promise in rejected state.
 
     MIDI.request.then(function(midi) {
         // Do something with midi object
