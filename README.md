@@ -72,10 +72,11 @@ Removes an event handler from all MIDI events matching the query. If
 query. If <code>query</code> is not given, removes the handler from all events.
 
 
-### .eventToData(e)
+### .normaliseEvent(e)
 
-Takes a MIDI event object and returns an array formatted as a
-<a href="https://github.com/sound-io/music-json-spec">Music JSON</a> event:
+Takes a DOM MIDI event object and returns a
+<a href="https://github.com/sound-io/music-json-spec">Music JSON</a> formatted
+event array of the form:
 
     [timestamp, duration, type, data ... ]
 
@@ -86,17 +87,17 @@ aftertouch data is normalised to the range 0-1. Some examples:
     // Event object e:
     // { receivedTime: 1234, data: [145,80,20], ... }
     
-    MIDI.eventToData(e);     // [1234, 0, 'noteon', 80, 0.157480315]
+    MIDI.normaliseEvent(e);     // [1234, 0, 'noteon', 80, 0.157480315]
 
     // Event object e:
     // { receivedTime: 1234, data: [180,1,127], ... }
     
-    MIDI.eventToData(e);     // [1234, 0, 'control', 1, 1]
+    MIDI.normaliseEvent(e);     // [1234, 0, 'control', 1, 1]
 
     // Event object e:
     // { receivedTime: 1234, data: [231,62,119], ... }
     
-    MIDI.eventToData(e);     // [1234, 0, 'pitch', 1.26458903]
+    MIDI.normaliseEvent(e);     // [1234, 0, 'pitch', 1.26458903]
 
 ### .isNote(data)
 

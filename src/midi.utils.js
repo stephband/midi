@@ -28,8 +28,8 @@
 	    	pitch:        224
 	    };
 
-	var eventToData = (function(converters) {
-		return function eventToData(e) {
+	var normaliseEvent = (function(converters) {
+		return function normaliseEvent(e) {
 			var message = MIDI.toMessage(e.data);
 
 			return converters[message] ?
@@ -165,5 +165,5 @@
 	MIDI.normaliseNoteOff = normaliseNoteOff;
 	MIDI.pitchToInt = pitchToInt;
 	MIDI.pitchToFloat = pitchToFloat;
-	MIDI.eventToData = eventToData;
+	MIDI.normaliseEvent = normaliseEvent;
 })(MIDI);
