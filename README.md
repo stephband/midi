@@ -173,7 +173,3 @@ harmonic corresponds to that frequency.
 
 The reference tuning is A = 440Hz by default. Pass in a value <code>reference</code> to use a
 different tuning.
-
-### .noop()
-
-A function that does nothing.
