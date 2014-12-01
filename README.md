@@ -74,6 +74,7 @@ Removes an event handler from all MIDI events matching the query. If
 query. If <code>query</code> is not given, removes the handler from all events.
 
 
+### .normaliseEvent(e)
 ### .normaliseEvent(e, timeOffset)
 
 Takes a DOM MIDI event object and returns a
