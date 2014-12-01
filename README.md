@@ -6,7 +6,20 @@ Note! Currently only Chrome has native MIDI support, and then only behind a flag
 If you're in Chrome, switch on Web MIDI at
 <a href="chrome://flags/#enable-web-midi">chrome://flags/#enable-web-midi</a>.
 
-## MIDI
+## MIDI properties
+
+### .request
+
+A promise. Where MIDI is supported, the library requests access to the browser's
+midi API and sets <code>MIDI.request</code> with a promise as soon as it loads.
+This is the promise returned by <code>navigator.requestMIDIAcess()</code>. Where
+MIDI is not supported, <code>.request</code> is a promise in rejected state.
+
+    MIDI.request.then(function(midi) {
+        // Do something with midi object
+    });
+
+## MIDI functions
 
 ### .on(query, fn)
 
@@ -57,20 +70,6 @@ A query object has the optional properties:
 Removes an event handler from all MIDI events matching the query. If
 <code>fn</code> is not given, removes all handlers from events matching the
 query. If <code>query</code> is not given, removes the handler from all events.
-
-### .request
-
-A promise. Where MIDI is supported, this is the promise returned by
-<code>navigator.requestMIDIAcess()</code>. Where MIDI is not supported, it is a
-promise in rejected state.
-
-    MIDI.request.then(function(midi) {
-        // Do something with midi object
-    });
-
-The MIDI library requests access to the browser's midi API and sets
-<code>MIDI.request</code> with a promise as soon as it loads.
-
 
 ### .isNote(data)
 
@@ -137,7 +136,6 @@ The reference tuning is A = 440Hz by default. Change the tuning by assigning MID
 ### .noop()
 
 A function that does nothing.
-
 
 ## MIDI node constructors
 
