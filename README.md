@@ -151,8 +151,7 @@ Given a note number between 0 and 127, returns the octave the note is in as a nu
 
     MIDI.numberToOctave(66);              // 3
 
-### .numberToFrequency(n)
-### .numberToFrequency(n, reference)
+### .numberToFrequency(n)<br/>.numberToFrequency(n, reference)
 
 Given a note number between 0 and 127, returns the frequency of the fundamental tone of that note.
 
@@ -163,8 +162,7 @@ different tuning.
 
     MIDI.numberToFrequency(57, 442);      // 442
 
-### .frequencyToNumber(f)
-### .frequencyToNumber(f, reference)
+### .frequencyToNumber(f)<br/>.frequencyToNumber(f, reference)
 
 NOT IMPLEMENTED
 
