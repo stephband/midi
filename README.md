@@ -71,6 +71,33 @@ Removes an event handler from all MIDI events matching the query. If
 <code>fn</code> is not given, removes all handlers from events matching the
 query. If <code>query</code> is not given, removes the handler from all events.
 
+
+### .eventToData(e)
+
+Takes a MIDI event object and returns an array formatting the event as a
+<a href="https://github.com/sound-io/music-json-spec">Music JSON</a> event:
+
+    [timestamp, duration, type, data ... ]
+
+The timestamp is read from <code>e.receivedTime</code>. Duration is 0.
+Pitch bend data is normalised to semitones, and note velocities and
+aftertouch data is normalised to the range 0-1. Some examples:
+
+    // For event object e -
+    // { receivedTime: 1234, data: [145,80,20], ... }
+    
+    MIDI.eventToData(e);     // [1234, 0, 'noteon', 80, 0.157480315]
+
+    // For event object e -
+    // { receivedTime: 1234, data: [180, 1, 127], ... }
+    
+    MIDI.eventToData(e);     // [1234, 0, 'control', 1, 1]
+
+    // For event object e -
+    // { receivedTime: 1234, data: [231, 62, 119], ... }
+    
+    MIDI.eventToData(e);     // [1234, 0, 'pitch', 1.26458903]
+
 ### .isNote(data)
 
     MIDI.isNote([145,80,20]);             // true
@@ -83,13 +110,13 @@ query. If <code>query</code> is not given, removes the handler from all events.
 
     MIDI.isControl([145,80,20]);          // false
 
-### .channel(data)
+### .toChannel(data)
 
 Returns the MIDI channel of the data as a number 1-16.
 
     MIDI.channel([145,80,20]);            // 2
 
-### .message(data)
+### .toMessage(data)
 
 Returns message name of the data.
 

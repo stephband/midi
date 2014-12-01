@@ -28,11 +28,32 @@
 	    	pitch:        224
 	    };
 
+	var eventToData = (function(converters) {
+		return function eventToData(e) {
+			var message = MIDI.toMessage(e.data);
+
+			return converters[message] ?
+				converters[message](e) :
+				[e.receivedTime, 0, message, e.data[1], e.data[2] / 127] ;
+		};
+	})({
+		pitch: function(e) {
+			return [e.receivedTime, 0, message, pitchToFloat(e.data, 2)];
+		},
+
+		pc: function(e) {
+			return [e.receivedTime, 0, message, e.data[1]];
+		},
+
+		channeltouch: function(e) {
+			return [e.receivedTime, 0, message, e.data[1] / 127];
+		}
+	});
+
 	function round(n, d) {
 		var factor = Math.pow(10, d); 
 		return Math.round(n * factor) / factor;
 	}
-
 
 	// Library functions
 
@@ -48,15 +69,15 @@
 		return data[0] > 223 && data[0] < 240 ;
 	}
 
-	function returnChannel(data) {
+	function toChannel(data) {
 		return data[0] % 16 + 1;
 	}
 
-	//function returnMessage(data) {
+	//function toMessage(data) {
 	//	return MIDI.messages[Math.floor(data[0] / 16) - 8];
 	//}
 
-	function returnMessage(data) {
+	function toMessage(data) {
 		var name = MIDI.messages[Math.floor(data[0] / 16) - 8];
 	
 		// Catch type noteon with zero velocity and rename it as noteoff
@@ -137,12 +158,12 @@
 	MIDI.numberToNote = numberToNote;
 	MIDI.numberToOctave = numberToOctave;
 	MIDI.numberToFrequency = numberToFrequency;
-	MIDI.channel = returnChannel;
-	MIDI.message = returnMessage;
-	MIDI.toChannel = returnChannel;
-	MIDI.toType = returnMessage;
+	MIDI.toMessage = toMessage;
+	MIDI.toChannel = toChannel;
+	MIDI.toType    = toMessage;
 	MIDI.normaliseNoteOn = normaliseNoteOn;
 	MIDI.normaliseNoteOff = normaliseNoteOff;
 	MIDI.pitchToInt = pitchToInt;
 	MIDI.pitchToFloat = pitchToFloat;
+	MIDI.eventToData = eventToData;
 })(MIDI);
