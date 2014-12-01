@@ -25,6 +25,10 @@ by <code>navigator.requestMIDIAcess()</code>. Where MIDI is not supported,
 
 Registers a handler <code>fn</code> for all incoming browser MIDI events.
 
+    MIDI.on(function(e) {
+        // Called for all incoming MIDI events.
+    });
+
 ### .on(query, fn)
 
 Registers a handler <code>fn</code> for browser MIDI events. The handler is
