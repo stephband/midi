@@ -83,17 +83,17 @@ The timestamp is read from <code>e.receivedTime</code>. Duration is 0.
 Pitch bend data is normalised to semitones, and note velocities and
 aftertouch data is normalised to the range 0-1. Some examples:
 
-    // Event object e
+    // Event object e:
     // { receivedTime: 1234, data: [145,80,20], ... }
     
     MIDI.eventToData(e);     // [1234, 0, 'noteon', 80, 0.157480315]
 
-    // Event object e
+    // Event object e:
     // { receivedTime: 1234, data: [180, 1, 127], ... }
     
     MIDI.eventToData(e);     // [1234, 0, 'control', 1, 1]
 
-    // Event object e
+    // Event object e:
     // { receivedTime: 1234, data: [231, 62, 119], ... }
     
     MIDI.eventToData(e);     // [1234, 0, 'pitch', 1.26458903]
