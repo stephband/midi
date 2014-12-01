@@ -23,7 +23,7 @@ by <code>navigator.requestMIDIAcess()</code>. Where MIDI is not supported,
 
 ### .on(query, fn)
 
-Registers an handler for browser MIDI events. The handler is called for all
+Registers a handler for browser MIDI events. The handler is called for all
 incoming events that match <code>query</code>. A query can be expressed as
 an object:
 
