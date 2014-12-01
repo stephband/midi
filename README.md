@@ -1,9 +1,9 @@
 # MIDI
 
-MIDI is library of functions for routing and transforming MIDI events.
+MIDI is library of functions for routing and transforming browser MIDI events.
 
-Warning! Currently only Chrome has native MIDI support, and then only behind a flag.
-If you're in Chrome, switch it on Web MIDI here
+Note! Currently only Chrome has native MIDI support, and then only behind a flag.
+If you're in Chrome, switch on Web MIDI at
 <a href="chrome://flags/#enable-web-midi">chrome://flags/#enable-web-midi</a>.
 
 ## MIDI
@@ -23,11 +23,26 @@ expressed as an object:
         // messages on all channels.
     });
 
+A query object has the optional properties:
+
+    {
+        port:    // Not curently implemented
+        channel: // number 1–16
+        message: // string 'note', 'noteon', 'noteoff', 'cc', 'pc', 'pitch', 'polytouch', 'channeltouch'
+        data1:   // number 0-127 or string note name, eg. 'C#3'
+        data2:   // number 0-127
+    }
+
 A query can alternatively be expressed as a MIDI message data array:
 
     MIDI.on([145, 80], function(e) {
         // Called for incoming MIDI NoteOn A4 messages on
         // channel 2.
+    });
+
+    MIDI.on([180, 1, 0], function(e) {
+        // Called for MIDI Channel 5, Control Change 1 messages
+        // with value 0.
     });
 
 Where a query is not given, the handler is registered to all MIDI events.
