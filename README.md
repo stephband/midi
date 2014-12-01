@@ -58,7 +58,7 @@ MIDI data is compared to:
         // with value 0.
     });
 
-Query objects can have the properties:
+Query objects can have one or more of the properties:
 
     {
         port:    // Not curently implemented
