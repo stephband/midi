@@ -87,20 +87,16 @@ is given, <code>e.receivedTime - timeOffset</code>. Duration is 0. Pitch bend
 data is normalised to floats representing semitones, and note velocities and
 aftertouch data is normalised to the range 0-1. So for example:
 
-    // e is { receivedTime: 1234, data: [145,80,20], ... }
-    
+    // If e is { receivedTime: 1234, data: [145,80,20], ... }
     MIDI.normaliseEvent(e);     // [1234, 0, 'noteon', 80, 0.15748032]
 
-    // e is { receivedTime: 1234, data: [180,1,127], ... }
-    
+    // If e is { receivedTime: 1234, data: [180,1,127], ... }
     MIDI.normaliseEvent(e);     // [1234, 0, 'control', 1, 1]
 
-    // e is { receivedTime: 1234, data: [231,62,119], ... }
-    
+    // If e is { receivedTime: 1234, data: [231,62,119], ... }
     MIDI.normaliseEvent(e);     // [1234, 0, "pitch", 1.73409840]
 
-    // e is { receivedTime: 1234, data: [168,62,119], ... }
-
+    // If e is { receivedTime: 1234, data: [168,62,119], ... }
     MIDI.normaliseEvent(e);     // [1234, 0, "aftertouch", 62, 0.93700787]
 
 ### .isNote(data)
