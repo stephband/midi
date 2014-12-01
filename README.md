@@ -152,14 +152,29 @@ Given a note number between 0 and 127, returns the octave the note is in as a nu
     MIDI.numberToOctave(66);              // 3
 
 ### .numberToFrequency(n)
+### .numberToFrequency(n, reference)
 
 Given a note number between 0 and 127, returns the frequency of the fundamental tone of that note.
 
-    MIDI.numberToFrequency(66);           // 
+    MIDI.numberToFrequency(57);           // 440
 
-The reference tuning is A = 440Hz by default. Change the tuning by assigning MIDI.pitch.
+The reference tuning is A = 440Hz by default. Pass in a value <code>reference</code> to use a
+different tuning.
 
-    MIDI.pitch = 442;
+    MIDI.numberToFrequency(57, 442);      // 442
+
+### .frequencyToNumber(f)
+### .frequencyToNumber(f, reference)
+
+NOT IMPLEMENTED
+
+Given a frequency <code>f</code>, returns the note number whose fundamental
+harmonic corresponds to that frequency.
+
+    MIDI.frequencyToNumber(440);          // 57
+
+The reference tuning is A = 440Hz by default. Pass in a value <code>reference</code> to use a
+different tuning.
 
 ### .noop()
 

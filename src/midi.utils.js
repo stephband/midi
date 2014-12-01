@@ -141,8 +141,13 @@
 		return Math.floor(n / 12) - (5 - MIDI.middle);
 	}
 
-	function numberToFrequency(n) {
-		return round(MIDI.pitch * Math.pow(1.059463094359, (n + 3 - (MIDI.middle + 2) * 12)));
+	function numberToFrequency(n, frequency) {
+		return (frequency || 440) * Math.pow(1.059463094359, (n + 3 - (MIDI.middle + 2) * 12));
+	}
+
+	function frequencyToNumber(n, frequency) {
+		// TODO: Implement
+		return;
 	}
 
 	function messageToNumber(channel, message) {
