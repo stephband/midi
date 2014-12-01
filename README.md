@@ -49,13 +49,11 @@ A query can alternatively be expressed as an array that incoming MIDI event data
 is compared&nbsp;against:
 
     MIDI.on([145, 80], function(e) {
-        // Called for incoming MIDI NoteOn A4 messages on
-        // channel 2.
+        // Called for Channel 2 NoteOn A4 messages.
     });
 
     MIDI.on([180, 1, 0], function(e) {
-        // Called for MIDI Channel 5, Control Change 1 messages
-        // with value 0.
+        // Called for Channel 5, Control Change 1 messages with value 0.
     });
 
 Query objects can have one or more of the properties:
