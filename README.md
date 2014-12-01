@@ -86,7 +86,7 @@ The timestamp is <code>e.receivedTime</code> - <code>timeOffset</code>. (Where
 <code>timeOffset</code> is not given the timestamp is just
 <code>e.receivedTime</code>). Duration is 0. Pitch bend data is normalised
 to semitones, and note velocities and aftertouch data is normalised to the range
-0-1. Some examples:
+0-1. So for example:
 
     // Event object e:
     // { receivedTime: 1234, data: [145,80,20], ... }
