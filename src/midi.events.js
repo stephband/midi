@@ -83,7 +83,7 @@
 
 			// All messages
 			if (obj.all) {
-				trigger(obj.all, message);
+				trigger(obj.all, e);
 			}
 
 			// data[0]
@@ -92,7 +92,7 @@
 			if (!obj) { return; }
 
 			if (obj.all) {
-				trigger(obj.all, message);
+				trigger(obj.all, e);
 			}
 
 			// data[1]
@@ -101,7 +101,7 @@
 			if (!obj) { return; }
 
 			if (obj) {
-				trigger(obj, message);
+				trigger(obj, e);
 			}
 		});
 	}
@@ -129,7 +129,11 @@
 
 	function createData(channel, message, data1, data2) {
 		var number = MIDI.messageToNumber(channel, message);
-		return data1 ? data2 ? [number, data1, data2] : [number, data1] : [number] ;
+		var data = typeof data1 === 'string' ?
+		    	MIDI.noteToNumber(data1) :
+		    	data1 ;
+
+		return data1 ? data2 ? [number, data, data2] : [number, data] : [number] ;
 	}
 
 	function createDatas(channel, message, data1, data2) {
@@ -147,10 +151,14 @@
 			return datas;
 		}
 
-		var ch = 17;
+		var ch = 16;
+		var array = createData(1, message, data1, data2);
+		var data;
 
-		while (--ch) {
-			datas.push(createData(ch + 1, message, data1, data2));
+		while (ch--) {
+			data = array.slice();
+			data[0] += ch;
+			datas.push(data);
 		}
 
 		return datas;

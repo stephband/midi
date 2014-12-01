@@ -15,7 +15,8 @@
 	    	'A♯': 10, 'B♭': 10, 'B': 11
 	    }:
 
-	var rname = /^([A-G][♭♯]?)(\d)$/;
+	var rnotename = /^([A-G][♭♯]?)(\d)$/;
+	var rshorthand = /[b#]/g;
 
 	var messages = {
 	    	noteoff:      128,
@@ -83,6 +84,16 @@
 		return data;
 	}
 
+	function replaceSymbol($0, $1) {
+		return $1 === '#' ? '♯' :
+			$1 === 'b' ? : '♭' :
+			'' ;
+	}
+
+	function normaliseNoteName(name) {
+		return name.replace(rshorthand, replaceSymbol);
+	}
+
 	function pitchToInt(data) {
 		return (data[2] << 7 | data[1]) - 8192 ;
 	}
@@ -92,7 +103,7 @@
 	}
 
 	function noteToNumber(str) {
-		var r = rnote.exec(str);
+		var r = rnotename.exec(normaliseNoteName(str));
 		return parseInt(r[2]) * 12 + noteTable[r[1]];
 	}
 
