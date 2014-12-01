@@ -26,12 +26,12 @@ by <code>navigator.requestMIDIAcess()</code>. Where MIDI is not supported,
 Registers an event handler for MIDI events that match <code>query</code>. A
 query can be expressed as an object:
 
-    MIDI.on({ channel: 1, message: 'cc' }, function(e) {
+    MIDI.on({ channel: 1, message: 'control' }, function(e) {
         // Called for all incoming MIDI Control Change
         // messages on channel 1.
     });
 
-    MIDI.on({ message: 'cc', data1: 7 }, function(e) {
+    MIDI.on({ message: 'control', data1: 7 }, function(e) {
         // Called for all incoming MIDI Control Change 7
         // messages on all channels.
     });
@@ -59,7 +59,7 @@ A query object has the optional properties:
     {
         port:    // Not curently implemented
         channel: // number 1–16
-        message: // string 'note', 'noteon', 'noteoff', 'cc', 'pc', 'pitch', 'polytouch', 'channeltouch'
+        message: // string 'note', 'noteon', 'noteoff', 'control', 'pc', 'pitch', 'polytouch', 'channeltouch'
         data1:   // number 0-127
                  // string note name, eg. 'C#3'
         data2:   // number 0-127

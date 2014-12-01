@@ -291,7 +291,7 @@
 		'noteoff',
 		'noteon',
 		'polytouch',
-		'cc',
+		'control',
 		'pc',
 		'channeltouch',
 		'pitch'
