@@ -78,7 +78,7 @@ query. If <code>query</code> is not given, removes the handler from all events.
 
 Takes a DOM MIDI event object and returns a
 <a href="https://github.com/sound-io/music-json-spec">Music JSON</a> formatted
-event array of the form:
+event array. Music JSON events have the form:
 
     [timestamp, duration, type, data ... ]
 
