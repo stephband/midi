@@ -21,11 +21,15 @@ by <code>navigator.requestMIDIAcess()</code>. Where MIDI is not supported,
 
 ## MIDI functions
 
+### .on(fn)
+
+Registers a handler <code>fn</code> for all incoming browser MIDI events.
+
 ### .on(query, fn)
 
-Registers a handler for browser MIDI events. The handler is called for all
-incoming events that match <code>query</code>. A query can be expressed as
-an object:
+Registers a handler <code>fn</code> for browser MIDI events. The handler is
+called for incoming events that match <code>query</code>. A query can be
+expressed as an object:
 
     MIDI.on({ channel: 1, message: 'control' }, function(e) {
         // Called for all incoming MIDI Control Change
@@ -37,7 +41,8 @@ an object:
         // messages on all channels.
     });
 
-A query can alternatively be expressed as a MIDI message data array:
+A query can alternatively be expressed as an array of data that the incoming
+MIDI data is compared to:
 
     MIDI.on([145, 80], function(e) {
         // Called for incoming MIDI NoteOn A4 messages on
@@ -49,13 +54,7 @@ A query can alternatively be expressed as a MIDI message data array:
         // with value 0.
     });
 
-Where a query is not given, the handler is registered to all MIDI events.
-
-    MIDI.on(function(e) {
-        // Called for all incoming MIDI events.
-    });
-
-A query object has the optional properties:
+Query objects can have the properties:
 
     {
         port:    // Not curently implemented
