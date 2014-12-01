@@ -74,7 +74,7 @@ query. If <code>query</code> is not given, removes the handler from all events.
 
 ### .eventToData(e)
 
-Takes a MIDI event object and returns an array formatting the event as a
+Takes a MIDI event object and returns an array formatted as a
 <a href="https://github.com/sound-io/music-json-spec">Music JSON</a> event:
 
     [timestamp, duration, type, data ... ]
