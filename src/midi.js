@@ -164,6 +164,12 @@
 		return MIDI.Node();
 	}
 
+//	var prototype = {};
+//
+//	function createMIDI() {
+//		return Object.create(prototype);
+//	}
+
 	MIDI = {};
 	MIDI.request = navigator.requestMIDIAccess ?
 		navigator.requestMIDIAccess() :

@@ -21,6 +21,34 @@
 			type ;
 	}
 
+	function extend(obj) {
+		var i = 0,
+		    length = arguments.length,
+		    obj2, key;
+	
+		while (++i < length) {
+			obj2 = arguments[i];
+	
+			for (key in obj2) {
+				if (obj2.hasOwnProperty(key)) {
+					obj[key] = obj2[key];
+				}
+			}
+		}
+	
+		return obj;
+	}
+
+	function getListeners(object) {
+		if (!object.listeners) {
+			Object.defineProperty(object, 'listeners', {
+				value: {}
+			});
+		}
+
+		return object.listeners;
+	}
+
 	// Deep get and set for getting and setting nested objects
 
 	function get(object, property) {
@@ -60,7 +88,7 @@
 		}
 	}
 
-	function trigger(list, message) {
+	function triggerList(list, message) {
 		var l = list.length;
 		var n = -1;
 		var fn, args;
@@ -76,55 +104,32 @@
 		}
 	}
 
-	function listen(input) {
-		input.addEventListener('midimessage', function(e) {
-			var message = e.data;
-			var obj = map;
+	function trigger(object, e) {
+		var message = e.data;
+		var obj = getListeners(object);
 
-			// All messages
-			if (obj.all) {
-				trigger(obj.all, e);
-			}
+		// All messages
+		if (obj.all) {
+			triggerList(obj.all, e);
+		}
 
-			// data[0]
-			obj = obj[message[0]];
+		// data[0]
+		obj = obj[message[0]];
 
-			if (!obj) { return; }
+		if (!obj) { return; }
 
-			if (obj.all) {
-				trigger(obj.all, e);
-			}
+		if (obj.all) {
+			triggerList(obj.all, e);
+		}
 
-			// data[1]
-			obj = obj[message[1]];
+		// data[1]
+		obj = obj[message[1]];
 
-			if (!obj) { return; }
+		if (!obj) { return; }
 
-			if (obj) {
-				trigger(obj, e);
-			}
-		});
-	}
-
-	function updateInputs(midi) {
-		// It's suggested here that we need to keep a reference to midi inputs
-		// hanging around to avoid garbage collection:
-		// https://code.google.com/p/chromium/issues/detail?id=163795#c123
-		MIDI.inputs = slice(midi.inputs());
-		MIDI.inputs.forEach(listen);
-		if (debug) { console.log('MIDI: updated MIDI inputs', MIDI.inputs); }
-	}
-
-	function setupInputs(midi) {
-		midi.addEventListener('connect', function() {
-			updateInputs(midi);
-		});
-
-		midi.addEventListener('disconnect', function() {
-			updateInputs(midi);
-		});
-
-		updateInputs(midi);
+		if (obj) {
+			triggerList(obj, e);
+		}
 	}
 
 	function createData(channel, message, data1, data2) {
@@ -180,6 +185,15 @@
 		return queries;
 	}
 
+	function inFn(map) {
+		if (this.fn) {
+			this.fn(e);
+		}
+		else {
+			trigger(list, message);
+		}
+	}
+
 	function on(map, query, fn) {
 		var list = query.length === 0 ?
 				get(map, 'all') || set(map, 'all', []) :
@@ -190,55 +204,145 @@
 		list.push([fn, slice(arguments, 2)]);
 	}
 
-	MIDI.on = function(query, fn) {
-		var type = typeOf(query);
-		var queries;
+	function off(map, query, fn) {
+		var object = query.length === 0 ?
+				map :
+			query.length === 1 ?
+				get(map, query[0]) :
+				get(map, query[0], query[1]) ;
 
-		if (type === 'object') {
-			queries = createQueries(query);
+		if (!object) { return; }
 
-			while (query = queries.pop()) {
-				on(map, query, fn);
-			}
+		var keys = Object.keys(object);
+		var n = keys.length;
+		var list;
 
-			return this;
-		}
-
-		if (type === 'function') {
-			fn = query;
-			query = empty;
-		}
-
-		on(map, query, fn);
-		return this;
-	};
-
-	MIDI.off = function(message, fn) {
-		if (typeOf(message) === 'function' || message.length === 0) {
-			remove(map.all, message);
-			// TODO: Remove function from all event lists
-		}
-
-		var list = message.length === 1 ?
-			get(map, message[0], 'all') :
-			get(map, message[0], message[1]) ;
-
-		if (list) {
-			if (fn) {
+		if (fn) {
+			while (n--) {
+				list = object[keys[n]];
 				remove(list, fn);
 			}
-			else {
+		}
+		else {
+			while (n--) {
+				list = object[keys[n]];
 				list.length = 0;
 			}
 		}
-		
-		return this;
+	}
+
+	var mixins = MIDI.mixins || (MIDI.mixins = {});
+
+	mixins.events = {
+		in: function(data) {
+			var e = {
+			    	data: data,
+			    	receivedTime: +new Date()
+			    };
+
+			trigger(this, e);
+		},
+
+		on: function(query, fn) {
+			var type = typeOf(query);
+			var map = getListeners(this);
+			var queries;
+
+			if (type === 'object') {
+				queries = createQueries(query);
+
+				while (query = queries.pop()) {
+					on(map, query, fn);
+				}
+
+				return this;
+			}
+
+			if (type === 'function') {
+				fn = query;
+				query = empty;
+			}
+
+			on(map, query, fn);
+			return this;
+		},
+
+		off: function(query, fn) {
+			var type = typeOf(query);
+			var map = getListeners(this);
+			var queries;
+
+			if (type === 'object') {
+				queries = createQueries(query);
+
+				while (query = queries.pop()) {
+					off(map, query, fn);
+				}
+
+				return this;
+			}
+
+			if (!fn && type === 'function') {
+				fn = query;
+				query = empty;
+			}
+			else if (!query) {
+				query = empty;
+			}
+
+			off(map, query, fn);
+			return this;
+		}
 	};
 
-	Object.defineProperty(MIDI, 'events', { value: map });
 
-	MIDI.inputs = [];
-	MIDI.request.then(function(midi) {
+	// Set up MIDI to listen to browser MIDI inputs
+
+	function listen(input) {
+		input.addEventListener('midimessage', function(e) {
+			trigger(MIDI, e);
+		});
+	}
+
+	function updateInputs(midi) {
+		// It's suggested here that we need to keep a reference to midi inputs
+		// hanging around to avoid garbage collection:
+		// https://code.google.com/p/chromium/issues/detail?id=163795#c123
+
+		// As of ~August 2014, inputs and outputs are iterables.
+
+		// This is supposed to work, but it doesn't
+		//midi.inputs.values(function(input) {
+		//	console.log('MIDI: Input detected:', input.name, input.id);
+		//	listen(input);
+		//});
+
+		var arr;
+
+		for (arr of midi.inputs) {
+			var id = arr[0];
+			var input = arr[1];
+			console.log('MIDI: Input detected:', input.name, input.id);
+			listen(input);
+		}
+	}
+
+	function setupInputs(midi) {
+		midi.onconnect = function connect() {
+			updateInputs(midi);
+		};
+
+		midi.ondisconnect = function disconnect() {
+			updateInputs(midi);
+		};
+
+		updateInputs(midi);
+	}
+
+	extend(MIDI, mixins.events);
+
+	MIDI.request
+	.then(function(midi) {
 		setupInputs(midi);
 	})
 	.catch(function(error) {
