@@ -13,6 +13,8 @@
 	    	all: []
 	    };
 
+	var store = [];
+
 	function typeOf(object) {
 		var type = typeof object;
 	
@@ -299,16 +301,17 @@
 	// Set up MIDI to listen to browser MIDI inputs
 
 	function listen(input) {
+		// It's suggested here that we need to keep a reference to midi inputs
+		// hanging around to avoid garbage collection:
+		// https://code.google.com/p/chromium/issues/detail?id=163795#c123
+		store.push(input);
+
 		input.addEventListener('midimessage', function(e) {
 			trigger(MIDI, e);
 		});
 	}
 
 	function updateInputs(midi) {
-		// It's suggested here that we need to keep a reference to midi inputs
-		// hanging around to avoid garbage collection:
-		// https://code.google.com/p/chromium/issues/detail?id=163795#c123
-
 		// As of ~August 2014, inputs and outputs are iterables.
 
 		// This is supposed to work, but it doesn't
