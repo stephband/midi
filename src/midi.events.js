@@ -15,6 +15,8 @@
 
 	var store = [];
 
+	var outputs = {};
+
 	function typeOf(object) {
 		var type = typeof object;
 	
@@ -39,6 +41,11 @@
 		}
 	
 		return obj;
+	}
+
+	function clear(obj) {
+		var key;
+		for (key in obj) { delete obj[key]; }
 	}
 
 	function getListeners(object) {
@@ -197,6 +204,8 @@
 	}
 
 	function on(map, query, fn) {
+		console.log('ON', query, fn.name);
+
 		var list = query.length === 0 ?
 				get(map, 'all') || set(map, 'all', []) :
 			query.length === 1 ?
@@ -204,32 +213,41 @@
 				get(map, query[0], query[1]) || set(map, query[0], query[1], []) ;
 
 		list.push([fn, slice(arguments, 2)]);
+
+		console.table(map);
 	}
 
 	function off(map, query, fn) {
-		var object = query.length === 0 ?
-				map :
-			query.length === 1 ?
-				get(map, query[0]) :
-				get(map, query[0], query[1]) ;
+		console.log('OFF', query, fn.name);
+
+		var args = [map];
+
+		args.push.apply(args, query);
+
+		if (!fn) {
+			// Remove the object by setting it to undefined (undefined is
+			// implied here, we're not passing it to set() explicitly as the
+			// last value in args).
+			set.apply(this, args);
+			return;
+		}
+
+		var object = get.apply(this, args);
+		var key;
 
 		if (!object) { return; }
 
-		var keys = Object.keys(object);
-		var n = keys.length;
-		var list;
-
-		if (fn) {
-			while (n--) {
-				list = object[keys[n]];
-				remove(list, fn);
-			}
+		// Remove the matching function from each array in object
+		for (key in object) {
+			remove(object[key], fn);
 		}
-		else {
-			while (n--) {
-				list = object[keys[n]];
-				list.length = 0;
-			}
+
+		console.table(map);
+	}
+
+	function out(data, port) {
+		if (port) {
+			outputs[port].send(data, 0);
 		}
 	}
 
@@ -294,6 +312,11 @@
 
 			off(map, query, fn);
 			return this;
+		},
+
+		out: function(data, port) {
+			out(data, port);
+			return this;
 		}
 	};
 
@@ -330,23 +353,44 @@
 		}
 	}
 
-	function setupInputs(midi) {
-		midi.onconnect = function connect() {
-			updateInputs(midi);
-		};
+	function updateOutputs(midi) {
+		// As of ~August 2014, inputs and outputs are iterables.
 
-		midi.ondisconnect = function disconnect() {
-			updateInputs(midi);
-		};
+		// This is supposed to work, but it doesn't
+		//midi.inputs.values(function(input) {
+		//	console.log('MIDI: Input detected:', input.name, input.id);
+		//	listen(input);
+		//});
 
-		updateInputs(midi);
+		var arr;
+
+		clear(outputs);
+
+		for (arr of midi.outputs) {
+			var id = arr[0];
+			var output = arr[1];
+			console.log('MIDI: Output detected:', output.name, output.id);
+			// Store outputs
+			outputs[output.name] = output;
+		}
+	}
+
+	function setupPorts(midi) {
+		function connect() {
+			updateInputs(midi);
+			updateOutputs(midi);
+		}
+
+		midi.onconnect = connect;
+		midi.ondisconnect = connect;
+		connect();
 	}
 
 	extend(MIDI, mixins.events);
-
+window.map = map;
 	MIDI.request
 	.then(function(midi) {
-		setupInputs(midi);
+		setupPorts(midi);
 	})
 	.catch(function(error) {
 		console.log(error);
