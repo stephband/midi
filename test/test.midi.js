@@ -1,8 +1,8 @@
 (function() {
 	"use strict";
 
-	function detectControl(e) {
-		console.log(e.data, e.data[2] === 0);
+	function detectControl(data, time, port) {
+		console.log(data, data[2] === 0);
 	}
 
 	// Bind

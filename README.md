@@ -25,7 +25,7 @@ by <code>navigator.requestMIDIAcess()</code>. Where MIDI is not supported,
 
 Registers a handler <code>fn</code> for all incoming browser MIDI events.
 
-    MIDI.on(function(e) {
+    MIDI.on(function(data, time, port) {
         // Called for all incoming MIDI events.
     });
 
@@ -35,12 +35,12 @@ Registers a handler <code>fn</code> for browser MIDI events. The handler is
 called for incoming events that match <code>query</code>. A query can be
 expressed as an object:
 
-    MIDI.on({ channel: 1, message: 'control' }, function(e) {
+    MIDI.on({ channel: 1, message: 'control' }, function(data, time, port) {
         // Called for all incoming MIDI Control Change
         // messages on channel 1.
     });
 
-    MIDI.on({ message: 'control', data1: 7 }, function(e) {
+    MIDI.on({ message: 'control', data1: 7 }, function(data, time, port) {
         // Called for all incoming MIDI Control Change 7
         // messages on all channels.
     });
@@ -48,11 +48,11 @@ expressed as an object:
 A query can alternatively be expressed as an array that incoming MIDI event data
 is compared&nbsp;against:
 
-    MIDI.on([145, 80], function(e) {
+    MIDI.on([145, 80], function(data, time, port) {
         // Called for Channel 2, NoteOn A4 messages.
     });
 
-    MIDI.on([180, 1, 0], function(e) {
+    MIDI.on([180, 1, 0], function(data, time, port) {
         // Called for Channel 5, Control Change 1 messages with value 0.
     });
 
@@ -66,6 +66,17 @@ Query objects can have one or more of the properties:
                  // string note name, eg. 'C#3'
         data2:   // number 0-127
     }
+
+### .on(query, fn, args ... )
+
+Function parameters passed into <code>.on()</code> following <code>fn</code> are
+passed to the handler as extra arguments. Use this to pass data to your handlers:
+
+    function handler(data, time, port, data) {
+        var bing = data.bing;    // 'bong'
+    }
+    
+    MIDI.on([180, 1, 0], handler, { bing: 'bong' });
 
 ### .off(query, fn)
 

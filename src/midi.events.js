@@ -15,7 +15,9 @@
 
 	var store = [];
 
-	var outputs = {};
+	var outputs = [];
+
+	function noop() {}
 
 	function typeOf(object) {
 		var type = typeof object;
@@ -97,48 +99,46 @@
 		}
 	}
 
-	function triggerList(list, message) {
+	function triggerList(list, e) {
 		var l = list.length;
 		var n = -1;
 		var fn, args;
 
-		// Lets not worry about list mutating while we trigger.
+		// Lets not worry about list mutating while we trigger. We want speed.
 		// list = slice(list);
 
 		while (++n < l) {
 			fn = list[n][0];
 			args = list[n][1];
-			args[0] = message;
+			args[0] = e.data;
+			args[1] = e.receivedTime;
+			args[2] = e.target;
 			fn.apply(MIDI, args);
 		}
 	}
 
-	function trigger(object, e) {
-		var message = e.data;
-		var obj = getListeners(object);
-
-		// All messages
-		if (obj.all) {
-			triggerList(obj.all, e);
-		}
-
-		// data[0]
-		obj = obj[message[0]];
-
-		if (!obj) { return; }
-
-		if (obj.all) {
-			triggerList(obj.all, e);
-		}
-
-		// data[1]
-		obj = obj[message[1]];
-
-		if (!obj) { return; }
+	function triggerTree(object, array, n, e) {
+		var prop = array[n];
+		var obj = object[prop];
 
 		if (obj) {
-			triggerList(obj, e);
+			++n;
+
+			if (n < array.length) {
+				triggerTree(obj, array, n, e);
+			}
+			else if (obj.length) {
+				triggerList(obj, e);
+			}
 		}
+
+		if (object.all) {
+			triggerList(object.all, e);
+		}
+	}
+
+	function trigger(object, e) {
+		triggerTree(getListeners(object), e.data, 0, e);
 	}
 
 	function createData(channel, message, data1, data2) {
@@ -194,32 +194,19 @@
 		return queries;
 	}
 
-	function inFn(map) {
-		if (this.fn) {
-			this.fn(e);
-		}
-		else {
-			trigger(list, message);
-		}
-	}
-
-	function on(map, query, fn) {
-		console.log('ON', query, fn.name);
-
+	function on(map, query, fn, args) {
 		var list = query.length === 0 ?
-				get(map, 'all') || set(map, 'all', []) :
-			query.length === 1 ?
-				get(map, query[0], 'all') || set(map, query[0], 'all', []) :
-				get(map, query[0], query[1]) || set(map, query[0], query[1], []) ;
+		    	get(map, 'all') || set(map, 'all', []) :
+		    query.length === 1 ?
+		    	get(map, query[0], 'all') || set(map, query[0], 'all', []) :
+		    query.length === 2 ?
+		    	get(map, query[0], query[1], 'all') || set(map, query[0], query[1], 'all', []) :
+		    	get(map, query[0], query[1], query[2]) || set(map, query[0], query[1], query[2], []) ;
 
-		list.push([fn, slice(arguments, 2)]);
-
-		console.table(map);
+		list.push([fn, args]);
 	}
 
 	function off(map, query, fn) {
-		console.log('OFF', query, fn.name);
-
 		var args = [map];
 
 		args.push.apply(args, query);
@@ -241,13 +228,11 @@
 		for (key in object) {
 			remove(object[key], fn);
 		}
-
-		console.table(map);
 	}
 
-	function out(data, port) {
+	function send(port, data) {
 		if (port) {
-			outputs[port].send(data, 0);
+			port.send(data, 0);
 		}
 	}
 
@@ -266,13 +251,16 @@
 		on: function(query, fn) {
 			var type = typeOf(query);
 			var map = getListeners(this);
+			var args = [];
 			var queries;
 
 			if (type === 'object') {
 				queries = createQueries(query);
+				args.length = 1;
+				args.push.apply(args, arguments);
 
 				while (query = queries.pop()) {
-					on(map, query, fn);
+					on(map, query, fn, args);
 				}
 
 				return this;
@@ -281,9 +269,15 @@
 			if (type === 'function') {
 				fn = query;
 				query = empty;
+				args.length = 2;
+			}
+			else {
+				args.length = 1;
 			}
 
-			on(map, query, fn);
+			args.push.apply(args, arguments);
+
+			on(map, query, fn, args);
 			return this;
 		},
 
@@ -314,10 +308,9 @@
 			return this;
 		},
 
-		out: function(data, port) {
-			out(data, port);
-			return this;
-		}
+		// These methods are overidden when output ports become available.
+		send: noop,
+		output: noop
 	};
 
 
@@ -353,26 +346,55 @@
 		}
 	}
 
+	function createSendFn(outputs, map) {
+		return function send(portName, data, time) {
+			var port = this.output(portName);
+
+			if (port) {
+				port.send(data, time || 0);
+			}
+			else {
+				console.warn('MIDI: .send() output port not found:', port);
+			}
+
+			return this;
+		};
+	}
+
+	function createPortFn(ports) {
+		return function getPort(id) {
+			var port;
+
+			if (typeof id === 'string') {
+				for (port of ports) {
+					if (port[1].name === id) { return port[1]; }
+				}
+			}
+			else {
+				for (port of ports) {
+					if (port[0] === id) { return port[1]; }
+				}
+			}
+		};
+	}
+
 	function updateOutputs(midi) {
-		// As of ~August 2014, inputs and outputs are iterables.
-
-		// This is supposed to work, but it doesn't
-		//midi.inputs.values(function(input) {
-		//	console.log('MIDI: Input detected:', input.name, input.id);
-		//	listen(input);
-		//});
-
 		var arr;
 
-		clear(outputs);
+		if (!MIDI.outputs) { MIDI.outputs = []; }
+
+		MIDI.outputs.length = 0;
 
 		for (arr of midi.outputs) {
 			var id = arr[0];
 			var output = arr[1];
 			console.log('MIDI: Output detected:', output.name, output.id);
 			// Store outputs
-			outputs[output.name] = output;
+			MIDI.outputs.push(output);
 		}
+
+		MIDI.output = createPortFn(midi.outputs);
+		MIDI.send = createSendFn(midi.outputs, outputs);
 	}
 
 	function setupPorts(midi) {
@@ -387,9 +409,10 @@
 	}
 
 	extend(MIDI, mixins.events);
-window.map = map;
+
 	MIDI.request
 	.then(function(midi) {
+		
 		setupPorts(midi);
 	})
 	.catch(function(error) {
