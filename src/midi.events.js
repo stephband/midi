@@ -63,8 +63,8 @@
 	// Deep get and set for getting and setting nested objects
 
 	function get(object, property) {
-		if (arguments.length < 3) {
-			return object[property];
+		if (arguments.length < 2) {
+			return object;
 		}
 
 		if (!object[property]) {
@@ -206,6 +206,20 @@
 		list.push([fn, args]);
 	}
 
+	function offTree(object, fn) {
+		var key;
+		
+		// Remove the matching function from each array in object
+		for (key in object) {
+			if (object[key].length) {
+				remove(object[key], fn);
+			}
+			else {
+				offTree(object[key], fn);
+			}
+		}
+	}
+
 	function off(map, query, fn) {
 		var args = [map];
 
@@ -224,10 +238,7 @@
 
 		if (!object) { return; }
 
-		// Remove the matching function from each array in object
-		for (key in object) {
-			remove(object[key], fn);
-		}
+		offTree(object, fn);
 	}
 
 	function send(port, data) {
