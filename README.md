@@ -1,10 +1,10 @@
 # MIDI
 
-MIDI is library of functions for routing and transforming browser MIDI events.
+MIDI is library of functions for listening to browser MIDI events and
+manipulating MIDI data.
 
-Note! Currently only Chrome has native MIDI support, and then only behind a flag.
-If you're in Chrome, switch on Web MIDI at
-<a href="chrome://flags/#enable-web-midi">chrome://flags/#enable-web-midi</a>.
+Note! Currently only Chrome has native MIDI support. If you're in Chrome, switch
+on Web MIDI at <a href="chrome://flags/#enable-web-midi">chrome://flags/#enable-web-midi</a>.
 
 ## MIDI properties
 
