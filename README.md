@@ -33,7 +33,17 @@ Registers a handler <code>fn</code> for all incoming browser MIDI events.
 
 Registers a handler <code>fn</code> for browser MIDI events. The handler is
 called for incoming events that match <code>query</code>. A query can be
-expressed as an object:
+expressed as a data array:
+
+    MIDI.on([145, 80], function(data, time, port) {
+        // Called for Channel 2, NoteOn A4 messages.
+    });
+
+    MIDI.on([180, 1, 0], function(data, time, port) {
+        // Called for Channel 5, Control Change 1 messages with value 0.
+    });
+
+A query can alternatively be expressed as an object:
 
     MIDI.on({ channel: 1, message: 'control' }, function(data, time, port) {
         // Called for all incoming MIDI Control Change
@@ -43,17 +53,6 @@ expressed as an object:
     MIDI.on({ message: 'control', data1: 7 }, function(data, time, port) {
         // Called for all incoming MIDI Control Change 7
         // messages on all channels.
-    });
-
-A query can alternatively be expressed as an array that incoming MIDI event data
-is compared&nbsp;against:
-
-    MIDI.on([145, 80], function(data, time, port) {
-        // Called for Channel 2, NoteOn A4 messages.
-    });
-
-    MIDI.on([180, 1, 0], function(data, time, port) {
-        // Called for Channel 5, Control Change 1 messages with value 0.
     });
 
 Query objects can have one or more of the properties:
@@ -70,7 +69,7 @@ Query objects can have one or more of the properties:
 ### .on(query, fn, args ... )
 
 Function parameters passed into <code>.on()</code> following <code>fn</code> are
-passed to the handler as extra arguments. Use this to pass data to your handlers:
+passed to the handler as extra arguments. Use this to pass data to handlers:
 
     function handler(data, time, port, data) {
         var bing = data.bing;    // 'bong'
