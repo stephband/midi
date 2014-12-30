@@ -155,6 +155,8 @@ Given a note number between 0 and 127, returns a note name as a string.
 
     MIDI.numberToNote(66);                // 'F♯'
 
+MIDI uses unicode symbols for accidentals <code>♭</code> and <code>♯</code>.
+
 ### .numberToOctave(n)
 
 Given a note number between 0 and 127, returns the octave the note is in as a number. 
