@@ -423,8 +423,9 @@
 
 	MIDI.request
 	.then(function(midi) {
-		
+		console.groupCollapsed('MIDI');
 		setupPorts(midi);
+		console.groupEnd();
 	})
 	.catch(function(error) {
 		console.log(error);
