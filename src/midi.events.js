@@ -428,7 +428,6 @@
 		console.groupEnd();
 	})
 	.catch(function(error) {
-		console.log(error);
-		throw error;
+		console.warn(error.message);
 	});
 })(window.MIDI);

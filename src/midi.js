@@ -8,7 +8,9 @@
 	MIDI.request = navigator.requestMIDIAccess ?
 		navigator.requestMIDIAccess() :
 		new Promise(function(accept, reject){
-			reject('Your browser does not support MIDI via the navigator.requestMIDIAccess() API.');
+			reject({
+				message: 'This browser does not support Web MIDI.'
+			});
 		}) ;
 
 	window.MIDI = MIDI;
