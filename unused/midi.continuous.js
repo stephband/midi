@@ -26,7 +26,7 @@
 	}
 
 	function Convert(options) {
-		options = Sparky.extend({}, defaults, options);
+		options = Object.assign({}, defaults, options);
 		
 		var filterNode = MIDI.Filter(options);
 		var node = MIDI.Node(function(e) {
