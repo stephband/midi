@@ -333,9 +333,16 @@
 		// https://code.google.com/p/chromium/issues/detail?id=163795#c123
 		store.push(input);
 
-		input.addEventListener('midimessage', function(e) {
+		// For some reason .addEventListener does not work with the midimessage
+		// event.
+		//
+		//input.addEventListener('midimessage', function(e) {
+		//	trigger(MIDI, e);
+		//});
+
+		input.onmidimessage = function(e) {
 			trigger(MIDI, e);
-		});
+		};
 	}
 
 	function updateInputs(midi) {
