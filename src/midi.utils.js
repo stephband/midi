@@ -28,32 +28,36 @@
 	    	pitch:        224
 	    };
 
-	var normaliseEvent = (function(converters) {
-		return function normaliseEvent(e, timeOffset) {
-			var message = MIDI.toMessage(e.data);
-			var time = e.receivedTime - (timeOffset || 0);
+	var normaliseData = (function(converters) {
+		return function normaliseData(data, receivedTime, timeOffset) {
+			var message = MIDI.toMessage(data);
+			var time = (receivedTime || 0) + (timeOffset || 0);
 
 			return converters[message] ?
-				converters[message](e) :
-				[time, 0, message, e.data[1], e.data[2] / 127] ;
+				converters[message](data, time) :
+				[time, 0, message, data[1], data[2] / 127] ;
 		};
 	})({
-		pitch: function(e) {
-			return [e.receivedTime, 0, 'pitch', pitchToFloat(e.data, 2)];
+		pitch: function(data, time) {
+			return [time, 0, 'pitch', pitchToFloat(data, 2)];
 		},
 
-		pc: function(e) {
-			return [e.receivedTime, 0, 'program', e.data[1]];
+		pc: function(data, time) {
+			return [time, 0, 'program', data[1]];
 		},
 
-		channeltouch: function(e) {
-			return [e.receivedTime, 0, 'aftertouch', 'all', e.data[1] / 127];
+		channeltouch: function(data, time) {
+			return [time, 0, 'aftertouch', 'all', data[1] / 127];
 		},
 
-		polytouch: function(e) {
-			return [e.receivedTime, 0, 'aftertouch', e.data[1], e.data[2] / 127];
+		polytouch: function(data, time) {
+			return [time, 0, 'aftertouch', data[1], data[2] / 127];
 		}
 	});
+
+	function normaliseEvent(e) {
+		return normaliseData(e.data, e.receivedTime);
+	}
 
 	function round(n, d) {
 		var factor = Math.pow(10, d); 
@@ -176,4 +180,5 @@
 	MIDI.pitchToInt = pitchToInt;
 	MIDI.pitchToFloat = pitchToFloat;
 	MIDI.normaliseEvent = normaliseEvent;
+	MIDI.normaliseData = normaliseData;
 })(MIDI);
