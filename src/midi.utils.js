@@ -2,8 +2,10 @@
 //
 // Declares utility functions and constants on the MIDI object.
 
-(function(MIDI) {
+(function(window) {
 	'use strict';
+
+	var MIDI = window.MIDI;
 
 	var noteNames = [
 	    	'C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G♯', 'A', 'B♭', 'B'
@@ -28,14 +30,14 @@
 	    	pitch:        224
 	    };
 
-	var normaliseData = (function(converters) {
-		return function normaliseData(data, receivedTime, timeOffset) {
-			var message = MIDI.toMessage(data);
+	var normalise = (function(converters) {
+		return function normalise(data, receivedTime, timeOffset) {
+			var type = MIDI.toType(data);
 			var time = (receivedTime || 0) + (timeOffset || 0);
 
-			return converters[message] ?
-				converters[message](data, time) :
-				[time, 0, message, data[1], data[2] / 127] ;
+			return converters[type] ?
+				converters[type](data, time) :
+				[time, 0, type, data[1], data[2] / 127] ;
 		};
 	})({
 		pitch: function(data, time) {
@@ -56,7 +58,7 @@
 	});
 
 	function normaliseEvent(e) {
-		return normaliseData(e.data, e.receivedTime);
+		return normalise(e.data, e.receivedTime);
 	}
 
 	function round(n, d) {
@@ -82,15 +84,11 @@
 		return data[0] % 16 + 1;
 	}
 
-	//function toMessage(data) {
-	//	return MIDI.messages[Math.floor(data[0] / 16) - 8];
-	//}
+	function toType(message) {
+		var name = MIDI.messages[Math.floor(message[0] / 16) - 8];
 
-	function toMessage(data) {
-		var name = MIDI.messages[Math.floor(data[0] / 16) - 8];
-	
 		// Catch type noteon with zero velocity and rename it as noteoff
-		return name === MIDI.messages[1] && data[2] === 0 ?
+		return name === MIDI.messages[1] && message[2] === 0 ?
 			MIDI.messages[0] :
 			name ;
 	}
@@ -172,13 +170,23 @@
 	MIDI.numberToNote = numberToNote;
 	MIDI.numberToOctave = numberToOctave;
 	MIDI.numberToFrequency = numberToFrequency;
-	MIDI.toMessage = toMessage;
 	MIDI.toChannel = toChannel;
-	MIDI.toType    = toMessage;
+	MIDI.toType    = toType;
 	MIDI.normaliseNoteOn = normaliseNoteOn;
 	MIDI.normaliseNoteOff = normaliseNoteOff;
 	MIDI.pitchToInt = pitchToInt;
 	MIDI.pitchToFloat = pitchToFloat;
+	MIDI.normalise = normalise;
 	MIDI.normaliseEvent = normaliseEvent;
-	MIDI.normaliseData = normaliseData;
-})(MIDI);
+
+	// Aliases
+	MIDI.toMessage = function() {
+		console.warn('MIDI: deprecation warning - MIDI.toMessage() has been renamed to MIDI.toType()');
+		return toType.apply(this, arguments);
+	};
+
+	MIDI.normaliseData = function() {
+		console.warn('MIDI: deprecation warning - MIDI.normaliseData() has been renamed to MIDI.normalise()');
+		return normalise.apply(this, arguments);
+	};
+})(window);

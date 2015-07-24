@@ -1,10 +1,9 @@
 # MIDI
 
-MIDI is library of functions for listening to browser MIDI events and
-manipulating MIDI data.
+MIDI is a hub for receiving, sending and filtering browser MIDI messages, and a
+library of functions for manipulating them. It is optimised for input speed.
 
-Note! Currently only Chrome has native MIDI support. If you're in Chrome, switch
-on Web MIDI at <a href="chrome://flags/#enable-web-midi">chrome://flags/#enable-web-midi</a>.
+Note: as of June 2015 Chrome has native MIDI support. Joy! No other browser yet do.
 
 ## MIDI properties
 
@@ -58,13 +57,21 @@ A query can alternatively be expressed as an object:
 Query objects can have one or more of the properties:
 
     {
-        port:    // Not curently implemented
         channel: // number 1–16
         message: // string 'note', 'noteon', 'noteoff', 'control', 'pc', 'pitch', 'polytouch', 'channeltouch'
+                 // regexp, eg. /^note|^pitch/
         data1:   // number 0-127
                  // string note name, eg. 'C#3'
         data2:   // number 0-127
     }
+
+Note that in order to optimise the speed of processing incoming MIDI events,
+filter queries are pre-sorted at the point of calling <code>.on()</code> and a
+listener tree is constructed. Incoming events are simply matched against the
+tree with a couple of lookups (very fast). This avoids running all filters
+against every incoming event (potentially slow) – but it also means that queries
+are not dynamic. Changing the values in a query after it has been passed to
+<code>.on()</code> will not alter the MIDI events that trigger <code>fn</code>.
 
 ### .on(query, fn, args ... )
 
@@ -89,52 +96,52 @@ Registers a handler <code>fn</code> for the next incoming MIDI event to match
 <code>query</code>. Thereafter <code>fn</code> is called whenever that MIDI
 event is received.
 
-### .normaliseEvent(e)<br/>.normaliseEvent(e, timeOffset)
+### .normalise(message, time)
 
-Takes a DOM MIDI event object and returns a
-<a href="https://github.com/sound-io/music-json-spec">Music JSON</a> formatted
-event array. Music JSON events have the form:
+Takes a MIDI message array and returns a
+<a href="https://github.com/sound-io/music-json-spec">Music JSON</a> event
+array. Music JSON events have the form:
 
     [timestamp, duration, type, data ... ]
 
-The timestamp is <code>e.receivedTime</code>, or where <code>timeOffset</code>
-is given, <code>e.receivedTime - timeOffset</code>. Duration is 0. Pitch bend
-data is normalised to floats representing semitones, and note velocities and
-aftertouch data is normalised to the range 0-1. So for example:
+For MIDI events <code>duration</code> is 0. Note velocities and aftertouch data
+are normalised to the range 0-1, while pitch bend data is normalised to floats
+representing semitones. For example:
 
-    // If e is { receivedTime: 1234, data: [145,80,20], ... }
-    MIDI.normaliseEvent(e);     // [1234, 0, 'noteon', 80, 0.15748032]
+    MIDI.normalise([145,80,20], 1);    // [1, 0, 'noteon', 80, 0.15748032]
+    MIDI.normalise([180,1,127], 2);    // [2, 0, 'control', 1, 1]
+    MIDI.normalise([231,62,119], 3);   // [3, 0, "pitch", 1.73409840]
+    MIDI.normalise([168,62,119], 4);   // [4, 0, "aftertouch", 62, 0.93700787]
 
-    // If e is { receivedTime: 1234, data: [180,1,127], ... }
-    MIDI.normaliseEvent(e);     // [1234, 0, 'control', 1, 1]
+### .normaliseEvent(e)
 
-    // If e is { receivedTime: 1234, data: [231,62,119], ... }
-    MIDI.normaliseEvent(e);     // [1234, 0, "pitch", 1.73409840]
+Takes a DOM MIDI event object and returns a
+<a href="https://github.com/sound-io/music-json-spec">Music JSON</a> normalised
+event array. Equivalent to:
 
-    // If e is { receivedTime: 1234, data: [168,62,119], ... }
-    MIDI.normaliseEvent(e);     // [1234, 0, "aftertouch", 62, 0.93700787]
+    MIDI.normalise(e.data, e.receivedTime);
 
-### .isNote(data)
+### .isNote(message)
 
     MIDI.isNote([145,80,20]);             // true
 
-### .isPitch(data)
+### .isPitch(message)
 
     MIDI.isPitch([145,80,20]);            // false
 
-### .isControl(data)
+### .isControl(message)
 
     MIDI.isControl([145,80,20]);          // false
 
-### .toChannel(data)
+### .toChannel(message)
 
-Returns the MIDI channel of the data as a number 1-16.
+Returns the MIDI channel of the message as a number 1-16.
 
     MIDI.channel([145,80,20]);            // 2
 
-### .toMessage(data)
+### .toType(message)
 
-Returns message name of the data.
+Returns type of message.
 
     MIDI.message([145,80,20])             // 'noteon'
 
@@ -147,7 +154,7 @@ not created – the existing array is modified and returned.
 
     MIDI.normaliseNote([145,80,0]);       // [129,80,0]
 
-### .pitchToFloat(data, range)
+### .pitchToFloat(message, range)
 
 Returns the pitch bend value in semitones. Range is the bend range up or down,
 in semitones. Where range is not given it defaults to <code>2</code>.

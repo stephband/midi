@@ -3,7 +3,6 @@ module.exports = function(grunt) {
 		concat: {
 			'js/midi.js': [
 				'src/midi.js',
-				'src/midi.events.js',
 				'src/midi.utils.js'
 			]
 		},

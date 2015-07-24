@@ -46,13 +46,12 @@
 	<!--script src="js/midi.js"></script-->
 
 	<script src="src/midi.js"></script>
-	<script src="src/midi.events.js"></script>
 	<script src="src/midi.utils.js"></script>
 
 	<script class="block">
 MIDI.on({ message: /^note|^pitch/ }, function(message, time) {
-    var normal = MIDI.normaliseData(message, time);
-    console.log(normal);
+    var event = MIDI.normalise(message, time);
+    console.log(event);
 });
 	</script>
 </body>
