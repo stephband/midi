@@ -40,8 +40,7 @@
 	<p class="block">
 		This example takes midi events from all inputs, filters them to
 		<code>noteon</code>, <code>noteoff</code> and <code>pitch</code>
-		messages, draws the result on a canvas and outputs as midi events and
-		OSC-like arrays. The arrays are recorded in <code>tape</code>:
+		normalises the messages (to Music JSON) and logs the results.
 	</p>
 
 	<!--script src="js/midi.js"></script-->
@@ -49,32 +48,12 @@
 	<script src="src/midi.js"></script>
 	<script src="src/midi.events.js"></script>
 	<script src="src/midi.utils.js"></script>
-	<script src="src/midi.input.js"></script>
-	<script src="src/midi.output.js"></script>
-	<script src="src/midi.filter.js"></script>
-	<script src="src/midi.modify.js"></script>
-	<script src="src/midi.continuous.js"></script>
-	<script src="src/midi.graph.js"></script>
-	<script src="src/midi.out-map.js"></script>
-	<script src="src/midi.out-array.js"></script>
-	<script src="src/midi.log.js"></script>
 
 	<script class="block">
-var tape = [];
-	
-MIDI.Node()
-.input()
-.filter({ message: /^note|^pitch/ })
-.graph({ canvas: document.getElementById('midi-graph') })
-.out(function(e) {
-    console.log(e.data);
-})
-.outArray(function(message) {
-    tape.push(message);
+MIDI.on({ message: /^note|^pitch/ }, function(message, time) {
+    var normal = MIDI.normaliseData(message, time);
+    console.log(normal);
 });
 	</script>
-	
-	<p>Open the console to see what you've recorded:</p>
-	<pre><code>console.log(tape)</code></pre>
 </body>
 </html>
