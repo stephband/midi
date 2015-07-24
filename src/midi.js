@@ -333,9 +333,11 @@
 			query = empty;
 		}
 
-		return this.on(query, function handleOnce() {
+		return this
+		.on(query, fn)
+		.on(query, function handleOnce() {
+			this.off(query, fn);
 			this.off(handleOnce);
-			fn.apply(this, arguments);
 		});
 	};
 
