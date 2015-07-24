@@ -3,10 +3,9 @@
 MIDI is a hub for receiving, sending and filtering browser MIDI messages, and a
 library of functions for manipulating them.
 
-MIDI aims to make it easy to attach physical instruments and controllers to web
-apps. Plus, JavaScript is a great langauge for processing events.
-
-Note: as of June 2015 Chrome has native MIDI support. Joy! No other browser yet do.
+The MIDI library aims to make it easy to attach physical instruments and
+controllers to web apps. As of June 2015 Chrome has native MIDI support. Joy!
+No other browser yet do.
 
 ## MIDI properties
 
@@ -17,13 +16,18 @@ midi API as soon as it loads. <code>MIDI.request</code> is the promise returned
 by <code>navigator.requestMIDIAcess()</code>, or where MIDI is not supported,
 <code>MIDI.request</code> is a rejected promise.
 
-    MIDI.request.then(function(midi) {
+    MIDI.request
+    .then(function(midi) {
         // Do something with midi object
+    })
+    .catch(function(error) {
+        // Alert the user they don't have MIDI
     });
 
-Note that MIDI library functions are available before the promise is resolved.
-Calling <code>MIDI.on(query, fn)</code> before this time will nonetheless bind
-to incoming MIDI events when they become available.
+Note that using the MIDI library you don't really need to touch the midi object.
+MIDI functions are available before the promise is resolved. For example,
+calling <code>MIDI.on(query, fn)</code> before this time will bind to incoming
+MIDI events when <code>MIDI.request</code> is resolved.
 
 ## MIDI functions
 
