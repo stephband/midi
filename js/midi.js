@@ -1,33 +1,28 @@
-// MIDI module.
+(function(window) {
+	if (!window.console || !window.console.log) { return; }
 
-(function (window) {
-	'use strict';
+	console.log('MIDI 0.6');
+	console.log('http://github.com/soundio/midi');
+	console.log('MIDI events hub and helper library');
+	console.log('——————————————————————————————————');
+})(this);
 
-	var MIDI = {};
-
-	MIDI.request = navigator.requestMIDIAccess ?
-		navigator.requestMIDIAccess() :
-		new Promise(function(accept, reject){
-			reject('Your browser does not support MIDI via the navigator.requestMIDIAccess() API.');
-		}) ;
-
-	window.MIDI = MIDI;
-})(window);
-
-(function(MIDI) {
+(function(window) {
 	"use strict";
 
 	var debug = true;
 
-	var slice = Function.prototype.call.bind(Array.prototype.slice);
+	var MIDI = window.MIDI = {};
+
+	var assign = Object.assign;
+
+	var slice  = Function.prototype.call.bind(Array.prototype.slice);
 
 	var rtype = /^\[object\s([A-Za-z]+)/;
 
 	var empty = [];
 
-	var map = {
-	    	all: []
-	    };
+	var map = { all: [] };
 
 	var store = [];
 
@@ -79,8 +74,8 @@
 	// Deep get and set for getting and setting nested objects
 
 	function get(object, property) {
-		if (arguments.length < 3) {
-			return object[property];
+		if (arguments.length < 2) {
+			return object;
 		}
 
 		if (!object[property]) {
@@ -166,23 +161,40 @@
 		return data1 ? data2 ? [number, data, data2] : [number, data] : [number] ;
 	}
 
-	function createDatas(channel, message, data1, data2) {
+	function createDatas(channel, type, data1, data2) {
+		var types = MIDI.messages;
 		var datas = [];
+		var regexp, n;
 
-		if (!message) {
-			for (message in MIDI.messages) {
-				datas.push.apply(this, createDatas(channel, message, data1, data2));
+		if (!type) {
+			n = types.length;
+			while (n--) {
+				type = types[n];
+				datas.push.apply(datas, createDatas(channel, type, data1, data2));
 			}
 			return datas;
 		}
 
+		if (typeOf(type) === 'regexp') {
+			regexp = type;
+			n = types.length;
+			while (n--) {
+				type = types[n];
+				if (regexp.test(type)) {
+					datas.push.apply(datas, createDatas(channel, type, data1, data2));
+				}
+			}
+
+			return datas;
+		}
+
 		if (channel && channel !== 'all') {
-			datas.push(createData(channel, message, data1, data2));
+			datas.push(createData(channel, type, data1, data2));
 			return datas;
 		}
 
 		var ch = 16;
-		var array = createData(1, message, data1, data2);
+		var array = createData(1, type, data1, data2);
 		var data;
 
 		while (ch--) {
@@ -222,6 +234,20 @@
 		list.push([fn, args]);
 	}
 
+	function offTree(object, fn) {
+		var key;
+		
+		// Remove the matching function from each array in object
+		for (key in object) {
+			if (object[key].length) {
+				remove(object[key], fn);
+			}
+			else {
+				offTree(object[key], fn);
+			}
+		}
+	}
+
 	function off(map, query, fn) {
 		var args = [map];
 
@@ -240,10 +266,7 @@
 
 		if (!object) { return; }
 
-		// Remove the matching function from each array in object
-		for (key in object) {
-			remove(object[key], fn);
-		}
+		offTree(object, fn);
 	}
 
 	function send(port, data) {
@@ -252,82 +275,102 @@
 		}
 	}
 
-	var mixins = MIDI.mixins || (MIDI.mixins = {});
+	MIDI.request = navigator.requestMIDIAccess ?
+		navigator.requestMIDIAccess() :
+		new Promise(function(accept, reject){
+			reject({
+				message: 'This browser does not support Web MIDI.'
+			});
+		}) ;
 
-	mixins.events = {
-		in: function(data) {
-			var e = {
-			    	data: data,
-			    	receivedTime: +new Date()
-			    };
+	MIDI.in = function(data) {
+		var e = {
+		    	data: data,
+		    	receivedTime: +new Date()
+		    };
 
-			trigger(this, e);
-		},
+		trigger(this, e);
+	};
 
-		on: function(query, fn) {
-			var type = typeOf(query);
-			var map = getListeners(this);
-			var args = [];
-			var queries;
+	MIDI.on = function(query, fn) {
+		var type = typeOf(query);
+		var map = getListeners(this);
+		var args = [];
+		var queries;
 
-			if (type === 'object') {
-				queries = createQueries(query);
-				args.length = 1;
-				args.push.apply(args, arguments);
-
-				while (query = queries.pop()) {
-					on(map, query, fn, args);
-				}
-
-				return this;
-			}
-
-			if (type === 'function') {
-				fn = query;
-				query = empty;
-				args.length = 2;
-			}
-			else {
-				args.length = 1;
-			}
-
+		if (type === 'object') {
+			queries = createQueries(query);
+			args.length = 1;
 			args.push.apply(args, arguments);
 
-			on(map, query, fn, args);
+			while (query = queries.pop()) {
+				on(map, query, fn, args);
+			}
+
 			return this;
-		},
+		}
 
-		off: function(query, fn) {
-			var type = typeOf(query);
-			var map = getListeners(this);
-			var queries;
+		if (type === 'function') {
+			fn = query;
+			query = empty;
+			args.length = 2;
+		}
+		else {
+			args.length = 1;
+		}
 
-			if (type === 'object') {
-				queries = createQueries(query);
+		args.push.apply(args, arguments);
 
-				while (query = queries.pop()) {
-					off(map, query, fn);
-				}
-
-				return this;
-			}
-
-			if (!fn && type === 'function') {
-				fn = query;
-				query = empty;
-			}
-			else if (!query) {
-				query = empty;
-			}
-
-			off(map, query, fn);
-			return this;
-		},
-
-		// These methods are overidden when output ports become available.
-		send: noop,
-		output: noop
+		on(map, query, fn, args);
+		return this;
 	};
+
+	MIDI.once = function(query, fn) {
+		var type = typeOf(query);
+
+		if (type === 'function') {
+			fn = query;
+			query = empty;
+		}
+
+		return this
+		.on(query, fn)
+		.on(query, function handleOnce() {
+			this.off(query, fn);
+			this.off(handleOnce);
+		});
+	};
+
+	MIDI.off = function(query, fn) {
+		var type = typeOf(query);
+		var map = getListeners(this);
+		var queries;
+
+		if (type === 'object') {
+			queries = createQueries(query);
+
+			while (query = queries.pop()) {
+				off(map, query, fn);
+			}
+
+			return this;
+		}
+
+		if (!fn && type === 'function') {
+			fn = query;
+			query = empty;
+		}
+		else if (!query) {
+			query = empty;
+		}
+
+		off(map, query, fn);
+		return this;
+	};
+
+	// These methods are overidden when output ports become available.
+	MIDI.send = noop;
+	MIDI.output = noop;
 
 
 	// Set up MIDI to listen to browser MIDI inputs
@@ -338,9 +381,16 @@
 		// https://code.google.com/p/chromium/issues/detail?id=163795#c123
 		store.push(input);
 
-		input.addEventListener('midimessage', function(e) {
+		// For some reason .addEventListener does not work with the midimessage
+		// event.
+		//
+		//input.addEventListener('midimessage', function(e) {
+		//	trigger(MIDI, e);
+		//});
+
+		input.onmidimessage = function(e) {
 			trigger(MIDI, e);
-		});
+		};
 	}
 
 	function updateInputs(midi) {
@@ -424,195 +474,13 @@
 		connect();
 	}
 
-	extend(MIDI, mixins.events);
-
 	MIDI.request
 	.then(function(midi) {
-		
+		if (debug) { console.groupCollapsed('MIDI'); }
 		setupPorts(midi);
+		if (debug) { console.groupEnd(); }
 	})
 	.catch(function(error) {
-		console.log(error);
-		throw error;
+		console.warn(error.message);
 	});
-})(window.MIDI);
-
-// MIDI utilities
-//
-// Declares utility functions and constants on the MIDI object.
-
-(function(MIDI) {
-	'use strict';
-
-	var noteNames = [
-	    	'C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G♯', 'A', 'B♭', 'B'
-	    ];
-
-	var noteTable = {
-	    	'C':  0, 'C♯': 1, 'D♭': 1, 'D': 2, 'D♯': 3, 'E♭': 3, 'E': 4,
-	    	'F':  5, 'F♯': 6, 'G♭': 6, 'G': 7, 'G♯': 8, 'A♭': 8, 'A': 9,
-	    	'A♯': 10, 'B♭': 10, 'B': 11
-	    };
-
-	var rnotename = /^([A-G][♭♯]?)(\d)$/;
-	var rshorthand = /[b#]/g;
-
-	var messages = {
-	    	noteoff:      128,
-	    	noteon:       144,
-	    	polytouch:    160,
-	    	control:      176,
-	    	pc:           192,
-	    	channeltouch: 208,
-	    	pitch:        224
-	    };
-
-	var normaliseEvent = (function(converters) {
-		return function normaliseEvent(e, timeOffset) {
-			var message = MIDI.toMessage(e.data);
-			var time = e.receivedTime - (timeOffset || 0);
-
-			return converters[message] ?
-				converters[message](e) :
-				[time, 0, message, e.data[1], e.data[2] / 127] ;
-		};
-	})({
-		pitch: function(e) {
-			return [e.receivedTime, 0, 'pitch', pitchToFloat(e.data, 2)];
-		},
-
-		pc: function(e) {
-			return [e.receivedTime, 0, 'program', e.data[1]];
-		},
-
-		channeltouch: function(e) {
-			return [e.receivedTime, 0, 'aftertouch', 'all', e.data[1] / 127];
-		},
-
-		polytouch: function(e) {
-			return [e.receivedTime, 0, 'aftertouch', e.data[1], e.data[2] / 127];
-		}
-	});
-
-	function round(n, d) {
-		var factor = Math.pow(10, d); 
-		return Math.round(n * factor) / factor;
-	}
-
-	// Library functions
-
-	function isNote(data) {
-		return data[0] > 127 && data[0] < 160 ;
-	}
-
-	function isControl(data) {
-		return data[0] > 175 && data[0] < 192 ;
-	}
-
-	function isPitch(data) {
-		return data[0] > 223 && data[0] < 240 ;
-	}
-
-	function toChannel(data) {
-		return data[0] % 16 + 1;
-	}
-
-	//function toMessage(data) {
-	//	return MIDI.messages[Math.floor(data[0] / 16) - 8];
-	//}
-
-	function toMessage(data) {
-		var name = MIDI.messages[Math.floor(data[0] / 16) - 8];
-	
-		// Catch type noteon with zero velocity and rename it as noteoff
-		return name === MIDI.messages[1] && data[2] === 0 ?
-			MIDI.messages[0] :
-			name ;
-	}
-
-	function normaliseNoteOff(data) {
-		// If it's a noteon with 0 velocity, normalise it to a noteoff
-		if (data[2] === 0 && data[0] > 143 && data[0] < 160) {
-			data[0] -= 16;
-		}
-
-		return data;
-	}
-
-	function normaliseNoteOn(data) {
-		// If it's a noteoff, make it a noteon with 0 velocity.
-		if (data[0] > 127 && data[0] < 144) {
-			data[0] += 16;
-			data[2] = 0;
-		}
-
-		return data;
-	}
-
-	function replaceSymbol($0, $1) {
-		return $1 === '#' ? '♯' :
-			$1 === 'b' ? '♭' :
-			'' ;
-	}
-
-	function normaliseNoteName(name) {
-		return name.replace(rshorthand, replaceSymbol);
-	}
-
-	function pitchToInt(data) {
-		return (data[2] << 7 | data[1]) - 8192 ;
-	}
-
-	function pitchToFloat(data, range) {
-		return (range === undefined ? 2 : range) * pitchToInt(data) / 8191 ;
-	}
-
-	function noteToNumber(str) {
-		var r = rnotename.exec(normaliseNoteName(str));
-		return parseInt(r[2]) * 12 + noteTable[r[1]];
-	}
-
-	function numberToNote(n) {
-		return noteNames[n % 12];
-	}
-
-	function numberToOctave(n) {
-		return Math.floor(n / 12) - (5 - MIDI.middle);
-	}
-
-	function numberToFrequency(n, frequency) {
-		return (frequency || 440) * Math.pow(1.059463094359, (n + 3 - (MIDI.middle + 2) * 12));
-	}
-
-	function frequencyToNumber(n, frequency) {
-		// TODO: Implement
-		return;
-	}
-
-	function messageToNumber(channel, message) {
-		return messages[message] + (channel ? channel - 1 : 0 );
-	}
-
-	MIDI.messages = Object.keys(messages);
-	MIDI.pitch = 440;
-	MIDI.middle = 3;
-
-	//MIDI.noteNames = noteNames;
-	//MIDI.noteTable = noteTable;
-	MIDI.isNote = isNote;
-	MIDI.isPitch = isPitch;
-	MIDI.isControl = isControl;
-	MIDI.messageToNumber = messageToNumber;
-	MIDI.noteToNumber = noteToNumber;
-	MIDI.numberToNote = numberToNote;
-	MIDI.numberToOctave = numberToOctave;
-	MIDI.numberToFrequency = numberToFrequency;
-	MIDI.toMessage = toMessage;
-	MIDI.toChannel = toChannel;
-	MIDI.toType    = toMessage;
-	MIDI.normaliseNoteOn = normaliseNoteOn;
-	MIDI.normaliseNoteOff = normaliseNoteOff;
-	MIDI.pitchToInt = pitchToInt;
-	MIDI.pitchToFloat = pitchToFloat;
-	MIDI.normaliseEvent = normaliseEvent;
-})(MIDI);
+})(window);
