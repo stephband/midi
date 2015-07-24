@@ -90,30 +90,31 @@ passed to the handler as extra arguments. Use this to pass data to handlers:
     
     MIDI.on([180, 1, 0], handler, { bing: 'bong' });
 
+### .once(query, fn)
+
+Calls a handler <code>fn</code> once, on the next incoming MIDI event to match
+<code>query</code>. <code>.once()</code> can be used to implement a MIDI learn
+function:
+
+    function learnController(fn) {
+        // Listen for next incoming MIDI controller message
+        MIDI.once({ message: "control" }, function(message, time) {
+            var query = message.splice();
+
+            // Call the fn
+            fn.apply(this, arguments);
+
+            // Bind the fn to all values for this controller
+            query.length = 2;
+            MIDI.on(query, fn);
+        };
+    }
+
 ### .off(query, fn)
 
 Removes an event handler from all MIDI events matching the query. If
 <code>fn</code> is not given, removes all handlers from events matching the
 query. If <code>query</code> is not given, removes the handler from all events.
-
-### .once(query, fn)
-
-Registers a handler <code>fn</code> for the next incoming MIDI event to match
-<code>query</code>. Thereafter <code>fn</code> is called whenever that MIDI
-event is received.
-
-<code>.once()</code> can be used to implement a MIDI learn function:
-
-    function learnMIDIController(fn) {
-        // Listen for next incoming MIDI controller message
-        MIDI.once({ message: "control" }, function(message, time) {
-            var query = message.splice();
-
-            // Listen to all values for this controller and bind the fn
-            query.length = 2;
-            MIDI.on(query, fn);
-        };
-    }
 
 ### .normalise(message, time)
 
