@@ -3,6 +3,9 @@
 MIDI is a hub for receiving, sending and filtering browser MIDI messages, and a
 library of functions for manipulating them.
 
+MIDI aims to make it easy to attach physical instruments and controllers to web
+apps. Plus, JavaScript is a great langauge for processing events.
+
 Note: as of June 2015 Chrome has native MIDI support. Joy! No other browser yet do.
 
 ## MIDI properties
@@ -18,8 +21,9 @@ by <code>navigator.requestMIDIAcess()</code>, or where MIDI is not supported,
         // Do something with midi object
     });
 
-Note that the MIDI library can be used to bind listeners to incoming MIDI events
-before the request promise is resolved.
+Note that MIDI library functions are available before the promise is resolved.
+Calling <code>MIDI.on(query, fn)</code> before this time will nonetheless bind
+to incoming MIDI events when they become available.
 
 ## MIDI functions
 
@@ -33,9 +37,8 @@ Registers a handler <code>fn</code> for all incoming MIDI events.
 
 ### .on(query, fn)
 
-Registers a handler <code>fn</code> for MIDI events. The handler is
-called for incoming events that match <code>query</code>. A query can be
-expressed as a data array:
+Registers a handler <code>fn</code> for incoming MIDI events that match
+<code>query</code>. A query can be expressed as a data array:
 
     MIDI.on([145, 80], function(data, time, port) {
         // Called for Channel 2, NoteOn A4 messages.
@@ -71,8 +74,8 @@ Query objects can have one or more of the properties:
 Note that in order to optimise the speed of processing incoming MIDI events,
 filter queries are pre-sorted at the point of calling <code>.on()</code> and a
 listener tree is constructed. Incoming events are simply matched against the
-tree with a couple of lookups (very fast). This avoids running all filters
-against every incoming event (potentially slow) – but it also means that queries
+tree with a couple of lookups (very fast). This avoids filtering every incoming
+event against all queries (potentially slow) – but it also means that queries
 are not dynamic. Changing the values in a query after it has been passed to
 <code>.on()</code> will not alter the MIDI events that trigger <code>fn</code>.
 
@@ -107,9 +110,9 @@ array. Music JSON events have the form:
 
     [timestamp, duration, type, data ... ]
 
-For MIDI events <code>duration</code> is 0. Note velocities and aftertouch data
-are normalised to the range 0-1, while pitch bend data is normalised to floats
-representing semitones. For example:
+For MIDI events <code>duration</code> is 0. Note velocity, controller data and
+aftertouch data are normalised as floats in the range 0-1, while pitch bend data is
+normalised to floats representing semitones. For example:
 
     MIDI.normalise([145,80,20], 1);    // [1, 0, 'noteon', 80, 0.15748032]
     MIDI.normalise([180,1,127], 2);    // [2, 0, 'control', 1, 1]
@@ -178,18 +181,20 @@ Given a note number between 0 and 127, returns the octave the note is in as a nu
 
     MIDI.numberToOctave(66);              // 3
 
-### .numberToFrequency(n)<br/>.numberToFrequency(n, reference)
+### .numberToFrequency(n)
 
 Given a note number <code>n</code>, returns the frequency of the fundamental tone of that note.
 
     MIDI.numberToFrequency(57);           // 440
+
+### .numberToFrequency(n, reference)
 
 The reference tuning is A = 440Hz by default. Pass in a value <code>reference</code> to use a
 different tuning.
 
     MIDI.numberToFrequency(57, 442);      // 442
 
-### .frequencyToNumber(f)<br/>.frequencyToNumber(f, reference)
+### .frequencyToNumber(f)
 
 NOT IMPLEMENTED
 
@@ -197,6 +202,10 @@ Given a frequency <code>f</code>, returns the note number whose fundamental
 harmonic corresponds to that frequency.
 
     MIDI.frequencyToNumber(440);          // 57
+
+### .frequencyToNumber(f, reference)
+
+NOT IMPLEMENTED
 
 The reference tuning is A = 440Hz by default. Pass in a value <code>reference</code> to use a
 different tuning.
