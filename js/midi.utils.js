@@ -20,7 +20,7 @@
 	var rnotename = /^([A-G][♭♯]?)(\d)$/;
 	var rshorthand = /[b#]/g;
 
-	var messages = {
+	var types = {
 	    	noteoff:      128,
 	    	noteon:       144,
 	    	polytouch:    160,
@@ -85,11 +85,11 @@
 	}
 
 	function toType(message) {
-		var name = MIDI.messages[Math.floor(message[0] / 16) - 8];
+		var name = MIDI.types[Math.floor(message[0] / 16) - 8];
 
 		// Catch type noteon with zero velocity and rename it as noteoff
-		return name === MIDI.messages[1] && message[2] === 0 ?
-			MIDI.messages[0] :
+		return name === MIDI.types[1] && message[2] === 0 ?
+			MIDI.types[0] :
 			name ;
 	}
 
@@ -152,11 +152,11 @@
 		return;
 	}
 
-	function messageToNumber(channel, message) {
-		return messages[message] + (channel ? channel - 1 : 0 );
+	function typeToNumber(channel, type) {
+		return types[type] + (channel ? channel - 1 : 0 );
 	}
 
-	MIDI.messages = Object.keys(messages);
+	MIDI.types = Object.keys(types);
 	MIDI.pitch = 440;
 	MIDI.middle = 3;
 
@@ -165,7 +165,7 @@
 	MIDI.isNote = isNote;
 	MIDI.isPitch = isPitch;
 	MIDI.isControl = isControl;
-	MIDI.messageToNumber = messageToNumber;
+	MIDI.typeToNumber = typeToNumber;
 	MIDI.noteToNumber = noteToNumber;
 	MIDI.numberToNote = numberToNote;
 	MIDI.numberToOctave = numberToOctave;

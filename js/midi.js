@@ -153,7 +153,7 @@
 	}
 
 	function createData(channel, message, data1, data2) {
-		var number = MIDI.messageToNumber(channel, message);
+		var number = MIDI.typeToNumber(channel, message);
 		var data = typeof data1 === 'string' ?
 		    	MIDI.noteToNumber(data1) :
 		    	data1 ;
@@ -162,7 +162,7 @@
 	}
 
 	function createDatas(channel, type, data1, data2) {
-		var types = MIDI.messages;
+		var types = MIDI.types;
 		var datas = [];
 		var regexp, n;
 
