@@ -464,19 +464,21 @@
 	}
 
 	function setupPorts(midi) {
-		function connect() {
+		function connect(e) {
 			updateInputs(midi);
 			updateOutputs(midi);
 		}
 
-		midi.onconnect = connect;
-		midi.ondisconnect = connect;
+		// Not sure addEventListener works...
+		//midi.addEventListener(midi, 'statechange', connect);
+		midi.onstatechange = connect;
 		connect();
 	}
 
 	MIDI.request
 	.then(function(midi) {
 		if (debug) { console.groupCollapsed('MIDI'); }
+		if (debug) { window.midi = midi; }
 		setupPorts(midi);
 		if (debug) { console.groupEnd(); }
 	})
