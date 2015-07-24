@@ -11,12 +11,15 @@ Note: as of June 2015 Chrome has native MIDI support. Joy! No other browser yet 
 
 A promise. Where MIDI is supported, the library requests access to the browser's
 midi API as soon as it loads. <code>MIDI.request</code> is the promise returned
-by <code>navigator.requestMIDIAcess()</code>. Where MIDI is not supported,
-<code>MIDI.request</code> is a promise immediately put into rejected state.
+by <code>navigator.requestMIDIAcess()</code>, or where MIDI is not supported,
+<code>MIDI.request</code> is a rejected promise.
 
     MIDI.request.then(function(midi) {
         // Do something with midi object
     });
+
+Note that the MIDI library can be used to bind listeners to incoming MIDI events
+before the request promise is resolved.
 
 ## MIDI functions
 
