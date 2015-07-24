@@ -162,33 +162,39 @@
 	}
 
 	function createDatas(channel, type, data1, data2) {
+		var types = MIDI.messages;
 		var datas = [];
-		var regexp;
+		var regexp, n;
 
 		if (!type) {
-			for (type in MIDI.messages) {
-				datas.push.apply(this, createDatas(channel, type, data1, data2));
+			n = types.length;
+			while (n--) {
+				type = types[n];
+				datas.push.apply(datas, createDatas(channel, type, data1, data2));
 			}
 			return datas;
 		}
 
 		if (typeOf(type) === 'regexp') {
 			regexp = type;
-			for (type in MIDI.messages) {
+			n = types.length;
+			while (n--) {
+				type = types[n];
 				if (regexp.test(type)) {
-					datas.push.apply(this, createDatas(channel, type, data1, data2));
+					datas.push.apply(datas, createDatas(channel, type, data1, data2));
 				}
 			}
+
 			return datas;
 		}
 
 		if (channel && channel !== 'all') {
-			datas.push(createData(channel, message, data1, data2));
+			datas.push(createData(channel, type, data1, data2));
 			return datas;
 		}
 
 		var ch = 16;
-		var array = createData(1, message, data1, data2);
+		var array = createData(1, type, data1, data2);
 		var data;
 
 		while (ch--) {

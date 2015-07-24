@@ -49,6 +49,7 @@
 	<script src="src/midi.utils.js"></script>
 
 	<script class="block">
+console.log('HELLO');
 MIDI.on({ message: /^note|^pitch/ }, function(message, time) {
     var event = MIDI.normalise(message, time);
     console.log(event);
