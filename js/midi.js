@@ -1,7 +1,7 @@
 (function(window) {
 	if (!window.console || !window.console.log) { return; }
 
-	console.log('MIDI 0.6');
+	console.log('MIDI 0.6.2');
 	console.log('http://github.com/soundio/midi');
 	console.log('MIDI events hub and helper library');
 	console.log('——————————————————————————————————');
