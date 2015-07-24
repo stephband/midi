@@ -83,6 +83,11 @@ Removes an event handler from all MIDI events matching the query. If
 <code>fn</code> is not given, removes all handlers from events matching the
 query. If <code>query</code> is not given, removes the handler from all events.
 
+### .learn(query, fn)
+
+Registers a handler <code>fn</code> for the next incoming MIDI event to match
+<code>query</code>. Thereafter <code>fn</code> is called whenever that MIDI
+event is received.
 
 ### .normaliseEvent(e)<br/>.normaliseEvent(e, timeOffset)
 

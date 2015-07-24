@@ -319,6 +319,18 @@
 			return this;
 		},
 
+		learn: function(query, fn) {
+			function listen(message, time) {
+				var filter = message.slice();
+				filter.length = 2;
+				this.off(listen);
+				this.on(filter, fn);
+				fn(message, time);
+			}
+
+			this.on(query, listen);
+		},
+
 		// These methods are overidden when output ports become available.
 		send: noop,
 		output: noop
