@@ -283,7 +283,7 @@
 			});
 		}) ;
 
-	MIDI.in = function(data) {
+	MIDI.trigger = function(data) {
 		var e = {
 		    	data: data,
 		    	receivedTime: +new Date()

@@ -20,8 +20,8 @@
 //	// Test remove binding
 //	MIDI.off([176, 4], detectControl);
 //
-//	MIDI.in([176, 4, 0]);
-//	MIDI.in([176, 8, 0]);
+//	MIDI.trigger([176, 4, 0]);
+//	MIDI.trigger([176, 8, 0]);
 //
 //	// Test remove of non-existant binding 
 //	MIDI.off([176, 12], detectControl);
