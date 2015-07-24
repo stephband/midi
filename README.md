@@ -96,11 +96,24 @@ Removes an event handler from all MIDI events matching the query. If
 <code>fn</code> is not given, removes all handlers from events matching the
 query. If <code>query</code> is not given, removes the handler from all events.
 
-### .learn(query, fn)
+### .once(query, fn)
 
 Registers a handler <code>fn</code> for the next incoming MIDI event to match
 <code>query</code>. Thereafter <code>fn</code> is called whenever that MIDI
 event is received.
+
+<code>.once()</code> can be used to implement a MIDI learn function:
+
+    function learnMIDIController(fn) {
+        // Listen for next incoming MIDI controller message
+        MIDI.once({ message: "control" }, function(message, time) {
+            var query = message.splice();
+
+            // Listen to all values for this controller and bind the fn
+            query.length = 2;
+            MIDI.on(query, fn);
+        };
+    }
 
 ### .normalise(message, time)
 

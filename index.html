@@ -4,16 +4,16 @@
 	<meta charset="utf-8" />
 	<meta name="author" content="" />
 	<meta name="description" content="" />
-	
+
 	<title>MIDIRouter</title>
-	
+
 	<script>document.documentElement.className = 'js';</script>
-	
+
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
-	
+
 	<link rel="icon" type="image/png" href="images/favicon.png" />
 	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-	
+
 	<!--link rel="stylesheet" href="/css/bolt.normalise.css" />
 	<link rel="stylesheet" href="/css/bolt.typography.css" />
 	<link rel="stylesheet" href="/css/bolt.typography.15_24.css" />
@@ -49,7 +49,6 @@
 	<script src="src/midi.utils.js"></script>
 
 	<script class="block">
-console.log('HELLO');
 MIDI.on({ message: /^note|^pitch/ }, function(message, time) {
     var event = MIDI.normalise(message, time);
     console.log(event);

@@ -325,6 +325,20 @@
 		return this;
 	};
 
+	MIDI.once = function(query, fn) {
+		var type = typeOf(query);
+
+		if (type === 'function') {
+			fn = query;
+			query = empty;
+		}
+
+		return this.on(query, function handleOnce() {
+			this.off(handleOnce);
+			fn.apply(this, arguments);
+		});
+	};
+
 	MIDI.off = function(query, fn) {
 		var type = typeOf(query);
 		var map = getListeners(this);
@@ -350,18 +364,6 @@
 
 		off(map, query, fn);
 		return this;
-	};
-
-	MIDI.learn = function(query, fn) {
-		function listen(message, time) {
-			var filter = message.slice();
-			filter.length = 2;
-			this.off(listen);
-			this.on(filter, fn);
-			fn(message, time);
-		}
-
-		this.on(query, listen);
 	};
 
 	// These methods are overidden when output ports become available.
