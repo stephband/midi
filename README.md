@@ -1,7 +1,7 @@
 # MIDI
 
 MIDI is a hub for receiving, sending and filtering browser MIDI messages, and a
-library of functions for manipulating them. It is optimised for input speed.
+library of functions for manipulating them.
 
 Note: as of June 2015 Chrome has native MIDI support. Joy! No other browser yet do.
 
