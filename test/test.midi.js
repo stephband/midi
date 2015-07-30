@@ -11,8 +11,8 @@
 	MIDI.on([176], detectControl);
 
 	// Test bind
-	MIDI.in([176, 4, 0]);
-	MIDI.in([176, 8, 0]);
+	MIDI.trigger([176, 4, 0]);
+	MIDI.trigger([176, 8, 0]);
 
 	// Test remove binding
 	MIDI.off([176], detectControl);
