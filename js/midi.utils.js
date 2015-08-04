@@ -37,23 +37,23 @@
 
 			return converters[type] ?
 				converters[type](data, time) :
-				[time, 0, type, data[1], data[2] / 127] ;
+				[time, type, data[1], data[2] / 127] ;
 		};
 	})({
 		pitch: function(data, time) {
-			return [time, 0, 'pitch', pitchToFloat(data, 2)];
+			return [time, 'pitch', pitchToFloat(data, 2)];
 		},
 
 		pc: function(data, time) {
-			return [time, 0, 'program', data[1]];
+			return [time, 'program', data[1]];
 		},
 
 		channeltouch: function(data, time) {
-			return [time, 0, 'aftertouch', 'all', data[1] / 127];
+			return [time, 'aftertouch', 'all', data[1] / 127];
 		},
 
 		polytouch: function(data, time) {
-			return [time, 0, 'aftertouch', data[1], data[2] / 127];
+			return [time, 'aftertouch', data[1], data[2] / 127];
 		}
 	});
 
