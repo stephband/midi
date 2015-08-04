@@ -227,3 +227,9 @@ NOT IMPLEMENTED
 
 The reference tuning is A = 440Hz by default. Pass in a value <code>reference</code> to use a
 different tuning.
+
+### .typeToNumber(channel, type)
+
+Given a <code>channel</code> and <code>type</code>, returns the MIDI message number.
+
+    MIDI.typeToNumber(1, 'noteon');       // 144

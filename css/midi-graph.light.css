@@ -52,7 +52,7 @@
 
 /* .index */
 
-.note_index {
+.note-index {
 	line-height: 159px;
 	border-bottom: 1px solid #999999;
 	margin-bottom: 3rem;
@@ -69,7 +69,7 @@
 	background-image:         linear-gradient(to top, transparent 0%, transparent 63px, rgba(128,128,128,0.24) 63px, transparent 64px, transparent 127px, rgba(128,128,128,0.16) 127px, transparent 128px, transparent 100%);
 }
 
-.note_index > li {
+.note-index > li {
 	width: 0.78125%;
 	vertical-align: bottom;
 	padding-left: 1px;

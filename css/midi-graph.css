@@ -1,6 +1,6 @@
 /* .index */
 
-.note_index {
+.note-index {
 	padding-left: 3.3333%;
 	padding-right: 3.3333%;
 	white-space: nowrap;
@@ -10,7 +10,7 @@
 	border-bottom-right-radius: 0.25rem;
 }
 
-.note_index > li {
+.note-index > li {
 	font-family: "Andale Mono", Helvetica, Arial, sans-serif;
 	font-weight: bold;
 	font-size: 0.8125rem;
@@ -27,7 +27,7 @@
 	color: #666666;
 }
 
-.note_index > li.on {
+.note-index > li.on {
 	visibility: visible;
 }
 
