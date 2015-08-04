@@ -126,16 +126,16 @@ Takes a MIDI message array and returns a
 <a href="https://github.com/sound-io/music-json-spec">Music JSON</a> event
 array. Music JSON events have the form:
 
-    [timestamp, duration, type, data ... ]
+    [timestamp, type, data ... ]
 
 For MIDI events <code>duration</code> is 0. Note velocity, controller data and
 aftertouch data are normalised as floats in the range 0-1, while pitch bend data is
 normalised to floats representing semitones. For example:
 
-    MIDI.normalise([145,80,20], 1);    // [1, 0, 'noteon', 80, 0.15748032]
-    MIDI.normalise([180,1,127], 2);    // [2, 0, 'control', 1, 1]
-    MIDI.normalise([231,62,119], 3);   // [3, 0, "pitch", 1.73409840]
-    MIDI.normalise([168,62,119], 4);   // [4, 0, "aftertouch", 62, 0.93700787]
+    MIDI.normalise([145,80,20], 1);    // [1, 'noteon', 80, 0.15748032]
+    MIDI.normalise([180,1,127], 2);    // [2, 'control', 1, 1]
+    MIDI.normalise([231,62,119], 3);   // [3, "pitch", 1.73409840]
+    MIDI.normalise([168,62,119], 4);   // [4, "aftertouch", 62, 0.93700787]
 
 ### .normaliseEvent(e)
 
