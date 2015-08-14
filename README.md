@@ -189,7 +189,7 @@ in semitones. Where range is not given it defaults to <code>2</code>.
 
 Given a note number between 0 and 127, returns a note name as a string.
 
-    MIDI.numberToNote(66);                // 'F♯'
+    MIDI.numberToNote(66);                // 'F♯4'
 
 MIDI uses unicode symbols for accidentals <code>♭</code> and <code>♯</code>.
 
@@ -197,39 +197,50 @@ MIDI uses unicode symbols for accidentals <code>♭</code> and <code>♯</code>.
 
 Given a note number between 0 and 127, returns the octave the note is in as a number. 
 
-    MIDI.numberToOctave(66);              // 3
+    MIDI.numberToOctave(66);              // 4
 
 ### .numberToFrequency(n)
 
 Given a note number <code>n</code>, returns the frequency of the fundamental tone of that note.
 
-    MIDI.numberToFrequency(57);           // 440
+    MIDI.numberToFrequency(69);           // 440
+    MIDI.numberToFrequency(60);           // 261.625565
 
-### .numberToFrequency(n, reference)
+The reference tuning is A4 = 440Hz by default. Pass in a second parameter
+<code>tuning</code> to use a different tuning for A4.
 
-The reference tuning is A = 440Hz by default. Pass in a value <code>reference</code> to use a
-different tuning.
-
-    MIDI.numberToFrequency(57, 442);      // 442
+    MIDI.numberToFrequency(69, 442);      // 442
+    MIDI.numberToFrequency(60, 442);      // 262.814772
 
 ### .frequencyToNumber(f)
-
-NOT IMPLEMENTED
 
 Given a frequency <code>f</code>, returns the note number whose fundamental
 harmonic corresponds to that frequency.
 
-    MIDI.frequencyToNumber(440);          // 57
+    MIDI.frequencyToNumber(440);          // 69
+    MIDI.frequencyToNumber(200);          // 55.349958
 
-### .frequencyToNumber(f, reference)
+The reference tuning is A4 = 440Hz by default. Pass in a second parameter
+<code>tuning</code> to use a different tuning.
 
-NOT IMPLEMENTED
+    MIDI.frequencyToNumber(440, 442);     // 68.921486
 
-The reference tuning is A = 440Hz by default. Pass in a value <code>reference</code> to use a
-different tuning.
+Results of <code>.frequencyToNumber</code> are rounded to six decimal places
+to help avoid floating point errors and return whole semitones where intended.
 
 ### .typeToNumber(channel, type)
 
 Given a <code>channel</code> and <code>type</code>, returns the MIDI message number.
 
     MIDI.typeToNumber(1, 'noteon');       // 144
+
+
+### .noteNames
+
+An array of note names. Must have length <code>12</code> and contain one name
+for each degree of the chromatic scale starting with C.
+
+### .tuning
+
+The frequency value of A4 that is used in converting MIDI numbers
+to frequency values and vice versa. It is <code>440</code> by default.

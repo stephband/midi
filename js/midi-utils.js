@@ -7,17 +7,17 @@
 
 	var MIDI = window.MIDI;
 
-	var noteNames = [
-	    	'C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G♯', 'A', 'B♭', 'B'
-	    ];
+	var noteNames = ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'B♭', 'B'];
 
-	var noteTable = {
+	var noteNumbers = {
 	    	'C':  0, 'C♯': 1, 'D♭': 1, 'D': 2, 'D♯': 3, 'E♭': 3, 'E': 4,
 	    	'F':  5, 'F♯': 6, 'G♭': 6, 'G': 7, 'G♯': 8, 'A♭': 8, 'A': 9,
 	    	'A♯': 10, 'B♭': 10, 'B': 11
 	    };
 
-	var rnotename = /^([A-G][♭♯]?)(\d)$/;
+	var A4 = 69;
+
+	var rnotename = /^([A-G][♭♯]?)(-?\d)$/;
 	var rshorthand = /[b#]/g;
 
 	var types = {
@@ -132,24 +132,28 @@
 
 	function noteToNumber(str) {
 		var r = rnotename.exec(normaliseNoteName(str));
-		return parseInt(r[2]) * 12 + noteTable[r[1]];
+		return (parseInt(r[2]) + 1) * 12 + noteNumbers[r[1]];
 	}
 
 	function numberToNote(n) {
-		return noteNames[n % 12];
+		return noteNames[n % 12] + numberToOctave(n);
 	}
 
 	function numberToOctave(n) {
-		return Math.floor(n / 12) - (5 - MIDI.middle);
+		return Math.floor(n / 12) - 1;
 	}
 
-	function numberToFrequency(n, frequency) {
-		return (frequency || 440) * Math.pow(1.059463094359, (n + 3 - (MIDI.middle + 2) * 12));
+	function numberToFrequency(n, tuning) {
+		return (tuning || MIDI.tuning) * Math.pow(2, (n - A4) / 12);
 	}
 
-	function frequencyToNumber(n, frequency) {
-		// TODO: Implement
-		return;
+	function frequencyToNumber(frequency, tuning) {
+		var number = A4 + 12 * Math.log(frequency / (tuning || MIDI.tuning)) / Math.log(2);
+
+		// Rounded it to nearest 1,000,000th to avoid floating point errors and
+		// return whole semitone numbers where possible. Surely no-one needs
+		// more accuracy than a millionth of a semitone?
+		return Math.round(1000000 * number) / 1000000;
 	}
 
 	function typeToNumber(channel, type) {
@@ -157,11 +161,10 @@
 	}
 
 	MIDI.types = Object.keys(types);
-	MIDI.pitch = 440;
-	MIDI.middle = 3;
+	MIDI.tuning = 440;
 
-	//MIDI.noteNames = noteNames;
-	//MIDI.noteTable = noteTable;
+	MIDI.noteNames = noteNames;
+	//MIDI.noteNumbers = noteNumbers;
 	MIDI.isNote = isNote;
 	MIDI.isPitch = isPitch;
 	MIDI.isControl = isControl;
@@ -170,6 +173,7 @@
 	MIDI.numberToNote = numberToNote;
 	MIDI.numberToOctave = numberToOctave;
 	MIDI.numberToFrequency = numberToFrequency;
+	MIDI.frequencyToNumber = frequencyToNumber;
 	MIDI.toChannel = toChannel;
 	MIDI.toType    = toType;
 	MIDI.normaliseNoteOn = normaliseNoteOn;
