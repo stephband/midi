@@ -275,14 +275,6 @@
 		}
 	}
 
-	MIDI.request = navigator.requestMIDIAccess ?
-		navigator.requestMIDIAccess() :
-		new Promise(function(accept, reject){
-			reject({
-				message: 'This browser does not support Web MIDI.'
-			});
-		}) ;
-
 	MIDI.trigger = function(data) {
 		var e = {
 		    	data: data,
@@ -368,12 +360,20 @@
 		return this;
 	};
 
-	// These methods are overidden when output ports become available.
-	MIDI.send = noop;
-	MIDI.output = noop;
+
+	// Set up MIDI.request as a promise
+
+	MIDI.request = navigator.requestMIDIAccess ?
+		navigator.requestMIDIAccess() :
+		Promise.reject("This browser does not support Web MIDI.") ;
 
 
 	// Set up MIDI to listen to browser MIDI inputs
+
+	// These methods are overidden when output ports become available.
+
+	MIDI.send = noop;
+	MIDI.output = noop;
 
 	function listen(input) {
 		// It's suggested here that we need to keep a reference to midi inputs
