@@ -115,8 +115,7 @@
 		var n = -1;
 		var fn, args;
 
-		// Lets not worry about list mutating while we trigger. We want speed.
-		// list = slice(list);
+		list = list.slice();
 
 		while (++n < l) {
 			fn = list[n][0];
