@@ -30,7 +30,7 @@ calling <code>MIDI.on(query, fn)</code> before this time will bind to incoming
 MIDI events when <code>MIDI.request</code> is resolved.
 
 ## MIDI functions
-
+MIDI
 ### .on(fn)
 
 Registers a handler <code>fn</code> for all incoming MIDI events.
@@ -161,13 +161,13 @@ event array. Equivalent to:
 
 Returns the MIDI channel of the message as a number 1-16.
 
-    MIDI.channel([145,80,20]);            // 2
+    MIDI.toChannel([145,80,20]);            // 2
 
 ### .toType(message)
 
 Returns type of message.
 
-    MIDI.message([145,80,20])             // 'noteon'
+    MIDI.toType([145,80,20])             // 'noteon'
 
 ### .normaliseNote(data)
 
