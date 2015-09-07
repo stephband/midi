@@ -128,9 +128,9 @@ array. Music JSON events have the form:
 
     [timestamp, type, data ... ]
 
-For MIDI events <code>duration</code> is 0. Note velocity, controller data and
-aftertouch data are normalised as floats in the range 0-1, while pitch bend data is
-normalised to floats representing semitones. For example:
+Note velocity, controller data and aftertouch data are normalised as floats in
+the range 0-1, while pitch bend data is normalised to floats representing
+semitones. For example:
 
     MIDI.normalise([145,80,20], 1);    // [1, 'noteon', 80, 0.15748032]
     MIDI.normalise([180,1,127], 2);    // [2, 'control', 1, 1]
