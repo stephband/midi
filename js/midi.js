@@ -3,7 +3,7 @@
 
 	console.log('MIDI 0.6.2');
 	console.log('http://github.com/soundio/midi');
-	console.log('MIDI events hub and helper library');
+	//console.log('MIDI events hub and helper library');
 	console.log('——————————————————————————————————');
 })(this);
 
