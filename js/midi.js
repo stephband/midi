@@ -4,7 +4,6 @@
 	console.log('MIDI 0.6.2');
 	console.log('http://github.com/soundio/midi');
 	//console.log('MIDI events hub and helper library');
-	console.log('——————————————————————————————————');
 })(this);
 
 (function(window) {
@@ -482,6 +481,11 @@
 		if (debug) { console.groupEnd(); }
 	})
 	.catch(function(error) {
-		console.warn(error.message);
+		console.warn('MIDI: Not supported in this browser. Error: ' + error.message);
 	});
 })(window);
+
+(function(window) {
+	if (!window.console || !window.console.log) { return; }
+	console.log('______________________________');
+})(this);
