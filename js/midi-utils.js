@@ -64,7 +64,7 @@
 	}
 
 	function round(n, d) {
-		var factor = Math.pow(10, d); 
+		var factor = Math.pow(10, d);
 		return Math.round(n * factor) / factor;
 	}
 
@@ -134,7 +134,7 @@
 
 	function noteToNumber(str) {
 		var r = rnotename.exec(normaliseNoteName(str));
-		return (parseInt(r[2]) + 1) * 12 + noteNumbers[r[1]];
+		return (parseInt(r[2], 10) + 1) * 12 + noteNumbers[r[1]];
 	}
 
 	function numberToNote(n) {
