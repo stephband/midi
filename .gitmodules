@@ -1,0 +1,3 @@
+[submodule "modules/fn"]
+	path = modules/fn
+	url = https://github.com/cruncher/Fn.git

@@ -44,7 +44,9 @@
 	</p>
 
 	<!--script src="js/midi.js"></script-->
-
+	<script src="modules/fn/js/fn.js"></script>
+	<script src="modules/fn/js/stream.js"></script>
+	<script src="modules/fn/js/dom.js"></script>
 	<script src="js/midi.js"></script>
 	<script src="js/midi-utils.js"></script>
 
@@ -53,6 +55,19 @@ MIDI.on({ message: /^note|^pitch/ }, function(message, time) {
     var event = MIDI.normalise(message, time);
     console.log(event);
 });
+
+
+//MIDI.on([144]).log();
+MIDI.on({ channel: 1, message: /^note|^pitch/ }).normalise().log();
+MIDI.on({ message: /^note|^pitch/ }).log();
+
+console.log('TRIGGER NOTEON');
+MIDI.trigger([144,127,80]);
+console.log('TRIGGER NOTEOFF');
+MIDI.trigger([128,127,64]);
+console.log('TRIGGER NOTEON');
+MIDI.trigger([150,127,64]);
+console.log('------------');
 	</script>
 </body>
 </html>
