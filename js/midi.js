@@ -91,7 +91,7 @@
 
 	MIDI.trigger = noop;
 
-	var inputStream = new Stream(function(push) {
+	var inputStream = new Stream(function setup(push) {
 		// Enable triggering of input stream for testing.
 		MIDI.trigger = function(data) {
 			push(data, +new Date(), undefined);
@@ -106,6 +106,9 @@
 				push(e.data, e.receivedTime, e.target);
 			});
 		});
+
+		// inputStream cannot be torn down.
+		return noop;
 	});
 
 	var cache = {};
