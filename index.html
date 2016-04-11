@@ -51,22 +51,38 @@
 	<script src="js/midi-utils.js"></script>
 
 	<script class="block">
-MIDI.on({ message: /^note|^pitch/ }, function(message, time) {
-    var event = MIDI.normalise(message, time);
-    console.log(event);
-});
+//MIDI.on({ message: /^note|^pitch/ }, function(message, time) {
+//    var event = MIDI.normalise(message, time);
+//    console.log(event);
+//});
 
 
 //MIDI.on([144]).log();
-MIDI.on({ channel: 1, message: /^note|^pitch/ }).normalise().log();
-MIDI.on({ message: /^note|^pitch/ }).log();
+//MIDI.on({ channel: 1, message: /^note|^pitch/ }).normalise().log();
+//MIDI.on({ message: /^note|^pitch/ }).log();
 
-console.log('TRIGGER NOTEON');
-MIDI.trigger([144,127,80]);
-console.log('TRIGGER NOTEOFF');
-MIDI.trigger([128,127,64]);
-console.log('TRIGGER NOTEON');
-MIDI.trigger([150,127,64]);
+var s0 = MIDI.on({ message: /^note|^pitch/ }).log().map(Fn.identity).slice(2,6);
+
+var s1 = s0.head().map(function(a) { a.push('HEAD'); return a; }).log();
+
+MIDI.trigger([144,127,0]);
+MIDI.trigger([144,127,1]);
+MIDI.trigger([144,127,2]);
+MIDI.trigger([144,127,3]);
+
+var s2 = s0.tail().map(function(a) { a.push('TAIL'); return a; }).log();
+
+MIDI.trigger([144,127,4]);
+MIDI.trigger([144,127,5]);
+MIDI.trigger([144,127,6]);
+MIDI.trigger([150,127,7]);
+MIDI.trigger([150,127,8]);
+
+var s3 = s0.tail().map(function(a) { a.push('AFTER'); return a; }).log();
+
+MIDI.trigger([150,127,9]);
+MIDI.trigger([150,127,10]);
+MIDI.trigger([150,127,11]);
 console.log('------------');
 	</script>
 </body>

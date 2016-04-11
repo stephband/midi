@@ -180,7 +180,7 @@
 
 		// Create and return a new MIDI stream
 		return new MIDIStream(function(push) {
-			source.subscribe(push);
+			return source.subscribe(push);
 		});
 	};
 
