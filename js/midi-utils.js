@@ -35,9 +35,7 @@
 			var type = MIDI.toType(data);
 			var time = (receivedTime || 0) + (timeOffset || 0);
 
-			return converters[type] ?
-				converters[type](data, time) :
-				[time, type, data[1], data[2] / 127] ;
+			return (converters[type] || converters['default'])(data, time, type) ;
 		};
 	})({
 		pitch: function(data, time) {
@@ -49,11 +47,15 @@
 		},
 
 		channeltouch: function(data, time) {
-			return [time, 'aftertouch', 'all', data[1] / 127];
+			return [time, 'touch', 'all', data[1] / 127];
 		},
 
 		polytouch: function(data, time) {
-			return [time, 'aftertouch', data[1], data[2] / 127];
+			return [time, 'touch', data[1], data[2] / 127];
+		},
+
+		default: function(data, time, type) {
+			return [time, type, data[1], data[2] / 127] ;
 		}
 	});
 
@@ -62,7 +64,7 @@
 	}
 
 	function round(n, d) {
-		var factor = Math.pow(10, d); 
+		var factor = Math.pow(10, d);
 		return Math.round(n * factor) / factor;
 	}
 
@@ -132,7 +134,7 @@
 
 	function noteToNumber(str) {
 		var r = rnotename.exec(normaliseNoteName(str));
-		return (parseInt(r[2]) + 1) * 12 + noteNumbers[r[1]];
+		return (parseInt(r[2], 10) + 1) * 12 + noteNumbers[r[1]];
 	}
 
 	function numberToNote(n) {

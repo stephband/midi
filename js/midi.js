@@ -3,8 +3,7 @@
 
 	console.log('MIDI 0.6.2');
 	console.log('http://github.com/soundio/midi');
-	console.log('MIDI events hub and helper library');
-	console.log('——————————————————————————————————');
+	//console.log('MIDI events hub and helper library');
 })(this);
 
 (function(window) {
@@ -12,10 +11,11 @@
 
 	var debug = true;
 
-	var assign = Object.assign;
-	var Fn = window.Fn;
-	var Stream = Fn.Stream;
 	var MIDI = window.MIDI = {};
+
+	var assign = Object.assign;
+
+	var slice  = Function.prototype.call.bind(Array.prototype.slice);
 
 	var rtype = /^\[object\s([A-Za-z]+)/;
 
@@ -27,11 +27,7 @@
 
 	var outputs = [];
 
-
-	// Utility functions
-
-	var noop  = Fn.noop;
-	var slice = Fn.slice;
+	function noop() {}
 
 	function typeOf(object) {
 		var type = typeof object;
@@ -41,8 +37,235 @@
 			type ;
 	}
 
+	function extend(obj) {
+		var i = 0,
+		    length = arguments.length,
+		    obj2, key;
+
+		while (++i < length) {
+			obj2 = arguments[i];
+
+			for (key in obj2) {
+				if (obj2.hasOwnProperty(key)) {
+					obj[key] = obj2[key];
+				}
+			}
+		}
+
+		return obj;
+	}
+
+	function clear(obj) {
+		var key;
+		for (key in obj) { delete obj[key]; }
+	}
+
+	function getListeners(object) {
+		if (!object.listeners) {
+			Object.defineProperty(object, 'listeners', {
+				value: {}
+			});
+		}
+
+		return object.listeners;
+	}
 
 	// Deep get and set for getting and setting nested objects
+
+	function get(object, property) {
+		if (arguments.length < 2) {
+			return object;
+		}
+
+		if (!object[property]) {
+			return;
+		}
+
+		var args = slice(arguments, 1);
+
+		args[0] = object[property] ;
+		return get.apply(this, args);
+	}
+
+	function set(object, property, value) {
+		if (arguments.length < 4) {
+			object[property] = value;
+			return value;
+		}
+
+		var args = slice(arguments, 1);
+
+		args[0] = object[property] === undefined ? (object[property] = {}) : object[property] ;
+		return set.apply(this, args);
+	}
+
+	function remove(list, fn) {
+		var n = list.length;
+
+		while (n--) {
+			if (list[n][0] === fn) {
+				list.splice(n, 1);
+			}
+		}
+	}
+
+	function triggerList(list, e) {
+		var l = list.length;
+		var n = -1;
+		var fn, args;
+
+		list = list.slice();
+
+		while (++n < l) {
+			fn = list[n][0];
+			args = list[n][1];
+			args[0] = e.data;
+			args[1] = e.receivedTime;
+			args[2] = e.target;
+			fn.apply(MIDI, args);
+		}
+	}
+
+	function triggerTree(object, array, n, e) {
+		var prop = array[n];
+		var obj = object[prop];
+
+		if (obj) {
+			++n;
+
+			if (n < array.length) {
+				triggerTree(obj, array, n, e);
+			}
+			else if (obj.length) {
+				triggerList(obj, e);
+			}
+		}
+
+		if (object.all) {
+			triggerList(object.all, e);
+		}
+	}
+
+	function trigger(object, e) {
+		triggerTree(getListeners(object), e.data, 0, e);
+	}
+
+	function createData(channel, message, data1, data2) {
+		var number = MIDI.typeToNumber(channel, message);
+		var data = typeof data1 === 'string' ?
+		    	MIDI.noteToNumber(data1) :
+		    	data1 ;
+
+		return data1 ? data2 ? [number, data, data2] : [number, data] : [number] ;
+	}
+
+	function createDatas(channel, type, data1, data2) {
+		var types = MIDI.types;
+		var datas = [];
+		var regexp, n;
+
+		if (!type) {
+			n = types.length;
+			while (n--) {
+				type = types[n];
+				datas.push.apply(datas, createDatas(channel, type, data1, data2));
+			}
+			return datas;
+		}
+
+		if (typeOf(type) === 'regexp') {
+			regexp = type;
+			n = types.length;
+			while (n--) {
+				type = types[n];
+				if (regexp.test(type)) {
+					datas.push.apply(datas, createDatas(channel, type, data1, data2));
+				}
+			}
+
+			return datas;
+		}
+
+		if (channel && channel !== 'all') {
+			datas.push(createData(channel, type, data1, data2));
+			return datas;
+		}
+
+		var ch = 16;
+		var array = createData(1, type, data1, data2);
+		var data;
+
+		while (ch--) {
+			data = array.slice();
+			data[0] += ch;
+			datas.push(data);
+		}
+
+		return datas;
+	}
+
+	function createQueries(query) {
+		var queries;
+
+		if (query.message === 'note') {
+			var noteons  = createDatas(query.channel, 'noteon', query.data1, query.data2);
+			var noteoffs = createDatas(query.channel, 'noteoff', query.data1, query.data2);
+
+			queries = noteons.concat(noteoffs);
+		}
+		else {
+			queries = createDatas(query.channel, query.message, query.data1, query.data2);
+		}
+
+		return queries;
+	}
+
+	function on(map, query, fn, args) {
+		var list = query.length === 0 ?
+		    	get(map, 'all') || set(map, 'all', []) :
+		    query.length === 1 ?
+		    	get(map, query[0], 'all') || set(map, query[0], 'all', []) :
+		    query.length === 2 ?
+		    	get(map, query[0], query[1], 'all') || set(map, query[0], query[1], 'all', []) :
+		    	get(map, query[0], query[1], query[2]) || set(map, query[0], query[1], query[2], []) ;
+
+		list.push([fn, args]);
+	}
+
+	function offTree(object, fn) {
+		var key;
+
+		// Remove the matching function from each array in object
+		for (key in object) {
+			if (object[key].length) {
+				remove(object[key], fn);
+			}
+			else {
+				offTree(object[key], fn);
+			}
+		}
+	}
+
+	function off(map, query, fn) {
+		var args = [map];
+
+		args.push.apply(args, query);
+
+		if (!fn) {
+			// Remove the object by setting it to undefined (undefined is
+			// implied here, we're not passing it to set() explicitly as the
+			// last value in args).
+			set.apply(this, args);
+			return;
+		}
+
+		var object = get.apply(this, args);
+		var key;
+
+		if (!object) { return; }
+
+		offTree(object, fn);
+	}
 
 	function send(port, data) {
 		if (port) {
@@ -50,141 +273,46 @@
 		}
 	}
 
-	MIDI.request = navigator.requestMIDIAccess ?
-		navigator.requestMIDIAccess() :
-		new Promise(function(accept, reject){
-			reject({
-				message: 'This browser does not support Web MIDI.'
-			});
-		}) ;
+	MIDI.trigger = function(data) {
+		var e = {
+		    	data: data,
+		    	receivedTime: +new Date()
+		    };
 
-	function MIDIStream() {
-		Stream.apply(this, arguments);
-	}
-
-	MIDIStream.prototype = assign(Object.create(Stream.prototype), {
-		normalise: function() {
-			var source = this;
-			return new MusicStream(function(push) {
-				source.subscribe(function(data, time) {
-					push(MIDI.normalise(data, time));
-				});
-			});
-		}
-	});
-
-	function MusicStream() {
-		Stream.apply(this, arguments);
-	}
-
-	MusicStream.prototype = assign(Object.create(Stream.prototype), {
-		midi: function() {
-			var source = this;
-			return new MIDIStream(function(push) {
-				source.subscribe(function(event) {
-					// Todo: push a MIDI version of this event
-					//push();
-				});
-			});
-		}
-	});
-
-	MIDI.trigger = noop;
-
-	var inputStream = new Stream(function setup(push) {
-		// Enable triggering of input stream for testing.
-		MIDI.trigger = function(data) {
-			push(data, +new Date(), undefined);
-		};
-
-		// Setup ports to push to input stream.
-		MIDI.request
-		.then(function(midi) {
-			if (debug) { console.log('MIDI: pushing MIDI input ports to stream.'); }
-			if (debug) { window.midi = midi; }
-			setupPorts(midi, function(e) {
-				push(e.data, e.receivedTime, e.target);
-			});
-		});
-
-		// inputStream cannot be torn down.
-		return noop;
-	});
-
-	var cache = {};
-
-	function testValue(test, value) {
-		return test === undefined ? true :
-			// test is a regexp
-			test.test ? test.test(value) :
-			// test is a function
-			test.apply ? test(value) :
-			// test is a value
-			test === value ;
-	}
-
-	function byQuery(query) {
-		return query[0] === undefined ?
-			function byObjectQuery(data) {
-				return testValue(query.channel, MIDI.toChannel(data)) &&
-					testValue(query.message, MIDI.toType(data)) &&
-					testValue(query[1], data[1]) &&
-					testValue(query[2], data[2]) ;
-			} :
-			function byArrayQuery(data) {
-				console.log(query, data);
-				return data[0] === query[0] ?
-					query[1] === undefined ?
-						true :
-						data[1] === query[1] ?
-							query[2] === undefined ?
-								true :
-								data[2] === query[2] :
-							false :
-					false ;
-			};
-	}
-
-	function getCachePath(query) {
-		var channel = query[0] === undefined ? query.channel : MIDI.toChannel(query) ;
-		var message = query[0] === undefined ? query.message : MIDI.toType(query) ;
-		return channel + '.' + message + '.' + query[1] + '.' + query[2] ;
-	}
+		trigger(this, e);
+	};
 
 	MIDI.on = function(query, fn) {
-		var path, source;
+		var type = typeOf(query);
+		var map = getListeners(this);
+		var args = [];
+		var queries;
 
-		// If one fn was passed in call fn from input stream.
-		if (typeof query === 'function') {
-			inputStream.subscribe(query);
+		if (type === 'object') {
+			queries = createQueries(query);
+			args.length = 1;
+			args.push.apply(args, arguments);
+
+			while (query = queries.pop()) {
+				on(map, query, fn, args);
+			}
+
 			return this;
 		}
 
-		// If query was passed in build and cache filtered stream from query.
-		if (query) {
-			path = getCachePath(query);
-			source = Fn.get(path, cache);
-
-			if (!source) {
-				source = inputStream.filter(byQuery(query));
-				Fn.set(path, source, cache);
-			}
+		if (type === 'function') {
+			fn = query;
+			query = empty;
+			args.length = 2;
 		}
 		else {
-			source = inputStream;
+			args.length = 1;
 		}
 
-		// If a fn was passed as last param call fn from source stream.
-		if (fn) {
-			// Call function from source stream
-			source.subscribe(fn);
-			return this;
-		}
+		args.push.apply(args, arguments);
 
-		// Create and return a new MIDI stream
-		return new MIDIStream(function(push) {
-			return source.subscribe(push);
-		});
+		on(map, query, fn, args);
+		return this;
 	};
 
 	MIDI.once = function(query, fn) {
@@ -230,14 +358,22 @@
 		return this;
 	};
 
-	// These methods are overidden when output ports become available.
-	MIDI.send = noop;
-	MIDI.output = noop;
+
+	// Set up MIDI.request as a promise
+
+	MIDI.request = navigator.requestMIDIAccess ?
+		navigator.requestMIDIAccess() :
+		Promise.reject("This browser does not support Web MIDI.") ;
 
 
 	// Set up MIDI to listen to browser MIDI inputs
 
-	function listen(input, push) {
+	// These methods are overidden when output ports become available.
+
+	MIDI.send = noop;
+	MIDI.output = noop;
+
+	function listen(input) {
 		// It's suggested here that we need to keep a reference to midi inputs
 		// hanging around to avoid garbage collection:
 		// https://code.google.com/p/chromium/issues/detail?id=163795#c123
@@ -250,10 +386,12 @@
 		//	trigger(MIDI, e);
 		//});
 
-		input.onmidimessage = push;
+		input.onmidimessage = function(e) {
+			trigger(MIDI, e);
+		};
 	}
 
-	function updateInputs(midi, push) {
+	function updateInputs(midi) {
 		// As of ~August 2014, inputs and outputs are iterables.
 
 		// This is supposed to work, but it doesn't
@@ -267,8 +405,8 @@
 		for (arr of midi.inputs) {
 			var id = arr[0];
 			var input = arr[1];
-			//console.log('MIDI: Input detected:', input.name, input.id);
-			listen(input, push);
+			console.log('MIDI: Input detected:', input.name, input.id);
+			listen(input);
 		}
 	}
 
@@ -314,7 +452,7 @@
 		for (arr of midi.outputs) {
 			var id = arr[0];
 			var output = arr[1];
-			//console.log('MIDI: Output detected:', output.name, output.id);
+			console.log('MIDI: Output detected:', output.name, output.id);
 			// Store outputs
 			MIDI.outputs.push(output);
 		}
@@ -323,9 +461,9 @@
 		MIDI.send = createSendFn(midi.outputs, outputs);
 	}
 
-	function setupPorts(midi, push) {
+	function setupPorts(midi) {
 		function connect(e) {
-			updateInputs(midi, push);
+			updateInputs(midi);
 			updateOutputs(midi);
 		}
 
@@ -334,4 +472,20 @@
 		midi.onstatechange = connect;
 		connect();
 	}
+
+	MIDI.request
+	.then(function(midi) {
+		if (debug) { console.groupCollapsed('MIDI'); }
+		if (debug) { window.midi = midi; }
+		setupPorts(midi);
+		if (debug) { console.groupEnd(); }
+	})
+	.catch(function(error) {
+		console.warn('MIDI: Not supported in this browser. Error: ' + error.message);
+	});
 })(window);
+
+(function(window) {
+	if (!window.console || !window.console.log) { return; }
+	console.log('______________________________');
+})(this);
