@@ -11,9 +11,8 @@
 
 	var debug = true;
 
-	var MIDI = window.MIDI = {};
-
 	var assign = Object.assign;
+	var Fn     = window.Fn;
 
 	var slice  = Function.prototype.call.bind(Array.prototype.slice);
 
@@ -27,32 +26,18 @@
 
 	var outputs = [];
 
-	function noop() {}
+
+	// Utilities
+
+	var noop      = Fn.noop;
+	var isDefined = Fn.isDefined;
 
 	function typeOf(object) {
 		var type = typeof object;
-	
+
 		return type === 'object' ?
 			rtype.exec(Object.prototype.toString.apply(object))[1].toLowerCase() :
 			type ;
-	}
-
-	function extend(obj) {
-		var i = 0,
-		    length = arguments.length,
-		    obj2, key;
-	
-		while (++i < length) {
-			obj2 = arguments[i];
-	
-			for (key in obj2) {
-				if (obj2.hasOwnProperty(key)) {
-					obj[key] = obj2[key];
-				}
-			}
-		}
-	
-		return obj;
 	}
 
 	function clear(obj) {
@@ -69,6 +54,7 @@
 
 		return object.listeners;
 	}
+
 
 	// Deep get and set for getting and setting nested objects
 
@@ -101,13 +87,37 @@
 
 	function remove(list, fn) {
 		var n = list.length;
-		
+
 		while (n--) {
 			if (list[n][0] === fn) {
 				list.splice(n, 1);
 			}
 		}
 	}
+
+
+	function MIDI(query) {
+		if (!MIDI.prototype.isPrototypeOf(this)) { return new MIDI(query); }
+
+		Fn.Stream.call(this, function setup(notify) {
+			var buffer = [];
+
+			function fn(message, time) {
+				buffer.push(arguments);
+				notify('push');
+			}
+
+			MIDI.on(query, fn);
+
+			return {
+				shift: function midi() {
+					return buffer.shift();
+				}
+			};
+		});
+	}
+
+	//MIDI.prototype = Object.create(Fn.Stream.prototype);
 
 	function triggerList(list, e) {
 		var l = list.length;
@@ -234,7 +244,7 @@
 
 	function offTree(object, fn) {
 		var key;
-		
+
 		// Remove the matching function from each array in object
 		for (key in object) {
 			if (object[key].length) {
@@ -273,105 +283,105 @@
 		}
 	}
 
-	MIDI.trigger = function(data) {
-		var e = {
-		    	data: data,
-		    	receivedTime: +new Date()
-		    };
+	assign(MIDI, {
+		trigger: function(data) {
+			var e = {
+			    	data: data,
+			    	receivedTime: +new Date()
+			    };
 
-		trigger(this, e);
-	};
+			trigger(this, e);
+		},
 
-	MIDI.on = function(query, fn) {
-		var type = typeOf(query);
-		var map = getListeners(this);
-		var args = [];
-		var queries;
+		on: function(query, fn) {
+			var type = typeof query;
+			var map = getListeners(this);
+			var args = [];
+			var queries;
 
-		if (type === 'object') {
-			queries = createQueries(query);
-			args.length = 1;
+			if (type === 'object' && isDefined(query.length)) {
+				queries = createQueries(query);
+				args.length = 1;
+				args.push.apply(args, arguments);
+
+				while (query = queries.pop()) {
+					on(map, query, fn, args);
+				}
+
+				return this;
+			}
+
+			if (type === 'function') {
+				fn = query;
+				query = empty;
+				args.length = 2;
+			}
+			else {
+				args.length = 1;
+			}
+
 			args.push.apply(args, arguments);
 
-			while (query = queries.pop()) {
-				on(map, query, fn, args);
+			on(map, query, fn, args);
+			return this;
+		},
+
+		once: function(query, fn) {
+			var type = typeOf(query);
+
+			if (type === 'function') {
+				fn = query;
+				query = empty;
 			}
 
-			return this;
-		}
+			return this
+			.on(query, fn)
+			.on(query, function handleOnce() {
+				this.off(query, fn);
+				this.off(handleOnce);
+			});
+		},
 
-		if (type === 'function') {
-			fn = query;
-			query = empty;
-			args.length = 2;
-		}
-		else {
-			args.length = 1;
-		}
+		off: function(query, fn) {
+			var type = typeOf(query);
+			var map = getListeners(this);
+			var queries;
 
-		args.push.apply(args, arguments);
+			if (type === 'object') {
+				queries = createQueries(query);
 
-		on(map, query, fn, args);
-		return this;
-	};
+				while (query = queries.pop()) {
+					off(map, query, fn);
+				}
 
-	MIDI.once = function(query, fn) {
-		var type = typeOf(query);
-
-		if (type === 'function') {
-			fn = query;
-			query = empty;
-		}
-
-		return this
-		.on(query, fn)
-		.on(query, function handleOnce() {
-			this.off(query, fn);
-			this.off(handleOnce);
-		});
-	};
-
-	MIDI.off = function(query, fn) {
-		var type = typeOf(query);
-		var map = getListeners(this);
-		var queries;
-
-		if (type === 'object') {
-			queries = createQueries(query);
-
-			while (query = queries.pop()) {
-				off(map, query, fn);
+				return this;
 			}
 
+			if (!fn && type === 'function') {
+				fn = query;
+				query = empty;
+			}
+			else if (!query) {
+				query = empty;
+			}
+
+			off(map, query, fn);
 			return this;
-		}
+		},
 
-		if (!fn && type === 'function') {
-			fn = query;
-			query = empty;
-		}
-		else if (!query) {
-			query = empty;
-		}
+		// Set up MIDI.request as a promise
 
-		off(map, query, fn);
-		return this;
-	};
+		request: navigator.requestMIDIAccess ?
+			navigator.requestMIDIAccess() :
+			Promise.reject("This browser does not support Web MIDI.") ,
 
 
-	// Set up MIDI.request as a promise
+		// Set up MIDI to listen to browser MIDI inputs
+		// These methods are overidden when output ports become available.
 
-	MIDI.request = navigator.requestMIDIAccess ?
-		navigator.requestMIDIAccess() :
-		Promise.reject("This browser does not support Web MIDI.") ;
-
-
-	// Set up MIDI to listen to browser MIDI inputs
-
-	// These methods are overidden when output ports become available.
-
-	MIDI.send = noop;
-	MIDI.output = noop;
+		send: noop,
+		output: noop
+	});
 
 	function listen(input) {
 		// It's suggested here that we need to keep a reference to midi inputs
@@ -483,6 +493,8 @@
 	.catch(function(error) {
 		console.warn('MIDI: Not supported in this browser. Error: ' + error.message);
 	});
+
+	window.MIDI = MIDI;
 })(window);
 
 (function(window) {
