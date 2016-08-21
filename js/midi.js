@@ -100,7 +100,7 @@
 		// Setup ports to push to input stream.
 		MIDI.request
 		.then(function(midi) {
-			if (debug) { console.log('MIDI: pushing MIDI input to input stream.'); }
+			if (debug) { console.log('MIDI: pushing MIDI input ports to stream.'); }
 			if (debug) { window.midi = midi; }
 			setupPorts(midi, function(e) {
 				push(e.data, e.receivedTime, e.target);

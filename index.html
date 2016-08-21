@@ -61,21 +61,29 @@
 //MIDI.on({ channel: 1, message: /^note|^pitch/ }).normalise().log();
 //MIDI.on({ message: /^note|^pitch/ }).log();
 
-var s0 = MIDI.on({ message: /^note|^pitch/ }).map(Fn.identity).slice(2,6);
+var s0 = MIDI
+.on({ message: /^note|^pitch/ })
+.slice(2,6);
 
-var s1 = s0.head().map(function(a) { a.push('HEAD'); return a; }).log();
+var s1 = s0
+.head()
+.map(function(a) { a.push('HEAD'); return a; })
+.log();
 
 MIDI.trigger([144,127,0]);
 MIDI.trigger([144,127,1]);
 MIDI.trigger([144,127,2]);
 
-var s2 = s0.tail().map(function(a) { a.push('TAIL'); return a; }).log();
+var s2 = s0
+.tail()
+.map(function(a) { a.push('TAIL'); return a; })
+.log();
 
-MIDI.trigger([144,127,3]);
+MIDI.trigger([149,127,3]);
 MIDI.trigger([144,127,4]);
 MIDI.trigger([144,127,5]);
 MIDI.trigger([144,127,6]);
-MIDI.trigger([150,127,7]);
+MIDI.trigger([190,127,7]);
 MIDI.trigger([150,127,8]);
 
 var s3 = s0.tail().map(function(a) { a.push('AFTER'); return a; }).log();
