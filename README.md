@@ -55,22 +55,24 @@ Registers a handler `fn` for incoming MIDI events that match `query`. See the
 Removes an event handler `fn` from MIDI events matching the query. Where
 `fn` is not given, removes all handlers from events matching the query.
 
-//### .normalise(message, time)
-//
-//Takes a MIDI message array and returns a
-//<a href="https://github.com/sound-io/music-json-spec">Music JSON</a> event
-//array. Music JSON events have the form:
-//
-//    [timestamp, type, data ... ]
-//
-//Note velocity, controller data and aftertouch data are normalised as floats in
-//the range 0-1, while pitch bend data is normalised to floats representing
-//semitones. For example:
-//
-//    MIDI.normalise([145,80,20], 1);    // [1, 'noteon', 80, 0.15748032]
-//    MIDI.normalise([180,1,127], 2);    // [2, 'control', 1, 1]
-//    MIDI.normalise([231,62,119], 3);   // [3, "pitch", 1.73409840]
-//    MIDI.normalise([168,62,119], 4);   // [4, "aftertouch", 62, 0.93700787]
+<!--
+### .normalise(message, time)
+
+Takes a MIDI message array and returns a
+<a href="https://github.com/sound-io/music-json-spec">Music JSON</a> event
+array. Music JSON events have the form:
+
+    [timestamp, type, data ... ]
+
+Note velocity, controller data and aftertouch data are normalised as floats in
+the range 0-1, while pitch bend data is normalised to floats representing
+semitones. For example:
+
+    MIDI.normalise([145,80,20], 1);    // [1, 'noteon', 80, 0.15748032]
+    MIDI.normalise([180,1,127], 2);    // [2, 'control', 1, 1]
+    MIDI.normalise([231,62,119], 3);   // [3, "pitch", 1.73409840]
+    MIDI.normalise([168,62,119], 4);   // [4, "aftertouch", 62, 0.93700787]
+-->
 
 ### .normaliseEvent(e)
 
