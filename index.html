@@ -43,14 +43,18 @@
 		normalises the messages (to Music JSON) and logs the results.
 	</p>
 
-	<!--script src="js/midi.js"></script-->
-	<script src="modules/fn/js/fn.js"></script>
-	<script src="modules/fn/js/stream.js"></script>
-	<script src="modules/fn/js/dom.js"></script>
+	<script src="../../fn/js/fn.js"></script>
+	<script src="../../fn/js/stream.js"></script>
 	<script src="js/midi.js"></script>
 	<script src="js/midi-utils.js"></script>
 
-	<script class="block">
+	<script src="../../test/test.js"></script>
+	<!--script src="test/test-midi-lib.js"></script-->
+	<script src="test/test-midi.js"></script>
+
+	<script src="../dom/js/dom.js"></script>
+
+	<!--script class="block">
 //MIDI.on({ message: /^note|^pitch/ }, function(message, time) {
 //    var event = MIDI.normalise(message, time);
 //    console.log(event);
@@ -92,6 +96,6 @@ MIDI.trigger([150,127,9]);
 MIDI.trigger([150,127,10]);
 MIDI.trigger([150,127,11]);
 console.log('------------');
-	</script>
+	</script-->
 </body>
 </html>

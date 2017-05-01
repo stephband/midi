@@ -1,9 +1,6 @@
 (function(window) {
 	if (!window.console || !window.console.log) { return; }
-
-	console.log('MIDI 0.6.2');
-	console.log('http://github.com/soundio/midi');
-	//console.log('MIDI events hub and helper library');
+	console.log('MIDI 0.6.2  - http://github.com/soundio/midi');
 })(this);
 
 (function(window) {
@@ -11,69 +8,58 @@
 
 	var debug = true;
 
-	var assign = Object.assign;
-	var Fn     = window.Fn;
+	var Fn        = window.Fn;
+	var Stream    = window.Stream;
+
+	var assign    = Object.assign;
+	var curry     = Fn.curry;
+	var each      = Fn.each;
+	var get       = Fn.get;
+	var isDefined = Fn.isDefined;
+	var noop      = Fn.noop;
+	var remove    = Fn.remove;
+	var rest      = Fn.rest;
+	var set       = Fn.set;
+	var toClass   = Fn.toClass;
+
+	var nothing = Fn.nothing;
 
 	var slice  = Function.prototype.call.bind(Array.prototype.slice);
 
 	var rtype = /^\[object\s([A-Za-z]+)/;
 
-	var empty = [];
-
-	var map = { all: [] };
-
 	var store = [];
 
 	var outputs = [];
 
+	var status = {
+		noteoff:      128,
+		noteon:       144,
+		polytouch:    160,
+		control:      176,
+		pc:           192,
+		channeltouch: 208,
+		pitch:        224,
+	};
 
-	// Utilities
-
-	var noop      = Fn.noop;
-	var isDefined = Fn.isDefined;
-
-	function typeOf(object) {
-		var type = typeof object;
-
-		return type === 'object' ?
-			rtype.exec(Object.prototype.toString.apply(object))[1].toLowerCase() :
-			type ;
-	}
+	var call = curry(function call(value, fn) { fn(value); });
 
 	function clear(obj) {
 		var key;
 		for (key in obj) { delete obj[key]; }
 	}
 
-	function getListeners(object) {
-		if (!object.listeners) {
-			Object.defineProperty(object, 'listeners', {
-				value: {}
-			});
-		}
-
-		return object.listeners;
-	}
-
-
-	// Deep get and set for getting and setting nested objects
-
-	function get(object, property) {
-		if (arguments.length < 2) {
-			return object;
-		}
-
-		if (!object[property]) {
-			return;
-		}
+	function getRoute(object, property) {
+		if (arguments.length < 2) { return object; }
+		if (!object[property]) { return; }
 
 		var args = slice(arguments, 1);
 
 		args[0] = object[property] ;
-		return get.apply(this, args);
+		return getRoute.apply(this, args);
 	}
 
-	function set(object, property, value) {
+	function setRoute(object, property, value) {
 		if (arguments.length < 4) {
 			object[property] = value;
 			return value;
@@ -82,164 +68,96 @@
 		var args = slice(arguments, 1);
 
 		args[0] = object[property] === undefined ? (object[property] = {}) : object[property] ;
-		return set.apply(this, args);
+		return setRoute.apply(this, args);
 	}
-
-	function remove(list, fn) {
-		var n = list.length;
-
-		while (n--) {
-			if (list[n][0] === fn) {
-				list.splice(n, 1);
-			}
-		}
-	}
-
 
 	function MIDI(query) {
-		if (!MIDI.prototype.isPrototypeOf(this)) { return new MIDI(query); }
+		// Support constructor without `new` keyword
+		if (!MIDI.prototype.isPrototypeOf(this)) {
+			return new MIDI(query);
+		}
 
-		Fn.Stream.call(this, function setup(notify) {
+		Stream.call(this, function setup(notify, stop) {
 			var buffer = [];
 
-			function fn(message, time) {
-				buffer.push(arguments);
+			function push() {
+				buffer.push.apply(buffer, arguments);
 				notify('push');
 			}
 
-			MIDI.on(query, fn);
+			on(query, push);
 
 			return {
+				push: push,
+
 				shift: function midi() {
 					return buffer.shift();
+				},
+
+				stop: function() {
+					off(query, push);
+					stop(buffer.length);
 				}
 			};
 		});
 	}
 
-	//MIDI.prototype = Object.create(Fn.Stream.prototype);
+	MIDI.prototype = Object.create(Stream.prototype);
 
-	function triggerList(list, e) {
-		var l = list.length;
-		var n = -1;
-		var fn, args;
 
-		list = list.slice();
 
-		while (++n < l) {
-			fn = list[n][0];
-			args = list[n][1];
-			args[0] = e.data;
-			args[1] = e.receivedTime;
-			args[2] = e.target;
-			fn.apply(MIDI, args);
+	// Routing tree for routing messages
+
+	var tree = { all: [] };
+
+	function triggerTree(tree, e, i) {
+		if (tree.all) {
+			each(call(e), tree.all);
 		}
+
+		var prop   = e.data[i];
+		var object = tree[prop];
+
+		if (!object) { return; }
+
+		// The tree is 3 deep
+		return i < 2 ?
+			triggerTree(object, e, i + 1) :
+			each(call(e), object) ;
 	}
 
-	function triggerTree(object, array, n, e) {
-		var prop = array[n];
-		var obj = object[prop];
+	function trigger(e) {
+		triggerTree(tree, e, 0);
+	}
 
-		if (obj) {
-			++n;
+	function onTree(tree, query, fn) {
+		var list = query.length === 0 ?
+			getRoute(tree, 'all') || setRoute(tree, 'all', []) :
+		query.length === 1 ?
+			getRoute(tree, query[0], 'all') || setRoute(tree, query[0], 'all', []) :
+		query.length === 2 ?
+			getRoute(tree, query[0], query[1], 'all') || setRoute(tree, query[0], query[1], 'all', []) :
+			getRoute(tree, query[0], query[1], query[2]) || setRoute(tree, query[0], query[1], query[2], []) ;
 
-			if (n < array.length) {
-				triggerTree(obj, array, n, e);
+		list.push(fn);
+	}
+
+	function on(query, fn) {
+		if (!query) {
+			onTree(tree, nothing, fn);
+		}
+		else if (typeof query[1] === 'string') {
+			if (query[1] === 'note') {
+				onTree(tree, [typeToNumber(query[0], 'noteon')].concat(rest(2, query)), fn);
+				onTree(tree, [typeToNumber(query[0], 'noteoff')].concat(rest(2, query)), fn);
 			}
-			else if (obj.length) {
-				triggerList(obj, e);
+			else {
+				onTree(tree, [typeToNumber(query[0], query[1])].concat(rest(2, query)), fn);
 			}
-		}
-
-		if (object.all) {
-			triggerList(object.all, e);
-		}
-	}
-
-	function trigger(object, e) {
-		triggerTree(getListeners(object), e.data, 0, e);
-	}
-
-	function createData(channel, message, data1, data2) {
-		var number = MIDI.typeToNumber(channel, message);
-		var data = typeof data1 === 'string' ?
-		    	MIDI.noteToNumber(data1) :
-		    	data1 ;
-
-		return data1 ? data2 ? [number, data, data2] : [number, data] : [number] ;
-	}
-
-	function createDatas(channel, type, data1, data2) {
-		var types = MIDI.types;
-		var datas = [];
-		var regexp, n;
-
-		if (!type) {
-			n = types.length;
-			while (n--) {
-				type = types[n];
-				datas.push.apply(datas, createDatas(channel, type, data1, data2));
-			}
-			return datas;
-		}
-
-		if (typeOf(type) === 'regexp') {
-			regexp = type;
-			n = types.length;
-			while (n--) {
-				type = types[n];
-				if (regexp.test(type)) {
-					datas.push.apply(datas, createDatas(channel, type, data1, data2));
-				}
-			}
-
-			return datas;
-		}
-
-		if (channel && channel !== 'all') {
-			datas.push(createData(channel, type, data1, data2));
-			return datas;
-		}
-
-		var ch = 16;
-		var array = createData(1, type, data1, data2);
-		var data;
-
-		while (ch--) {
-			data = array.slice();
-			data[0] += ch;
-			datas.push(data);
-		}
-
-		return datas;
-	}
-
-	function createQueries(query) {
-		var queries;
-
-		if (query.message === 'note') {
-			var noteons  = createDatas(query.channel, 'noteon', query.data1, query.data2);
-			var noteoffs = createDatas(query.channel, 'noteoff', query.data1, query.data2);
-
-			queries = noteons.concat(noteoffs);
 		}
 		else {
-			queries = createDatas(query.channel, query.message, query.data1, query.data2);
+			onTree(tree, query, fn);
 		}
-
-		return queries;
-	}
-
-	function on(map, query, fn, args) {
-		var list = query.length === 0 ?
-		    	get(map, 'all') || set(map, 'all', []) :
-		    query.length === 1 ?
-		    	get(map, query[0], 'all') || set(map, query[0], 'all', []) :
-		    query.length === 2 ?
-		    	get(map, query[0], query[1], 'all') || set(map, query[0], query[1], 'all', []) :
-		    	get(map, query[0], query[1], query[2]) || set(map, query[0], query[1], query[2], []) ;
-
-		list.push([fn, args]);
 	}
 
 	function offTree(object, fn) {
@@ -256,8 +174,8 @@
 		}
 	}
 
-	function off(map, query, fn) {
-		var args = [map];
+	function off(query, fn) {
+		var args = [tree];
 
 		args.push.apply(args, query);
 
@@ -284,90 +202,41 @@
 	}
 
 	assign(MIDI, {
-		trigger: function(data) {
-			var e = {
-			    	data: data,
-			    	receivedTime: +new Date()
-			    };
-
-			trigger(this, e);
-		},
-
-		on: function(query, fn) {
-			var type = typeof query;
-			var map = getListeners(this);
-			var args = [];
-			var queries;
-
-			if (type === 'object' && isDefined(query.length)) {
-				queries = createQueries(query);
-				args.length = 1;
-				args.push.apply(args, arguments);
-
-				while (query = queries.pop()) {
-					on(map, query, fn, args);
+		Input: function(selector) {
+			return Stream(function setup(notify, stop) {
+				var buffer = [];
+			
+				function push() {
+					buffer.push.apply(buffer, arguments);
+					notify('push');
 				}
-
-				return this;
-			}
-
-			if (type === 'function') {
-				fn = query;
-				query = empty;
-				args.length = 2;
-			}
-			else {
-				args.length = 1;
-			}
-
-			args.push.apply(args, arguments);
-
-			on(map, query, fn, args);
-			return this;
-		},
-
-		once: function(query, fn) {
-			var type = typeOf(query);
-
-			if (type === 'function') {
-				fn = query;
-				query = empty;
-			}
-
-			return this
-			.on(query, fn)
-			.on(query, function handleOnce() {
-				this.off(query, fn);
-				this.off(handleOnce);
+			
+				on(selector, push);
+			
+				return {
+					push: push,
+			
+					shift: function midi() {
+						return buffer.shift();
+					},
+			
+					stop: function() {
+						off(selector, fn);
+						stop(buffer.length);
+					}
+				};
 			});
 		},
 
-		off: function(query, fn) {
-			var type = typeOf(query);
-			var map = getListeners(this);
-			var queries;
-
-			if (type === 'object') {
-				queries = createQueries(query);
-
-				while (query = queries.pop()) {
-					off(map, query, fn);
-				}
-
-				return this;
-			}
-
-			if (!fn && type === 'function') {
-				fn = query;
-				query = empty;
-			}
-			else if (!query) {
-				query = empty;
-			}
-
-			off(map, query, fn);
-			return this;
+		trigger: function(message) {
+			triggerTree(tree, {
+				data: message,
+				receivedTime: +new Date()
+			}, 0);
 		},
+
+		on:  on,
+		off: off,
 
 		// Set up MIDI.request as a promise
 
@@ -396,9 +265,7 @@
 		//	trigger(MIDI, e);
 		//});
 
-		input.onmidimessage = function(e) {
-			trigger(MIDI, e);
-		};
+		input.onmidimessage = trigger;
 	}
 
 	function updateInputs(midi) {
@@ -420,7 +287,7 @@
 		}
 	}
 
-	function createSendFn(outputs, map) {
+	function createSendFn(outputs, tree) {
 		return function send(portName, data, time) {
 			var port = this.output(portName);
 
@@ -483,6 +350,14 @@
 		connect();
 	}
 
+
+
+	function typeToNumber(channel, type) {
+		return status[type] + (channel ? channel - 1 : 0 );
+	}
+
+
+
 	MIDI.request
 	.then(function(midi) {
 		if (debug) { console.groupCollapsed('MIDI'); }
@@ -496,8 +371,3 @@
 
 	window.MIDI = MIDI;
 })(window);
-
-(function(window) {
-	if (!window.console || !window.console.log) { return; }
-	console.log('______________________________');
-})(this);

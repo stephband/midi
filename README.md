@@ -1,126 +1,61 @@
 # MIDI
 
-MIDI is a hub for receiving, sending and filtering browser MIDI messages, and a
-library of functions for manipulating them.
+MIDI is a library for receiving, sending and manipulating browser MIDI messages.
 
-The MIDI library aims to make it easy to attach physical instruments and
-controllers to web apps. As of June 2015 Chrome has native MIDI support. Joy!
-No other browser yet do.
 
-## MIDI properties
+## MIDI()
 
-### .request
+Creates a stream of MIDI event objects:
 
-A promise. Where MIDI is supported, the library requests access to the browser's
-midi API as soon as it loads. <code>MIDI.request</code> is the promise returned
-by <code>navigator.requestMIDIAcess()</code>, or where MIDI is not supported,
-<code>MIDI.request</code> is a rejected promise.
+    var midi = MIDI();
 
-    MIDI.request
-    .then(function(midi) {
-        // Do something with midi object
-    })
-    .catch(function(error) {
-        // Alert the user they don't have MIDI
-    });
+The first parameter to the constructor can be a query that filters the events
+entering the stream. A query is either an array in the form of a MIDI message,
+(`[status, data1, data2]`), or an array where the first two members describe
+the status (`[channel, type, data1, data2]`). A shorter query of the same form
+provides a broader filter. Here are some examples.
 
-Note that using the MIDI library you don't really need to touch the midi object.
-MIDI functions are available before the promise is resolved. For example,
-calling <code>MIDI.on(query, fn)</code> before this time will bind to incoming
-MIDI events when <code>MIDI.request</code> is resolved.
+    MIDI([176, 7, 0])          // CH1, CC7, value 0
+    MIDI([1, 'control', 7, 0]) // CH1, CC7, value 0
+
+    MIDI([144, 60])            // CH1, NOTEON, C3
+    MIDI([1, 'noteon', 60])    // CH1, NOTEON, C3
+    MIDI([1, 'noteon', 'C3'])  // CH1, NOTEON, C3
+
+    MIDI([144])                // CH1, NOTEON, all notes
+    MIDI([1, 'noteon'])        // CH1, NOTEON, all notes
+
+A MIDI stream can capture both 'noteon' and 'noteoff' messages with the
+shorthand type `'note'`:
+
+    MIDI([1, 'note'])          // Channel 1, NOTEON and NOTEOFF, all notes
+
+A MIDI stream inherits map, filter and consumption methods from
+<a href="//github.com/stephband/Fn">`Stream`</a>.
+
+    MIDI([1, 'noteon']).map(mapFn).each(outFn);
+
+A stream can be stopped with the `stop()` method.
+
+	var midi = MIDI([1, 'noteon']).map(mapFn).each(outFn);
+
+	// Sometime later...
+	midi.stop();
+
 
 ## MIDI functions
-MIDI
-### .on(fn)
 
-Registers a handler <code>fn</code> for all incoming MIDI events.
+### `on(query, fn)`
 
-    MIDI.on(function(data, time, port) {
-        // Called for all incoming MIDI events.
-    });
+Registers a handler `fn` for incoming MIDI events that match `query`. See the
+`MIDI()` constructor above for a description of queries.
 
-### .on(query, fn)
+### `off(query, fn)`
 
-Registers a handler <code>fn</code> for incoming MIDI events that match
-<code>query</code>. A query can be expressed as a data array:
+Removes an event handler `fn` from MIDI events matching the query. Where
+`fn` is not given, removes all handlers from events matching the query.
 
-    MIDI.on([145, 80], function(data, time, port) {
-        // Called for Channel 2, NoteOn A4 messages.
-    });
-
-    MIDI.on([180, 1, 0], function(data, time, port) {
-        // Called for Channel 5, Control Change 1 messages with value 0.
-    });
-
-A query can alternatively be expressed as an object:
-
-    MIDI.on({ channel: 1, message: 'control' }, function(data, time, port) {
-        // Called for all incoming MIDI Control Change
-        // messages on channel 1.
-    });
-
-    MIDI.on({ message: 'control', data1: 7 }, function(data, time, port) {
-        // Called for all incoming MIDI Control Change 7
-        // messages on all channels.
-    });
-
-Query objects can have one or more of the properties:
-
-    {
-        channel: // number 1–16
-        message: // string 'note', 'noteon', 'noteoff', 'control', 'pc', 'pitch', 'polytouch', 'channeltouch'
-                 // regexp, eg. /^note|^pitch/
-        data1:   // number 0-127
-                 // string note name, eg. 'C#3'
-        data2:   // number 0-127
-    }
-
-Note that in order to optimise the speed of processing incoming MIDI events,
-filter queries are pre-sorted at the point of calling <code>.on()</code> and a
-listener tree is constructed. Incoming events are simply matched against the
-tree with a couple of lookups (very fast). This avoids filtering every incoming
-event against all queries (potentially slow) – but it also means that queries
-are not dynamic. Changing the values in a query after it has been passed to
-<code>.on()</code> will not alter the MIDI events that trigger <code>fn</code>.
-
-### .on(query, fn, args ... )
-
-Function parameters passed into <code>.on()</code> following <code>fn</code> are
-passed to the handler as extra arguments. Use this to pass data to handlers:
-
-    function handler(data, time, port, data) {
-        var bing = data.bing;    // 'bong'
-    }
-    
-    MIDI.on([180, 1, 0], handler, { bing: 'bong' });
-
-### .once(query, fn)
-
-Calls a handler <code>fn</code> once, on the next incoming MIDI event to match
-<code>query</code>. <code>.once()</code> can be used to implement a MIDI learn
-function:
-
-    function learnController(fn) {
-        // Listen for next incoming MIDI controller message
-        MIDI.once({ message: "control" }, function(message, time) {
-            var query = message.splice();
-
-            // Call the fn
-            fn.apply(this, arguments);
-
-            // Bind the fn to all values for this controller
-            query.length = 2;
-            MIDI.on(query, fn);
-        };
-    }
-
-### .off(query, fn)
-
-Removes an event handler from all MIDI events matching the query. If
-<code>fn</code> is not given, removes all handlers from events matching the
-query. If <code>query</code> is not given, removes the handler from all events.
-
-### .normalise(message, time)
+### `normalise(message, time)`
 
 Takes a MIDI message array and returns a
 <a href="https://github.com/sound-io/music-json-spec">Music JSON</a> event
@@ -244,3 +179,26 @@ for each degree of the chromatic scale starting with C.
 
 The frequency value of A4 that is used in converting MIDI numbers
 to frequency values and vice versa. It is <code>440</code> by default.
+
+
+## MIDI properties
+
+### .request
+
+A promise. Where MIDI is supported, the library requests access to the browser's
+midi API as soon as it loads. <code>MIDI.request</code> is the promise returned
+by <code>navigator.requestMIDIAcess()</code>, or where MIDI is not supported,
+<code>MIDI.request</code> is a rejected promise.
+
+    MIDI.request
+    .then(function(midi) {
+        // Do something with midi object
+    })
+    .catch(function(error) {
+        // Alert the user they don't have MIDI
+    });
+
+Note that using the MIDI library you don't really need to touch the midi object.
+MIDI functions are available before the promise is resolved. For example,
+calling <code>MIDI.on(query, fn)</code> before this time will bind to incoming
+MIDI events when <code>MIDI.request</code> is resolved.

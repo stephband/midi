@@ -20,15 +20,25 @@
 	var rnotename = /^([A-G][♭♯]?)(-?\d)$/;
 	var rshorthand = /[b#]/g;
 
-	var types = {
-	    	noteoff:      128,
-	    	noteon:       144,
-	    	polytouch:    160,
-	    	control:      176,
-	    	pc:           192,
-	    	channeltouch: 208,
-	    	pitch:        224
-	    };
+	// MIDI message status bytes
+	//
+	// noteoff         128 - 143
+	// noteon          144 - 159
+	// polytouch       160 - 175
+	// control         176 - 191
+	// pc              192 - 207
+	// channeltouch    208 - 223
+	// pitch           224 - 240
+
+	var status = {
+		noteoff:      128,
+		noteon:       144,
+		polytouch:    160,
+		control:      176,
+		pc:           192,
+		channeltouch: 208,
+		pitch:        224,
+	};
 
 	var normalise = (function(converters) {
 		return function normalise(data, receivedTime, timeOffset) {
@@ -159,31 +169,31 @@
 	}
 
 	function typeToNumber(channel, type) {
-		return types[type] + (channel ? channel - 1 : 0 );
+		return status[type] + (channel ? channel - 1 : 0 );
 	}
 
-	MIDI.types = Object.keys(types);
+	MIDI.types = Object.keys(status);
 	MIDI.tuning = 440;
 
-	MIDI.noteNames = noteNames;
+	MIDI.noteNames         = noteNames;
 	//MIDI.noteNumbers = noteNumbers;
-	MIDI.isNote = isNote;
-	MIDI.isPitch = isPitch;
-	MIDI.isControl = isControl;
-	MIDI.typeToNumber = typeToNumber;
-	MIDI.noteToNumber = noteToNumber;
-	MIDI.numberToNote = numberToNote;
-	MIDI.numberToOctave = numberToOctave;
+	MIDI.isNote            = isNote;
+	MIDI.isPitch           = isPitch;
+	MIDI.isControl         = isControl;
+	MIDI.typeToNumber      = typeToNumber;
+	MIDI.noteToNumber      = noteToNumber;
+	MIDI.numberToNote      = numberToNote;
+	MIDI.numberToOctave    = numberToOctave;
 	MIDI.numberToFrequency = numberToFrequency;
 	MIDI.frequencyToNumber = frequencyToNumber;
-	MIDI.toChannel = toChannel;
-	MIDI.toType    = toType;
-	MIDI.normaliseNoteOn = normaliseNoteOn;
-	MIDI.normaliseNoteOff = normaliseNoteOff;
-	MIDI.pitchToInt = pitchToInt;
-	MIDI.pitchToFloat = pitchToFloat;
-	MIDI.normalise = normalise;
-	MIDI.normaliseEvent = normaliseEvent;
+	MIDI.toChannel         = toChannel;
+	MIDI.toType            = toType;
+	MIDI.normaliseNoteOn   = normaliseNoteOn;
+	MIDI.normaliseNoteOff  = normaliseNoteOff;
+	MIDI.pitchToInt        = pitchToInt;
+	MIDI.pitchToFloat      = pitchToFloat;
+	MIDI.normalise         = normalise;
+	MIDI.normaliseEvent    = normaliseEvent;
 
 	// Aliases
 	MIDI.toMessage = function() {
