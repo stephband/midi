@@ -2,7 +2,7 @@
   "name": "MIDI",
   "title": "MIDI",
   "description": "A hub for receiving, sending and filtering browser MIDI messages, and a library of functions for manipulating them.",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "homepage": "http://sound.io/midi",
   "author": {
     "name": "Stephen Band",

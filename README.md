@@ -5,7 +5,7 @@ MIDI is a library for receiving, sending and manipulating browser MIDI messages.
 
 ## MIDI()
 
-Creates a stream of MIDI event objects:
+Create a stream of MIDI event objects:
 
     var midi = MIDI();
 
@@ -25,15 +25,18 @@ provides a broader filter. Here are some examples.
     MIDI([144])                // CH1, NOTEON, all notes
     MIDI([1, 'noteon'])        // CH1, NOTEON, all notes
 
-A MIDI stream can capture both 'noteon' and 'noteoff' messages with the
-shorthand type `'note'`:
+The shorthand type `'note'` creates a stream of 'noteon' and 'noteoff' messages.
 
     MIDI([1, 'note'])          // Channel 1, NOTEON and NOTEOFF, all notes
 
-A MIDI stream inherits map, filter and consumption methods from
-<a href="//github.com/stephband/Fn">`Stream`</a>.
+A MIDI stream inherits map, filter and consumer methods from
+<a href="//github.com/stephband/fn#stream">`Stream`</a>.
 
-    MIDI([1, 'noteon']).map(mapFn).each(outFn);
+    MIDI([1, 'noteon'])
+    .map(get('data'))
+    .each(function(message) {
+    	// Do something with MIDI message
+    });
 
 A stream can be stopped with the `stop()` method.
 

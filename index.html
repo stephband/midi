@@ -30,7 +30,6 @@
 
 	<ul class="link-index index">
 		<li>repo: <a href="http://github.com/stephband/midi">github.com/sound-io/midi</a></li>
-		<!--li>author: <a href="https://cruncher.ch/en/about-us/">stephband</a></li-->
 	</ul>
 
 	<canvas class="midi-graph block" id="midi-graph" width="960"></canvas>
@@ -43,59 +42,15 @@
 		normalises the messages (to Music JSON) and logs the results.
 	</p>
 
-	<script src="../../fn/js/fn.js"></script>
-	<script src="../../fn/js/stream.js"></script>
+	<script src="fn/js/fn.js"></script>
+	<script src="fn/js/stream.js"></script>
 	<script src="js/midi.js"></script>
 	<script src="js/midi-utils.js"></script>
 
 	<script src="../../test/test.js"></script>
-	<!--script src="test/test-midi-lib.js"></script-->
+	<script src="test/test-midi-lib.js"></script>
 	<script src="test/test-midi.js"></script>
 
 	<script src="../dom/js/dom.js"></script>
-
-	<!--script class="block">
-//MIDI.on({ message: /^note|^pitch/ }, function(message, time) {
-//    var event = MIDI.normalise(message, time);
-//    console.log(event);
-//});
-
-
-//MIDI.on([144]).log();
-//MIDI.on({ channel: 1, message: /^note|^pitch/ }).normalise().log();
-//MIDI.on({ message: /^note|^pitch/ }).log();
-
-var s0 = MIDI
-.on({ message: /^note|^pitch/ })
-.slice(2,6);
-
-var s1 = s0
-.head()
-.map(function(a) { a.push('HEAD'); return a; })
-.log();
-
-MIDI.trigger([144,127,0]);
-MIDI.trigger([144,127,1]);
-MIDI.trigger([144,127,2]);
-
-var s2 = s0
-.tail()
-.map(function(a) { a.push('TAIL'); return a; })
-.log();
-
-MIDI.trigger([149,127,3]);
-MIDI.trigger([144,127,4]);
-MIDI.trigger([144,127,5]);
-MIDI.trigger([144,127,6]);
-MIDI.trigger([190,127,7]);
-MIDI.trigger([150,127,8]);
-
-var s3 = s0.tail().map(function(a) { a.push('AFTER'); return a; }).log();
-
-MIDI.trigger([150,127,9]);
-MIDI.trigger([150,127,10]);
-MIDI.trigger([150,127,11]);
-console.log('------------');
-	</script-->
 </body>
 </html>
