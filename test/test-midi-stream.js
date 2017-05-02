@@ -1,4 +1,4 @@
-group('MIDI()', function(test) {
+group('MIDI() streams', function(test) {
 
 	// MIDI message status bytes
 	//

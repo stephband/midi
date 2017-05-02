@@ -44,13 +44,25 @@
 
 	<script src="fn/js/fn.js"></script>
 	<script src="fn/js/stream.js"></script>
+
 	<script src="js/midi.js"></script>
-	<script src="js/midi-utils.js"></script>
+	<script src="js/midi-functions.js"></script>
+	<script src="js/midi-setup.js"></script>
 
-	<script src="../../test/test.js"></script>
-	<script src="test/test-midi-lib.js"></script>
-	<script src="test/test-midi.js"></script>
+	<script src="test/test.js"></script>
+	<script src="test/test-midi-functions.js"></script>
+	<script src="test/test-midi-stream.js"></script>
 
-	<script src="../dom/js/dom.js"></script>
+	<script>
+	(function(window) {
+		"use strict";
+	
+		var get = Fn.get;
+
+		MIDI([1, 'note'])
+		.map(get('data'))
+		.each(console.log);
+	})(this);
+	</script>
 </body>
 </html>

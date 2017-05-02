@@ -144,7 +144,7 @@
 	// Deprecate
 
 	MIDI.noteToNumber      = deprecate(nameToNumber, 'MIDI: noteToNumber(string) is now nameToNumber(string).');
-	MIDI.numberToName      = deprecate(numberToName, 'MIDI: numberToName(string) is now numberToName(string).');
+	MIDI.numberToNote      = deprecate(numberToName, 'MIDI: numberToName(string) is now numberToName(string).');
 	MIDI.normaliseData     = deprecate(noop, 'MIDI: deprecation warning - MIDI.normaliseData() has been deprecated');
 	MIDI.normaliseNoteOn   = deprecate(noop, 'MIDI: normaliseNoteOn is deprecated');
 	MIDI.normaliseNoteOff  = deprecate(normaliseNote, 'MIDI: normaliseNoteOff(message) is now normaliseNote(message)');
