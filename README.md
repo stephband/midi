@@ -56,7 +56,7 @@ Removes an event handler `fn` from MIDI events matching the query. Where
 `fn` is not given, removes all handlers from events matching the query.
 
 <!--
-### .normalise(message, time)
+### .normalise(e)
 
 Takes a MIDI message array and returns a
 <a href="https://github.com/sound-io/music-json-spec">Music JSON</a> event
@@ -74,125 +74,88 @@ semitones. For example:
     MIDI.normalise([168,62,119], 4);   // [4, "aftertouch", 62, 0.93700787]
 -->
 
-### .normaliseEvent(e)
-
-Takes a DOM MIDI event object and returns a
-<a href="https://github.com/sound-io/music-json-spec">Music JSON</a> normalised
-event array. Equivalent to:
-
-    MIDI.normalise(e.data, e.receivedTime);
-
 ### .isNote(message)
 
-    MIDI.isNote([145,80,20]);             // true
+    MIDI.isNote([145,80,20]);          // true
 
 ### .isPitch(message)
 
-    MIDI.isPitch([145,80,20]);            // false
+    MIDI.isPitch([145,80,20]);         // false
 
 ### .isControl(message)
 
-    MIDI.isControl([145,80,20]);          // false
+    MIDI.isControl([145,80,20]);       // false
 
-### .toChannel(message)
+### .frequencyToNumber(ref, f)
 
-Returns the MIDI channel of the message as a number 1-16.
+Given a frequency `f` in Hz, returns the note number whose fundamental
+harmonic corresponds to that frequency relative to the reference frequency `ref`.
 
-    MIDI.toChannel([145,80,20]);            // 2
+    MIDI.frequencyToNumber(440, 440);   // 69
+    MIDI.frequencyToNumber(440, 200);   // 55.349958
 
-### .toType(message)
+    MIDI.frequencyToNumber(440, 442);   // 68.921486
 
-Returns type of message.
+Results of <code>.frequencyToNumber</code> are rounded to six decimal places
+to help avoid floating point errors and return whole semitones where intended.
 
-    MIDI.toType([145,80,20])             // 'noteon'
+### .normalise(e)
 
-### .normaliseNote(data)
+Takes a DOM MIDI event object and returns a
+<a href="https://github.com/sound-io/music-json-spec">Music JSON</a> normalised
+event array of the form `[time, type, number, velocity]`.
+
+    MIDI.normalise(e);                 // [1, 'noteon', 80, 0.15748032]
+
+### .numberToNote(n)
+
+Given a note number between 0 and 127, returns a note name as a string.
+
+    MIDI.numberToNote(66);             // 'F♯4'
+
+MIDI uses unicode symbols for accidentals `♭` and `♯`. Note names can be
+overridden by altering the array `MIDI.noteNames`.
+
+### .numberToOctave(n)
+
+Given a note number between 0 and 127, returns the octave the note is in as a number. 
+
+    MIDI.numberToOctave(66);           // 4
+
+### .numberToFrequency(ref, n)
+
+Given a note number <code>n</code>, returns the frequency of the fundamental
+tone of that note relative to the reference frequency for middle A, `ref`.
+
+    MIDI.numberToFrequency(440, 69);   // 440
+    MIDI.numberToFrequency(440, 60);   // 261.625565
+
+    MIDI.numberToFrequency(442, 69);   // 442
+    MIDI.numberToFrequency(442, 60);   // 262.814772
+
+### .normaliseNote(message)
 
 Many keyboards transmit <code>noteon</code> with velocity 0 rather than
-<code>noteoff</code>s. <code>normaliseNote</code> converts <code>noteon</code>
-messages with velocity 0 to <code>noteoff</code> messages. A new array is
-not created – the existing array is modified and returned.
+`noteoff`s. `normaliseNote` converts `noteon` messages with velocity 0 to
+`noteoff` messages. A new array is not created, the existing message is
+modified and returned.
 
-    MIDI.normaliseNote([145,80,0]);       // [129,80,0]
+    MIDI.normaliseNote([145,80,0]);    // [129,80,0]
 
-### .pitchToFloat(message, range)
+### .pitchToFloat(range, message)
 
 Returns the pitch bend value in semitones. Range is the bend range up or down,
 in semitones. Where range is not given it defaults to <code>2</code>.
 
     MIDI.pitchToFloat([xxx,xx,xxx], 2);  // -1.625
 
-### .numberToNote(n)
+### .request()
 
-Given a note number between 0 and 127, returns a note name as a string.
+A helper for `navigator.requestMIDIAcess()`. Where MIDI is supported, requests
+access to the browser's midi API, returning a promise, or where MIDI is not
+supported, returns a rejected promise.
 
-    MIDI.numberToNote(66);                // 'F♯4'
-
-MIDI uses unicode symbols for accidentals <code>♭</code> and <code>♯</code>.
-
-### .numberToOctave(n)
-
-Given a note number between 0 and 127, returns the octave the note is in as a number. 
-
-    MIDI.numberToOctave(66);              // 4
-
-### .numberToFrequency(n)
-
-Given a note number <code>n</code>, returns the frequency of the fundamental tone of that note.
-
-    MIDI.numberToFrequency(69);           // 440
-    MIDI.numberToFrequency(60);           // 261.625565
-
-The reference tuning is A4 = 440Hz by default. Pass in a second parameter
-<code>tuning</code> to use a different tuning for A4.
-
-    MIDI.numberToFrequency(69, 442);      // 442
-    MIDI.numberToFrequency(60, 442);      // 262.814772
-
-### .frequencyToNumber(f)
-
-Given a frequency <code>f</code>, returns the note number whose fundamental
-harmonic corresponds to that frequency.
-
-    MIDI.frequencyToNumber(440);          // 69
-    MIDI.frequencyToNumber(200);          // 55.349958
-
-The reference tuning is A4 = 440Hz by default. Pass in a second parameter
-<code>tuning</code> to use a different tuning.
-
-    MIDI.frequencyToNumber(440, 442);     // 68.921486
-
-Results of <code>.frequencyToNumber</code> are rounded to six decimal places
-to help avoid floating point errors and return whole semitones where intended.
-
-### .typeToNumber(channel, type)
-
-Given a <code>channel</code> and <code>type</code>, returns the MIDI message number.
-
-    MIDI.typeToNumber(1, 'noteon');       // 144
-
-
-### .noteNames
-
-An array of note names. Must have length <code>12</code> and contain one name
-for each degree of the chromatic scale starting with C.
-
-### .tuning
-
-The frequency value of A4 that is used in converting MIDI numbers
-to frequency values and vice versa. It is <code>440</code> by default.
-
-
-## MIDI properties
-
-### .request
-
-A promise. Where MIDI is supported, the library requests access to the browser's
-midi API as soon as it loads. <code>MIDI.request</code> is the promise returned
-by <code>navigator.requestMIDIAcess()</code>, or where MIDI is not supported,
-<code>MIDI.request</code> is a rejected promise.
-
-    MIDI.request
+    MIDI.request()
     .then(function(midi) {
         // Do something with midi object
     })
@@ -200,7 +163,36 @@ by <code>navigator.requestMIDIAcess()</code>, or where MIDI is not supported,
         // Alert the user they don't have MIDI
     });
 
-Note that using the MIDI library you don't really need to touch the midi object.
-MIDI functions are available before the promise is resolved. For example,
-calling <code>MIDI.on(query, fn)</code> before this time will bind to incoming
-MIDI events when <code>MIDI.request</code> is resolved.
+Note that using the `MIDI` library you don't really need to touch the browser's
+lower-level `midi` object. `MIDI` library functions are available before the
+promise is resolved. For example, calling `MIDI(query)` or `MIDI.on(query, fn)`
+will bind to incoming MIDI events when `MIDI.request()` is resolved.
+
+### .toChannel(message)
+
+Returns the MIDI channel of the message as a number 1-16.
+
+    MIDI.toChannel([145,80,20]);       // 2
+
+### .toType(message)
+
+Returns type of message.
+
+    MIDI.toType([145,80,20]);          // 'noteon'
+
+### .toStatus(channel, type)
+
+Given a <code>channel</code> and <code>type</code>, returns the MIDI message number.
+
+    MIDI.typeToNumber(1, 'noteon');     // 144
+
+## MIDI properties
+
+### .noteNames
+
+An array of note names. Must have length `12` and contain one name for each
+degree of the chromatic scale starting with C.
+
+### .types
+
+An array of message types.
