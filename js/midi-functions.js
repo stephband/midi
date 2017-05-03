@@ -32,7 +32,7 @@
 	var normalise = (function(converters) {
 		return function normalise(e) {
 			var message = e.data;
-			var time    = e.receivedTime;
+			var time    = e.timeStamp;
 			var type    = MIDI.toType(message);
 			return (converters[type] || converters['default'])(data, time, type) ;
 		};

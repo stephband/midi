@@ -123,7 +123,7 @@
 	MIDI
 	.request()
 	.then(function(midi) {
-		if (debug) { console.group('MIDI ports'); }
+		if (debug) { console.groupCollapsed('MIDI ports'); }
 		if (debug) { window.midi = midi; }
 		setupPorts(midi);
 		if (debug) { console.groupEnd(); }

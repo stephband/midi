@@ -248,7 +248,7 @@
 		trigger: function(message, time) {
 			triggerTree(tree, {
 				data: message,
-				receivedTime: time || now()
+				timeStamp: time || now()
 			}, 0);
 		},
 
