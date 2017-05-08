@@ -1,6 +1,6 @@
 (function(window) {
 	if (!window.console || !window.console.log) { return; }
-	console.log('MIDI       - http://github.com/soundio/midi');
+	console.log('MIDI        - http://github.com/soundio/midi');
 })(this);
 
 (function(window) {
