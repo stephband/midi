@@ -42,6 +42,224 @@
 		normalises the messages (to Music JSON) and logs the results.
 	</p>
 
+
+<h1>API</h1>
+
+<table class="api-table">
+<thead>
+
+<tr>
+<th class="width-1/3"><code>MIDI</code></th>
+</tr>
+
+</thead>
+<tbody>
+
+<tr>
+<td><code>.on(query, fn)</code></td>
+<td>
+Registers a handler `fn` for incoming MIDI events that match `query`.
+See the `MIDI()` constructor above for a description of queries.
+</td>
+</tr>
+
+<tr>
+<td><code>.off(query, fn)</code></td>
+<td>
+Removes an event handler `fn` from MIDI events matching the query. Where
+`fn` is not given, removes all handlers from events matching the query.
+</td>
+</tr>
+
+<tr>
+<td><code>.trigger(message)</code></td>
+<td>
+Simulates the firing of a MIDI message.
+Creates an event object and calls handlers with it.
+</td>
+</tr>
+
+<!--
+<tr>
+<td><code>.normalise(e)</code></td>
+<td>
+<td><code>Takes a MIDI message array and returns a
+<a href="https://github.com/sound-io/music-json-spec">Music JSON</a> event
+array. Music JSON events have the form:
+
+    [timestamp, type, data ... ]
+
+Note velocity, controller data and aftertouch data are normalised as floats in
+the range 0-1, while pitch bend data is normalised to floats representing
+semitones. For example:
+
+    MIDI.normalise([145,80,20], 1);    // [1, 'noteon', 80, 0.15748032]
+    MIDI.normalise([180,1,127], 2);    // [2, 'control', 1, 1]
+    MIDI.normalise([231,62,119], 3);   // [3, "pitch", 1.73409840]
+    MIDI.normalise([168,62,119], 4);   // [4, "aftertouch", 62, 0.93700787]
+-->
+
+<tr>
+<td><code>.isNote(message)</code></td>
+<td>
+<pre><code>MIDI.isNote([145,80,20]);          // true</code></pre>
+</td>
+</tr>
+
+<tr>
+<td><code>.isPitch(message)</code></td>
+<td>
+<pre><code>MIDI.isPitch([145,80,20]);         // false</code></pre>
+</td>
+</tr>
+
+<tr>
+<td><code>.isControl(message)</code></td>
+<td>
+<pre><code>MIDI.isControl([145,80,20]);       // false</code></pre>
+</td>
+</tr>
+
+<tr>
+<td><code>.frequencyToNumber(ref, f)</code></td>
+<td>
+Given a frequency `f` in Hz, returns the note number whose fundamental
+harmonic corresponds to that frequency relative to the reference frequency `ref`.
+
+    MIDI.frequencyToNumber(440, 440);   // 69
+    MIDI.frequencyToNumber(440, 200);   // 55.349958
+
+    MIDI.frequencyToNumber(440, 442);   // 68.921486
+
+Results of <code>.frequencyToNumber</code> are rounded to six decimal places
+to help avoid floating point errors and return whole semitones where intended.
+</td>
+</tr>
+
+<tr>
+<td><code>.normalise(e)</code></td>
+<td>
+Takes a DOM MIDI event object and returns a
+<a href="https://github.com/sound-io/music-json-spec">Music JSON</a> normalised
+event array of the form `[time, type, number, velocity]`.
+
+    MIDI.normalise(e);                 // [1, 'noteon', 80, 0.15748032]
+</td>
+</tr>
+
+<tr>
+<td><code>.numberToNote(n)</code></td>
+<td>
+Given a note number between 0 and 127, returns a note name as a string.
+
+    MIDI.numberToNote(66);             // 'F♯4'
+
+MIDI uses unicode symbols for accidentals `♭` and `♯`. Note names can be
+overridden by altering the array `MIDI.noteNames`.
+</td>
+</tr>
+
+<tr>
+<td><code>.numberToOctave(n)</code></td>
+<td>
+Given a note number between 0 and 127, returns the octave the note is in as a number. 
+
+    MIDI.numberToOctave(66);           // 4
+</td>
+</tr>
+
+<tr>
+<td><code>.numberToFrequency(ref, n)</code></td>
+<td>Given a note number <code>n</code>, returns the frequency of the fundamental
+tone of that note relative to the reference frequency for middle A, `ref`.
+
+    MIDI.numberToFrequency(440, 69);   // 440
+    MIDI.numberToFrequency(440, 60);   // 261.625565
+
+    MIDI.numberToFrequency(442, 69);   // 442
+    MIDI.numberToFrequency(442, 60);   // 262.814772
+</td>
+</tr>
+
+<tr>
+<td><code>.normaliseNote(message)</code></td>
+<td>
+Many keyboards transmit <code>noteon</code> with velocity 0 rather than
+`noteoff`s. `normaliseNote` converts `noteon` messages with velocity 0 to
+`noteoff` messages. A new array is not created, the existing message is
+modified and returned.
+
+    MIDI.normaliseNote([145,80,0]);    // [129,80,0]
+</td>
+</tr>
+
+<tr>
+<td><code>.pitchToFloat(range, message)</code></td>
+<td>
+Returns the pitch bend value in semitones. Range is the bend range up or down,
+in semitones. Where range is not given it defaults to <code>2</code>.
+
+    MIDI.pitchToFloat([xxx,xx,xxx], 2);  // -1.625
+</td>
+</tr>
+
+<tr>
+<td><code>.request()</code></td>
+<td>
+A helper for `navigator.requestMIDIAcess()`. Where MIDI is supported, requests
+access to the browser's midi API, returning a promise, or where MIDI is not
+supported, returns a rejected promise.
+
+    MIDI.request()
+    .then(function(midi) {
+        // Do something with midi object
+    })
+    .catch(function(error) {
+        // Alert the user they don't have MIDI
+    });
+
+Note that using the `MIDI` library you don't really need to touch the browser's
+lower-level `midi` object. `MIDI` library functions are available before the
+promise is resolved. For example, calling `MIDI(query)` or `MIDI.on(query, fn)`
+will bind to incoming MIDI events when `MIDI.request()` is resolved.
+</td>
+</tr>
+
+<tr>
+<td><code>.toChannel(message)</code></td>
+<td>
+Returns the MIDI channel of the message as a number 1-16.
+
+    MIDI.toChannel([145,80,20]);       // 2
+</td>
+</tr>
+
+<tr>
+<td><code>.toType(message)</code></td>
+<td>
+Returns type of message.
+
+    MIDI.toType([145,80,20]);          // 'noteon'
+</td>
+</tr>
+
+<tr>
+<td><code>.toStatus(channel, type)</code></td>
+<td>
+Given a <code>channel</code> and <code>type</code>, returns the MIDI message number.
+
+    MIDI.typeToNumber(1, 'noteon');     // 144
+</td>
+</tr>
+
+</tbody>
+</table>
+
+
+
+
+
+
 	<script src="../fn/js/fn.js"></script>
 	<script src="../fn/js/stream.js"></script>
 
@@ -49,9 +267,9 @@
 	<script src="js/midi-functions.js"></script>
 	<script src="js/midi-setup.js"></script>
 
-	<!--script src="test/test.js"></script>
-	<script src="test/test-midi-functions.js"></script>
-	<script src="test/test-midi-stream.js"></script>
+	<script src="../fn/test/test.js"></script>
+	<script src="js/midi.test.js"></script>
+	<script src="js/midi-functions.test.js"></script>
 
 	<script>
 	(function(window) {
@@ -63,6 +281,6 @@
 		.map(get('data'))
 		.each(console.log);
 	})(this);
-	</script-->
+	</script>
 </body>
 </html>

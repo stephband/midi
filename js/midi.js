@@ -70,7 +70,7 @@
 		var branch = object[name];
 
 		if (name === undefined) {
-			branch && ap(data, branch);
+			branch && ap(message, branch);
 		}
 		else {
 			branch && fireRoute(i, query, branch, message);
@@ -293,6 +293,7 @@
 
 	// Deprecate
 
+	MIDI.routes       = root;
 	MIDI.toMessage    = deprecate(toType, 'MIDI: deprecation warning - MIDI.toMessage() has been renamed to MIDI.toType()');
 	MIDI.typeToNumber = deprecate(toStatus, 'MIDI: typeToNumber(ch, type) is now toStatus(ch, type)');
 
