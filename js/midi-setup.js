@@ -7,7 +7,6 @@
 	var MIDI    = window.MIDI;
 
 	var cache   = Fn.cache;
-	var trigger = MIDI._trigger;
 
 	var request = cache(function request() {
 		return navigator.requestMIDIAccess ?
@@ -25,7 +24,7 @@
 		// hanging around to avoid garbage collection:
 		// https://code.google.com/p/chromium/issues/detail?id=163795#c123
 		store.push(port);
-		port.onmidimessage = trigger;
+		port.onmidimessage = MIDI.push;
 	}
 
 	function unlisten(port) {
