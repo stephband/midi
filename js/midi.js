@@ -132,7 +132,7 @@
 
 	function toEvent(message) {
 		return {
-			timeStamp: time || now(),
+			timeStamp: now(),
 			data:      message
 		};
 	}
@@ -151,7 +151,9 @@
 	}
 
 	function toStatus(channel, type) {
-		return status[type] + (channel ? channel - 1 : 0 );
+		return channel > 0
+			&& channel < 17
+			&& status[type] + channel - 1 ;
 	}
 
 
@@ -207,11 +209,11 @@
 			'string': overload(get1, {
 				'note': function(data, fn) {
 					var query = toNoteQuery(data);
-		
-					query[0] = toStatus(query[0], 'noteon');
+
+					query[0] = toStatus(data[0], 'noteon');
 					setRoute(0, query, root, fn);
 			
-					query[0] = toStatus(query[0], 'noteoff');
+					query[0] = toStatus(data[0], 'noteoff');
 					setRoute(0, query, root, fn);
 				},
 		
@@ -241,10 +243,10 @@
 				'note': function(data, fn) {
 					var query = toNoteQuery(data);
 		
-					query[0] = toStatus(query[0], 'noteon');
+					query[0] = toStatus(data[0], 'noteon');
 					removeRoute(query, root, fn);
 		
-					query[0] = toStatus(query[0], 'noteoff');
+					query[0] = toStatus(data[0], 'noteoff');
 					removeRoute(query, root, fn);
 				},
 		
