@@ -256,6 +256,62 @@ Given a <code>channel</code> and <code>type</code>, returns the MIDI message num
 </table>
 
 
+<table class="api-table">
+<thead>
+<tr>
+<th class="width-1/3"><code>MIDI()</code></th>
+</tr>
+</thead>
+<tbody>
+
+<tr>
+<td><code>MIDI(query)</code></td>
+<td>
+Create a stream of MIDI event objects:
+
+    var midi = MIDI();
+
+The first parameter to the constructor can be a query that filters the events
+entering the stream. A query is either an array in the form of a MIDI message,
+(`[status, data1, data2]`), or an array where the first two members describe
+the status (`[channel, type, data1, data2]`). A shorter query of the same form
+provides a broader filter. Here are some examples.
+
+    MIDI([176, 7, 0])          // CH1, CC7, value 0
+    MIDI([1, 'control', 7, 0]) // CH1, CC7, value 0
+
+    MIDI([144, 60])            // CH1, NOTEON, C3
+    MIDI([1, 'noteon', 60])    // CH1, NOTEON, C3
+    MIDI([1, 'noteon', 'C3'])  // CH1, NOTEON, C3
+
+    MIDI([144])                // CH1, NOTEON, all notes
+    MIDI([1, 'noteon'])        // CH1, NOTEON, all notes
+
+The shorthand type `'note'` creates a stream of 'noteon' and 'noteoff' messages.
+
+    MIDI([1, 'note'])          // Channel 1, NOTEON and NOTEOFF, all notes
+
+A MIDI stream inherits map, filter and consumer methods from
+<a href="//github.com/stephband/fn#stream">`Stream`</a>.
+
+    MIDI([1, 'noteon'])
+    .map(get('data'))
+    .each(function(message) {
+    	// Do something with MIDI message
+    });
+
+A stream can be stopped with the `stop()` method.
+
+	var midi = MIDI([1, 'noteon']).map(mapFn).each(outFn);
+
+	// Sometime later...
+	midi.stop();
+</td>
+</tr>
+
+</tbody>
+</table>
+
 
 
 
