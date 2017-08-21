@@ -7,6 +7,7 @@
 	var MIDI    = window.MIDI;
 
 	var cache   = Fn.cache;
+	var remove  = Fn.remove;
 
 	var request = cache(function request() {
 		return navigator.requestMIDIAccess ?

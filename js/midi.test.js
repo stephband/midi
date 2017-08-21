@@ -1,4 +1,4 @@
-group('MIDI() streams', function(test, log) {
+group('MIDI listeners', function(test, log) {
 
 	// MIDI message status bytes
 	//
@@ -9,27 +9,6 @@ group('MIDI() streams', function(test, log) {
 	// pc              192 - 207
 	// channeltouch    208 - 223
 	// pitch           224 - 240
-
-//	test('MIDI()', function(equals, done) {
-//		var stream = MIDI();
-//		var i = -1;
-//		var expects = [
-//			{ data: [144,64,127] },
-//			{ data: [156,64,0] }
-//		];
-//
-//
-//		stream.each(function(message) {
-//			equals(expects[++i].data, message.data);
-//		});
-//
-//		MIDI.trigger([144,64,127]);
-//		MIDI.trigger([156,64,0]);
-//
-//		// Check correct number of tests
-//		equals(1, i, 'Incorrect number of tests run (' + i + ')');
-//		stream.stop();
-//	});
 
 	test('MIDI.on([144], fn)', function(equals, done) {
 		var expects = [
@@ -68,6 +47,27 @@ group('MIDI() streams', function(test, log) {
 		done();
 	}, 1);
 
+	test('MIDI.on([1, "note"], fn)', function(equals, done) {
+		var expects = [
+			{ data: [144,60,2] }
+		];
+
+		function update(e) {
+			equals(e.data, expects.shift().data);
+		}
+
+		MIDI.on([144, 60], update);
+		MIDI.trigger([144,62,127]);
+		MIDI.trigger([146,60,0]);
+		MIDI.trigger([144,60,2]);
+		MIDI.off([144, 60], update);
+		MIDI.trigger([144,60,2]);
+
+		done();
+	}, 1);
+});
+
+group('MIDI streams', function(test, log) {
 	test('MIDI([1,"note"])', function(equals, done) {
 		var expects = [
 			{ data: [144,60,1] },
@@ -131,11 +131,9 @@ group('MIDI() streams', function(test, log) {
 		MIDI.trigger([144,64,127]);
 		MIDI.trigger([156,64,0]);
 
-		// Check correct number of tests
-		equals(0, i);
 		stream.stop();
 		done();
-	});
+	}, 1);
 
 	test('MIDI([144, 60])', function(equals, done) {
 		var stream = MIDI([144, 60]);
@@ -153,11 +151,9 @@ group('MIDI() streams', function(test, log) {
 		MIDI.trigger([146,60,0]);
 		MIDI.trigger([144,60,2]);
 
-		// Check correct number of tests
-		equals(0, i);
 		stream.stop();
 		done();
-	});
+	}, 1);
 
 	test('MIDI([144, 60, 2])', function(equals, done) {
 		var stream = MIDI([144,60,2]);
@@ -175,11 +171,9 @@ group('MIDI() streams', function(test, log) {
 		MIDI.trigger([146,60,0]);
 		MIDI.trigger([144,60,2]);
 
-		// Check correct number of tests
-		equals(0, i);
 		stream.stop();
 		done();
-	});
+	}, 1);
 
 	test('MIDI([1,"note"])', function(equals, done) {
 		var stream = MIDI([1,"note"]);
@@ -205,9 +199,7 @@ group('MIDI() streams', function(test, log) {
 		MIDI.trigger([128,60,0]);
 		MIDI.trigger([176,60,2]);
 
-		// Check correct number of tests
-		equals(3, i);
 		stream.stop();
 		done();
-	});
+	}, 4);
 });

@@ -6,25 +6,25 @@
 (function(window) {
 	"use strict";
 
-	var Fn        = window.Fn;
-	var Stream    = window.Stream;
+	var Fn          = window.Fn;
+	var Stream      = window.Stream;
+	var performance = window.performance;
 
-	var assign    = Object.assign;
-	var cache     = Fn.cache;
-	var curry     = Fn.curry;
-	var deprecate = Fn.deprecate;
-	var each      = Fn.each;
-	var get       = Fn.get;
-	var isDefined = Fn.isDefined;
-	var noop      = Fn.noop;
-	var nothing   = Fn.nothing;
-	var now       = Fn.now;
-	var overload  = Fn.overload;
-	var pipe      = Fn.pipe;
-	var remove    = Fn.remove;
-	var rest      = Fn.rest;
-	var set       = Fn.set;
-	var toClass   = Fn.toClass;
+	var assign      = Object.assign;
+	var cache       = Fn.cache;
+	var curry       = Fn.curry;
+	var deprecate   = Fn.deprecate;
+	var each        = Fn.each;
+	var get         = Fn.get;
+	var isDefined   = Fn.isDefined;
+	var noop        = Fn.noop;
+	var nothing     = Fn.nothing;
+	var overload    = Fn.overload;
+	var pipe        = Fn.pipe;
+	var remove      = Fn.remove;
+	var rest        = Fn.rest;
+	var set         = Fn.set;
+	var toClass     = Fn.toClass;
 
 	// MIDI message status bytes
 	//
@@ -132,7 +132,7 @@
 
 	function toEvent(message) {
 		return {
-			timeStamp: now(),
+			timeStamp: performance.now(),
 			data:      message
 		};
 	}
