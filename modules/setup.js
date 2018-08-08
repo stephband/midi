@@ -1,10 +1,9 @@
 
 import { cache, remove } from '../../fn/fn.js';
+import MIDI from './midi.js';
 
 
 var debug = true;
-
-var MIDI    = window.MIDI;
 
 export const request = cache(function request() {
 	return navigator.requestMIDIAccess ?
@@ -112,9 +111,7 @@ function setupPorts(midi) {
 
 // Setup
 
-MIDI
-.request()
-.then(function(midi) {
+request().then(function(midi) {
 	if (debug) { console.groupCollapsed('MIDI ports'); }
 	if (debug) { window.midi = midi; }
 	setupPorts(midi);
