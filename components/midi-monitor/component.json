@@ -1,0 +1,21 @@
+{
+	"name": "midi-monitor",
+	"repo": "stephband/midi-monitor",
+	"description": "A live list display of MIDI events",
+	"version": "0.1.0",
+	"keywords": [],
+	"dependencies": {
+		"cruncher/app.js": "*",
+		"stephband/midi": "*"
+	},
+	"development": {},
+	"license": "",
+	"main": "js/midi-monitor.js",
+	"scripts": [
+		"js/midi-monitor.js",
+		"templates/midi-monitor.js"
+	],
+	"styles": [
+		"css/midi-monitor.css"
+	]
+}

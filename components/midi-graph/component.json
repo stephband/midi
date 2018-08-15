@@ -1,0 +1,22 @@
+{
+	"name": "midi-graph",
+	"repo": "stephband/midi-graph",
+	"description": "A live graph of MIDI events",
+	"version": "0.1.0",
+	"keywords": [],
+	"dependencies": {
+		"cruncher/app.js": "*",
+		"stephband/midi": "*"
+	},
+	"development": {},
+	"license": "",
+	"main": "js/midi-graph.js",
+	"scripts": [
+		"js/midi-graph.js",
+		"js/midi-graph.note.js",
+		"templates/midi-graph.js"
+	],
+	"styles": [
+		"css/midi-graph.css"
+	]
+}

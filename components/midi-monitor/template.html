@@ -1,0 +1,35 @@
+<div class="midi-monitor">
+	<div class="head_block block">
+		<table class="console_table">
+			<thead>
+				<tr>
+					<th class="time_th">Time</th>
+					<th class="port_th">Port</th>
+					<th class="type_th">Message</th>
+					<th class="chan_th">Ch</th>
+					<th class="num_th">No</th>
+					<th class="note_th">Note</th>
+					<th class="val_th">Value</th>
+				</tr>
+			</thead>
+		</table>
+	</div>
+	
+	<div class="body_block block" id="app_console">
+		<table class="console_table">
+			<tbody data-view="console" data-data="">
+				<template data-template="readout">
+					<tr>
+						<td class="time_td"></td>
+						<td class="port_td"></td>
+						<td class="type_td"></td>
+						<td class="chan_td"></td>
+						<td class="num_td"></td>
+						<td class="note_td"></td>
+						<td class="val_td"></td>
+					</tr>
+				</template>
+			</tbody>
+		</table>
+	</div>
+</div>
