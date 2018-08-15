@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="../fn/css/docs.css" />
     <link rel="stylesheet" href="../fn/css/tests.css" />
     <link rel="stylesheet" href="css/theme.css" />
+	<link rel="stylesheet" href="css/midi-graph.css" />
 </head>
 
 <body class="">
@@ -41,6 +42,9 @@
 
 	<canvas class="midi-graph block" id="midi-graph" width="960"></canvas>
 
+    <midi-graph></midi-graph>
+    <midi-monitor></midi-monitor>
+
 	<p class="block">Plug in a MIDI instrument!<p>
 
 	<p class="block">
@@ -50,32 +54,64 @@
 	</p>
 
     <article class="constructor-grid grid">
-        <h1 class="grid-header text-2">MIDI</h1>
         <article class="grid-1" sparky-fn="modules:'MIDI()' template:#module-doc"></article>
         <article class="grid-2" sparky-fn="modules:'MIDI'   template:#module-doc"></article>
     </article>
 
     <article class="l-grid grid">
+        <h1 class="grid-header text-2">Functions</h1>
         <article class="grid-1" sparky-fn="modules:messages template:#module-doc"></article>
         <article class="grid-2" sparky-fn="modules:data     template:#module-doc"></article>
     </article>
 
-    <template data-module="MIDI() MIDI(query)">
-        <p>Create a stream of MIDI event objects: var midi = MIDI(); The first parameter to the constructor can be a query that filters the events entering the stream. A query is either an array in the form of a MIDI message, (`[status, data1, data2]`), or an array where the first two members describe the status (`[channel, type, data1, data2]`). A shorter query of the same form provides a broader filter. Here are some examples. MIDI([176, 7, 0]) // CH1, CC7, value 0 MIDI([1, 'control', 7, 0]) // CH1, CC7, value 0 MIDI([144, 60]) // CH1, NOTEON, C3 MIDI([1, 'noteon', 60]) // CH1, NOTEON, C3 MIDI([1, 'noteon', 'C3']) // CH1, NOTEON, C3 MIDI([144]) // CH1, NOTEON, all notes MIDI([1, 'noteon']) // CH1, NOTEON, all notes The shorthand type `'note'` creates a stream of 'noteon' and 'noteoff' messages. MIDI([1, 'note']) // Channel 1, NOTEON and NOTEOFF, all notes A MIDI stream inherits map, filter and consumer methods from `Stream`. MIDI([1, 'noteon']) .map(get('data')) .each(function(message) { // Do something with MIDI message }); A stream can be stopped with the `stop()` method. var midi = MIDI([1, 'noteon']).map(mapFn).each(outFn); // Sometime later... midi.stop();</p>
+    <template data-module="MIDI() MIDI(selector)">
+        <p>Creates a stream of incoming MIDI event objects.</p>
 
         <script type="text/js">
-        MIDI(['note'])
-        .map(normaliseNote)
-        .each(function() {
-            // Do something
-        });
+        MIDI().each(console.log);
         </script>
+
+        <p>MIDI may be passed a selector that preselects which events enter the
+        stream. A selector is either an array in the form of a MIDI message
+        <code>[status, data1, data2]</code>:</p>
+
+        <script type="text/js">
+        MIDI([144])                // CH1, NOTEON, all numbers
+        MIDI([144, 60])            // CH1, NOTEON, C3
+        MIDI([176, 7, 0])          // CH1, CC7, value 0
+        </script>
+
+        <p>or more conveniently an array of interpreted data of the form
+        <code>[channel, type, data1, data2]</code>:</p>
+
+        <script type="text/js">
+        MIDI([1, 'noteon'])        // CH1, NOTEON, all numbers
+        MIDI([1, 'noteoff', 60])   // CH1, NOTEOFF, C3
+        MIDI([2, 'note', 'C3'])    // CH2, NOTEON and NOTEOFF, C3
+        MIDI([1, 'control', 7])    // CH1, CC7
+        </script>
+
+        <p>A MIDI stream is an instance of <a href="//stephen.band/fn/index.html#Stream"><code>Stream</code></a>
+        , and can be mapped, filtered, consumed and stopped:</p>
+
+        <script type="text/js">
+        const noteStream = MIDI([1, 'note'])
+        .map(get('data'))
+        .each(function(message) {
+            // Do something with MIDI message
+        });
+
+        // Sometime later...
+        noteStream.stop();
+        </script>
+
+        <p>To discover more stream methods, read the Stream API at <a href="//stephen.band/fn/index.html#Stream">stephen.band/fn/index.html#Stream</a></p>
     </template>
 
-    <template data-module="MIDI .on(query, fn)">
+    <template data-module="MIDI .on(selector, fn)">
         <p>Registers a handler <code>fn</code> for incoming MIDI events that
-        match object <code>query</code>. See the <code>MIDI()</code> constructor above for
-        a description of queries.</p>
+        match object <code>selector</code>. See the <a href="#MIDI.."<code>MIDI()</code> constructor
+        above for a description of selectors.</p>
 
         <script type="text/js">
         MIDI.on(['note'], function(e) {
@@ -84,10 +120,10 @@
         </script>
     </template>
 
-    <template data-module="MIDI .off(query, fn)">
+    <template data-module="MIDI .off(selector, fn)">
         <p>Removes an event handler <code>fn</code> from MIDI events matching
-        object <code>query</code>. Where <code>fn</code> is not given, removes
-        all handlers from events matching the query.</p>
+        object <code>selector</code>. Where <code>fn</code> is not given, removes
+        all handlers from events matching the <code>selector</code>.</p>
 
         <script type="text/js">
         MIDI.off(['note'], fn);

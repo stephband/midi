@@ -85,11 +85,6 @@ function toEvent(message) {
 	};
 }
 
-
-// MIDI
-
-var root  = {};
-
 // Important? Dunno.
 //
 //function send(port, data) {
@@ -98,40 +93,81 @@ var root  = {};
 //	}
 //}
 
+
+// MIDI
+
+const root  = {};
+
 function push(e) {
 	fireRoute(0, e.data, root, e);
 }
 
-export default function MIDI(query) {
-	// Support constructor without `new` keyword
-	if (!MIDI.prototype.isPrototypeOf(this)) {
-		return new MIDI(query);
+function Source(notify, stop, selector) {
+	const buffer = [];
+
+	function push() {
+		buffer.push.apply(buffer, arguments);
+		notify('push');
 	}
 
-	Stream.call(this, function setup(notify, stop) {
-		var buffer = [];
+	this._buffer   = buffer;
+	this._selector = selector;
+	this._push     = push;
+	this._stop     = stop;
 
-		function push() {
-			buffer.push.apply(buffer, arguments);
-			notify('push');
-		}
-
-		MIDI.on(query, push);
-
-		return {
-			shift: function midi() {
-				return buffer.shift();
-			},
-
-			stop: function() {
-				MIDI.off(query, push);
-				stop(buffer.length);
-			}
-		};
-	});
+	MIDI.on(selector, push);
 }
 
-MIDI.prototype = Object.create(Stream.prototype);
+assign(Source.prototype, {
+	shift: function midi() {
+		return this._buffer.shift();
+	},
+
+	stop: function() {
+		MIDI.off(this._selector, this._push);
+		this._stop(this._buffer.length);
+	}
+});
+
+export default function MIDI(selector) {
+	/*
+	Creates a stream of incoming MIDI event objects.
+
+	    MIDI().each(console.log);
+
+	<p>MIDI may be passed a selector that preselects which events enter the
+	stream. A selector is either an array in the form of a MIDI message
+	<code>[status, data1, data2]</code>:</p>
+
+	    MIDI([144])                // CH1, NOTEON, all numbers
+	    MIDI([144, 60])            // CH1, NOTEON, C3
+	    MIDI([176, 7, 0])          // CH1, CC7, value 0
+
+	or more conveniently an array of interpreted data of the form
+	<code>[channel, type, data1, data2]</code>:
+
+	    MIDI([1, 'noteon'])        // CH1, NOTEON, all numbers
+	    MIDI([1, 'noteoff', 60])   // CH1, NOTEOFF, C3
+	    MIDI([2, 'note', 'C3'])    // CH2, NOTEON and NOTEOFF, C3
+	    MIDI([1, 'control', 7])    // CH1, CC7
+
+	A MIDI stream is an instance of <a href="//stephen.band/fn/index.html#Stream"><code>Stream</code></a>
+	, and can be mapped, filtered, consumed and stopped:
+
+	    const noteStream = MIDI([1, 'note'])
+	    .map(get('data'))
+	    .each(function(message) {
+		    // Do something with MIDI message
+	    });
+
+	    // Sometime later...
+	    noteStream.stop();
+
+	To discover more stream methods, read the Stream API at <a href="//stephen.band/fn/index.html#Stream">stephen.band/fn/index.html#Stream</a>
+	*/
+
+	return new Stream(Source, selector);
+}
 
 assign(MIDI, {
 	on: overload(type1, {
@@ -210,7 +246,7 @@ assign(MIDI, {
 		default: pipe(toEvent, push)
 	}),
 
-	push:      push,
 	output:    noop,
+
 	send:      noop
 });
