@@ -162,7 +162,7 @@ overridden by altering the array `MIDI.noteNames`.
 <tr>
 <td><code>.numberToOctave(n)</code></td>
 <td>
-Given a note number between 0 and 127, returns the octave the note is in as a number. 
+Given a note number between 0 and 127, returns the octave the note is in as a number.
 
     MIDI.numberToOctave(66);           // 4
 </td>
@@ -311,32 +311,19 @@ A stream can be stopped with the `stop()` method.
 
 </tbody>
 </table>
-
-
-
-
-
-	<script src="../fn/js/fn.js"></script>
-	<script src="../fn/js/stream.js"></script>
-
-	<script src="js/midi.js"></script>
-	<script src="js/midi-functions.js"></script>
-	<script src="js/midi-setup.js"></script>
-
 	<script src="../fn/test/test.js"></script>
-	<script src="js/midi.test.js"></script>
-	<script src="js/midi-functions.test.js"></script>
+	<script src="test/midi.test.js"></script>
+	<script src="test/midi-functions.test.js"></script>
 
-	<script>
-	(function(window) {
-		"use strict";
-	
-		var get = Fn.get;
+	<script type="module">
+	import { get } from '../fn/fn.js';
+	import MIDI from './midi.js';
 
-		MIDI([1, 'note'])
-		.map(get('data'))
-		.each(console.log);
-	})(this);
+	var get = Fn.get;
+
+	MIDI([1, 'note'])
+	.map(get('data'))
+	.each(console.log);
 	</script>
 </body>
 </html>

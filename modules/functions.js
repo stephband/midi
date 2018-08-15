@@ -63,7 +63,7 @@ export const normalise = (function(converters) {
 	return function normalise(e) {
 		var message = e.data;
 		var time    = e.timeStamp;
-		var type    = MIDI.toType(message);
+		var type    = toType(message);
 		return (converters[type] || converters['default'])(data, time, type) ;
 	};
 })({
@@ -88,25 +88,33 @@ export const normalise = (function(converters) {
 	}
 });
 
-export function isNote(data) {
-	return data[0] > 127 && data[0] < 160 ;
+export function isNote(message) {
+	return message[0] > 127 && message[0] < 160 ;
 }
 
-export function isControl(data) {
-	return data[0] > 175 && data[0] < 192 ;
+export function isControl(message) {
+	return message[0] > 175 && message[0] < 192 ;
 }
 
-export function isPitch(data) {
-	return data[0] > 223 && data[0] < 240 ;
+export function isPitch(message) {
+	return message[0] > 223 && message[0] < 240 ;
 }
 
-export function normaliseNote(data) {
+export function normaliseNote(message) {
 	// If it's a noteon with 0 velocity, normalise it to a noteoff
-	if (data[2] === 0 && data[0] > 143 && data[0] < 160) {
-		data[0] -= 16;
+	if (message[2] === 0 && message[0] > 143 && message[0] < 160) {
+		message[0] -= 16;
 	}
 
-	return data;
+	return message;
+}
+
+export function pitchToInt(message) {
+	return (message[2] << 7 | message[1]) - 8192 ;
+}
+
+export function pitchToFloat(range, message) {
+	return (range === undefined ? 2 : range) * pitchToInt(message) / 8191 ;
 }
 
 function replaceSymbol($0, $1) {
@@ -117,14 +125,6 @@ function replaceSymbol($0, $1) {
 
 export function normaliseNoteName(name) {
 	return name.replace(rshorthand, replaceSymbol);
-}
-
-export function pitchToInt(data) {
-	return (data[2] << 7 | data[1]) - 8192 ;
-}
-
-export function pitchToFloat(range, message) {
-	return (range === undefined ? 2 : range) * pitchToInt(message) / 8191 ;
 }
 
 export function nameToNumber(str) {

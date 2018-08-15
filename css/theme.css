@@ -1,0 +1,21 @@
+html,
+body {
+    background-color: #ffb700;
+}
+
+body {
+    color: #202223;
+    background-image: linear-gradient(to top, #ff005e26 0%, #0000 33%, #0000 80%, #ffd76652 100%);
+    background-image: linear-gradient(to bottom, #ff006a30 0%, #0000 25rem);
+    background-attachment: fixed;
+}
+
+code,
+code > .params {
+    color: #dc0058;
+}
+
+.js.block,
+code.block {
+
+}
