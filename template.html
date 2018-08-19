@@ -131,7 +131,7 @@
     </template>
 
     <template data-module="MIDI .trigger(message)">
-        <p>Simulates the firing of a MIDI message. Creates an event object and
+        <p>Simulates an incoming MIDI message. Creates an event object and
         calls handlers with it.</p>
 
         <script type="text/js">
@@ -316,7 +316,7 @@
 
     <!-- Preprocess -->
 
-    <template class="remove" id="module-doc">
+    <template id="module-doc">
         <h1 class="grid-header text-3">{[0.section]}</h1>
         <div sparky-fn="each" class="toggle-block block" toggleable id="{[section]}.{[name]}">
             <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}"><a href="#{[section]}.{[name]}"><code class="js">{[name]}(<span class="params">{[params|join:', ']}</span>)</code></a></h3>
