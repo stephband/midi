@@ -137,21 +137,21 @@ export default function MIDI(selector) {
 
 	<p>MIDI may be passed a selector that preselects which events enter the
 	stream. A selector is either an array in the form of a MIDI message
-	<code>[status, data1, data2]</code>:</p>
+	`[status, data1, data2]`:</p>
 
 	    MIDI([144])                // CH1, NOTEON, all numbers
 	    MIDI([144, 60])            // CH1, NOTEON, C3
 	    MIDI([176, 7, 0])          // CH1, CC7, value 0
 
 	or more conveniently an array of interpreted data of the form
-	<code>[channel, type, data1, data2]</code>:
+	`[channel, type, data1, data2]`:
 
 	    MIDI([1, 'noteon'])        // CH1, NOTEON, all numbers
 	    MIDI([1, 'noteoff', 60])   // CH1, NOTEOFF, C3
 	    MIDI([2, 'note', 'C3'])    // CH2, NOTEON and NOTEOFF, C3
 	    MIDI([1, 'control', 7])    // CH1, CC7
 
-	A MIDI stream is an instance of <a href="//stephen.band/fn/index.html#Stream"><code>Stream</code></a>
+	A MIDI stream is an instance of <a href="//stephen.band/fn/index.html#Stream">`Stream`</a>
 	, and can be mapped, filtered, consumed and stopped:
 
 	    const noteStream = MIDI([1, 'note'])
@@ -168,6 +168,18 @@ export default function MIDI(selector) {
 
 	return new Stream(Source, selector);
 }
+
+/*
+.on(selector, fn)
+
+Registers a handler `fn` for incoming MIDI events that
+match object `selector`. See the `MIDI()` constructor
+above for a description of selectors.
+
+    MIDI.on(['note'], function(e) {
+	    // Do something with notes
+    });
+*/
 
 assign(MIDI, {
 	on: overload(type1, {

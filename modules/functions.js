@@ -1,3 +1,4 @@
+
 // MIDI utilities
 //
 // Declares utility functions and constants on the MIDI object.
@@ -40,6 +41,14 @@ const status = {
 
 const types = Object.keys(status);
 
+/* toType(message)
+
+Returns message type as one of the strings `'noteoff'`, `'noteon'`, `'polytouch'`,
+`'control'`, `'program'`, `'channeltouch'` or `'pitch'`.
+
+    toType([145,80,20]);          // 'noteon'.
+*/
+
 export function toType(message) {
 	var name = types[Math.floor(message[0] / 16) - 8];
 
@@ -49,11 +58,27 @@ export function toType(message) {
 		name ;
 }
 
+/*
+toStatus(channel, type)
+
+Given a channel and type, returns the MIDI message number.
+
+    toStatus(1, 'noteon');      // 144
+*/
+
 export function toStatus(channel, type) {
 	return channel > 0
 		&& channel < 17
 		&& status[type] + channel - 1 ;
 }
+
+/*
+toChannel(message)
+
+Returns the MIDI channel as a number.
+
+    toChannel([145,80,20]);       // 2
+*/
 
 export function toChannel(message) {
 	return message[0] % 16 + 1;
@@ -88,17 +113,52 @@ export const normalise = (function(converters) {
 	}
 });
 
+/*
+isNote(message)
+
+Returns `true` where message is a note, otherwise `false`.
+
+    isNote([145,80,20]);           // true
+*/
+
 export function isNote(message) {
 	return message[0] > 127 && message[0] < 160 ;
 }
+
+/*
+isControl(message)
+
+Returns `true` if message is a control change, otherwise `false`.
+
+    isControl([145,80,20]);       // false
+*/
 
 export function isControl(message) {
 	return message[0] > 175 && message[0] < 192 ;
 }
 
+/*
+isPitch(message)
+
+Returns `true` message is a pitch bend, otherwise `false`.
+
+    isPitch([145,80,20]);          // false
+*/
+
 export function isPitch(message) {
 	return message[0] > 223 && message[0] < 240 ;
 }
+
+/*
+normaliseNote(message)
+
+Many keyboards transmit `'noteon'` with
+velocity `0` rather than `'noteoff'` messages.
+`normaliseNote` <em>mutates</em> these messages to
+`'noteoff'` messages.
+
+    normaliseNote([145,80,0]);    // [129,80,0]
+*/
 
 export function normaliseNote(message) {
 	// If it's a noteon with 0 velocity, normalise it to a noteoff
@@ -109,13 +169,39 @@ export function normaliseNote(message) {
 	return message;
 }
 
+/*
+pitchToInt(message)
+
+Returns pitch bend data values as a 14-bit integer.
+
+    pitchToInt([xxx,xx,xxx]);      // -8125
+*/
+
 export function pitchToInt(message) {
 	return (message[2] << 7 | message[1]) - 8192 ;
 }
 
+/*
+pitchToFloat(range, message)
+
+Returns the pitch bend data as a float in semitones, where
+`range` is the bend range up or down in
+semitones.
+
+    pitchToFloat(2, [xxx,xx,xxx]); // -1.625
+*/
+
 export function pitchToFloat(range, message) {
 	return (range === undefined ? 2 : range) * pitchToInt(message) / 8191 ;
 }
+
+/*
+normaliseName(name)
+
+Normalises the string name to an identifier for a note.
+
+    normaliseNoteName(name);      //
+*/
 
 function replaceSymbol($0, $1) {
 	return $1 === '#' ? '♯' :
@@ -123,26 +209,73 @@ function replaceSymbol($0, $1) {
 		'' ;
 }
 
-export function normaliseNoteName(name) {
+export function normaliseName(name) {
 	return name.replace(rshorthand, replaceSymbol);
 }
+
+/*
+nameToNumber(name)
+
+Given a note name, returns a value in the range 0-127.
+
+    nameToNumber(name);          //
+*/
 
 export function nameToNumber(str) {
 	var r = rnotename.exec(normaliseNoteName(str));
 	return (parseInt(r[2], 10) + 1) * 12 + noteNumbers[r[1]];
 }
 
+/*
+numberToName(n)
+
+Returns note name from a value in the range 0-127.
+
+    numberToName(49);           // 'A4'
+*/
+
 export function numberToName(n) {
 	return noteNames[n % 12] + numberToOctave(n);
 }
+
+/*
+numberToOctave(n)
+
+Where `n` is a note number, returns the numerical octave of that note.
+
+    numberToOctave(49);         // 4
+*/
 
 export function numberToOctave(n) {
 	return Math.floor(n / 12) - 1;
 }
 
+/*
+numberToFrequency(freqA, n)
+
+Given a note number `n`, returns the frequency
+of the fundamental tone of that note relative to the reference frequency
+for middle A3 `freqA`.
+
+    numberToFrequency(440, 69);  // 440
+    numberToFrequency(440, 60);  // 261.625565
+    numberToFrequency(442, 69);  // 442
+    numberToFrequency(442, 60);  // 262.814772
+*/
+
 export function numberToFrequency(tuning, n) {
 	return tuning * Math.pow(2, (n - A4) / 12);
 }
+
+/*
+frequencyToNumber(freqA, freq)
+
+Returns freq as a float on the note number scale, where
+`freqA` is a reference frequency for middle
+A3.
+
+    frequencyToNumber(hz, freq);      //
+*/
 
 export function frequencyToNumber(tuning, frequency) {
 	var number = A4 + 12 * Math.log(frequency / tuning) / Math.log(2);
@@ -152,12 +285,3 @@ export function frequencyToNumber(tuning, frequency) {
 	// more accuracy than a millionth of a semitone?
 	return Math.round(1000000 * number) / 1000000;
 }
-
-
-// Deprecate
-
-export const noteToNumber      = deprecate(nameToNumber, 'MIDI: noteToNumber(string) is now nameToNumber(string).');
-export const numberToNote      = deprecate(numberToName, 'MIDI: numberToName(string) is now numberToName(string).');
-export const normaliseData     = deprecate(noop, 'MIDI: deprecation warning - MIDI.normaliseData() has been deprecated');
-export const normaliseNoteOn   = deprecate(noop, 'MIDI: normaliseNoteOn is deprecated');
-export const normaliseNoteOff  = deprecate(normaliseNote, 'MIDI: normaliseNoteOff(message) is now normaliseNote(message)');

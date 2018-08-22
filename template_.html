@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head sparky-fn="import:package.json" class="{[name]}">
+    <meta charset="utf-8" />
+    <meta name="author" content="@{[author.twitter]}" />
+    <meta name="description" content="Documentation for {[title]}. {[description]}" />
+    <meta name="viewport" content="width=device-width" />
+
+    <title>{[title]}</title>
+
+    <script>
+    document.documentElement.className = 'js';
+    window.DEBUG = true;
+    </script>
+
+    <link rel="icon" type="image/png" href="images/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:100,300,400,500,700" />
+    <link rel="stylesheet" href="http://stephen.band/bolt/dist/bolt.css" />
+    <link rel="stylesheet" href="http://stephen.band/dom/css/dom.css" />
+    <link rel="stylesheet" href="../fn/css/prism.cruncher.css" />
+    <link rel="stylesheet" href="../fn/css/docs.css" />
+    <link rel="stylesheet" href="../fn/css/tests.css" />
+    <link rel="stylesheet" href="css/theme.css" />
+	<link rel="stylesheet" href="css/midi-graph.css" />
+</head>
+
+<body class="">
+    <header sparky-fn="import:package.json" class="l-grid grid" id="header">
+    <div class="grid-header bottom-align">
+        <h1>{[title]} <span class="text-6">{[version]}</span></h1>
+        <p class="text-8">{[description]}</p>
+    </div
+
+    ><!--img class="block @2-grid-3/15 @2-grid-left-1/15 @3-grid-left-1/9 bottom-align" src="images/sparky-logo-dark.svg" /-->
+    </header>
+
+    <ul class="link-index index">
+		<li>repo: <a href="http://github.com/stephband/midi">github.com/sound-io/midi</a></li>
+	</ul>
+
+	<canvas class="midi-graph block" id="midi-graph" width="960"></canvas>
+
+    <midi-graph></midi-graph>
+    <midi-monitor></midi-monitor>
+
+	<p class="block">Plug in a MIDI instrument!<p>
+
+	<p class="block">
+		This example takes midi events from all inputs, filters them to
+		<code>noteon</code>, <code>noteoff</code> and <code>pitch</code>
+		normalises the messages (to Music JSON) and logs the results.
+	</p>
+
+    <article class="constructor-grid grid">
+        <article class="grid-1" sparky-fn="modules:'MIDI()' template:#module-doc"></article>
+        <article class="grid-2" sparky-fn="modules:'MIDI'   template:#module-doc"></article>
+    </article>
+
+    <article class="l-grid grid">
+        <h1 class="grid-header text-2">Functions</h1>
+        <article class="grid-1" sparky-fn="modules:messages template:#module-doc"></article>
+        <article class="grid-2" sparky-fn="modules:data     template:#module-doc"></article>
+    </article>
+
+    <template data-module="MIDI() MIDI(selector)">
+        <p>Creates a stream of incoming MIDI event objects.</p>
+
+        <script type="text/js">
+        MIDI().each(console.log);
+        </script>
+
+        <p>MIDI may be passed a selector that preselects which events enter the
+        stream. A selector is either an array in the form of a MIDI message
+        <code>[status, data1, data2]</code>:</p>
+
+        <script type="text/js">
+        MIDI([144])                // CH1, NOTEON, all numbers
+        MIDI([144, 60])            // CH1, NOTEON, C3
+        MIDI([176, 7, 0])          // CH1, CC7, value 0
+        </script>
+
+        <p>or more conveniently an array of interpreted data of the form
+        <code>[channel, type, data1, data2]</code>:</p>
+
+        <script type="text/js">
+        MIDI([1, 'noteon'])        // CH1, NOTEON, all numbers
+        MIDI([1, 'noteoff', 60])   // CH1, NOTEOFF, C3
+        MIDI([2, 'note', 'C3'])    // CH2, NOTEON and NOTEOFF, C3
+        MIDI([1, 'control', 7])    // CH1, CC7
+        </script>
+
+        <p>A MIDI stream is an instance of <a href="//stephen.band/fn/index.html#Stream"><code>Stream</code></a>
+        , and can be mapped, filtered, consumed and stopped:</p>
+
+        <script type="text/js">
+        const noteStream = MIDI([1, 'note'])
+        .map(get('data'))
+        .each(function(message) {
+            // Do something with MIDI message
+        });
+
+        // Sometime later...
+        noteStream.stop();
+        </script>
+
+        <p>To discover more stream methods, read the Stream API at <a href="//stephen.band/fn/index.html#Stream">stephen.band/fn/index.html#Stream</a></p>
+    </template>
+
+    <!--template data-module="MIDI .on(selector, fn)">
+        <p>Registers a handler <code>fn</code> for incoming MIDI events that
+        match object <code>selector</code>. See the <a href="#MIDI.."<code>MIDI()</code> constructor
+        above for a description of selectors.</p>
+
+        <script type="text/js">
+        MIDI.on(['note'], function(e) {
+            // Do something with notes
+        });
+        </script>
+    </template-->
+
+    <template data-module="MIDI .off(selector, fn)">
+        <p>Removes an event handler <code>fn</code> from MIDI events matching
+        object <code>selector</code>. Where <code>fn</code> is not given, removes
+        all handlers from events matching the <code>selector</code>.</p>
+
+        <script type="text/js">
+        MIDI.off(['note'], fn);
+        </script>
+    </template>
+
+    <template data-module="MIDI .trigger(message)">
+        <p>Simulates an incoming MIDI message. Creates an event object and
+        calls handlers with it.</p>
+
+        <script type="text/js">
+        MIDI.trigger(['noteon', 64, 64]);
+        </script>
+    </template>
+
+    <template data-module="MIDI .request()">
+        <p>A helper for <code>navigator.requestMIDIAcess()</code>.
+        Where MIDI is supported, requests access to the browser's midi API,
+        returning a promise, or where MIDI is not supported, returns a rejected
+        promise.</p>
+
+        <script type="text/js">
+        MIDI.request()
+        .catch(function(error) {
+            // Alert the user they don't have MIDI
+        })
+        .then(function(midi) {
+            // Do something with midi object
+        });
+        </script>
+
+        <p>Note that using the <code>MIDI</code> library you
+        don't really need to touch the browser's lower-level
+        <code>midi</code> object. MIDI library functions are
+        available before the promise is resolved. For example, calling
+        <code>MIDI(query)</code> or <code>MIDI.on(query, fn)</code>
+        will bind to incoming MIDI events when <code>MIDI.request()</code>
+        is resolved.</p>
+    </template>
+
+    <!--template data-module="messages isControl(message)">
+        <script type="text/js">
+        isControl([145,80,20]);       // false
+        </script>
+    </template>
+
+    <template data-module="messages isNote(message)">
+        <script type="text/js">
+        isNote([145,80,20]);           // true
+        </script>
+    </template>
+
+    <template data-module="messages isPitch(message)">
+        <script type="text/js">
+        isPitch([145,80,20]);          // false
+        </script>
+    </template>
+
+    <template data-module="messages normaliseNote(message)">
+        <p>Many keyboards transmit <code>'noteon'</code> with
+        velocity <code>0</code> rather than <code>'noteoff'</code>s.
+        <code>normaliseNote</code> <em>mutates</em> these messages to
+        <code>'noteoff'</code> messages.</p>
+        <script type="text/js">
+        normaliseNote([145,80,0]);    // [129,80,0]
+        </script>
+    </template>
+
+    <template data-module="messages pitchToInt(message)">
+        <p>Returns pitch bend data values as a 14-bit integer.</p>
+        <script type="text/js">
+        pitchToInt([xxx,xx,xxx]);      // -8125
+        </script>
+    </template>
+
+    <template data-module="messages pitchToFloat(range, message)">
+        <p>Returns the pitch bend data as a float in semitones, where
+        <code>range</code> is the bend range up or down in
+        semitones.</p>
+        <script type="text/js">
+        pitchToFloat(2, [xxx,xx,xxx]); // -1.625
+        </script>
+    </template>
+
+    <template data-module="messages toChannel(message)">
+        <p>Returns the MIDI channel as a number.</p>
+        <script type="text/js">
+        toChannel([145,80,20]);       // 2
+        </script>
+    </template>
+
+    <template data-module="messages toType(message)">
+        <p>Returns message type as one of the strings
+        <code>'noteoff'</code>,
+    	<code>'noteon'</code>,
+    	<code>'polytouch'</code>,
+    	<code>'control'</code>,
+    	<code>'program'</code>,
+    	<code>'channeltouch'</code> or
+    	<code>'pitch'</code>.
+        </p>
+        <script type="text/js">
+        toType([145,80,20]);          // 'noteon'.
+        </script>
+    </template>
+
+    <template data-module="data frequencyToNumber(freqA, freq)">
+        <p>Returns freq as a float on the note number scale, where
+        <code>freqA</code> is a reference frequency for middle
+        A3.</p>
+        <script type="text/js">
+        frequencyToNumber(hz, freq);      //
+        </script>
+    </template>
+
+    <template data-module="data numberToFrequency(freqA, n)">
+        <p>Given a note number <code>n</code>, returns the frequency
+        of the fundamental tone of that note relative to the reference frequency
+        for middle A3 <code>freqA</code>. </p>
+        <script type="text/js">
+        numberToFrequency(440, 69);  // 440
+        numberToFrequency(440, 60);  // 261.625565
+        numberToFrequency(442, 69);  // 442
+        numberToFrequency(442, 60);  // 262.814772
+        </script>
+    </template>
+
+    <template data-module="data normaliseNoteName(name)">
+        <p>Normalises the string name to an identifier for a note.</p>
+        <script type="text/js">
+        normaliseNoteName(name);      //
+        </script>
+    </template>
+
+    <template data-module="data nameToNumber(name)">
+        <p>Given a note name, returns a value in the range 0-127.</p>
+        <script type="text/js">
+        nameToNumber(name);          //
+        </script>
+    </template>
+
+    <template data-module="data numberToName(n)">
+        <p>Returns note name from a value in the range 0-127.</p>
+        <script type="text/js">
+        numberToName(49);           // 'A4'
+        </script>
+    </template>
+
+    <template data-module="data numberToOctave(n)">
+        <p>Where n is a note number, returns the numerical octave of that note.</p>
+        <script type="text/js">
+        numberToOctave(49);         // 4
+        </script>
+    </template>
+
+    <template data-module="data toStatus(channel, type)">
+        <p>Given a channel and type, returns the MIDI message number.</p>
+        <script type="text/js">
+        toStatus(1, 'noteon');      // 144
+        </script>
+    </template-->
+
+    <!-- Polyfills -->
+
+    <!--script src="http://stephen.band/fn/polyfills/object.assign.js"></script>
+    <script src="http://stephen.band/fn/polyfills/array.find.js"></script>
+    <script src="http://stephen.band/fn/polyfills/array.from.js"></script>
+    <script src="http://stephen.band/fn/polyfills/array.of.js"></script>
+    <script src="http://stephen.band/fn/polyfills/number.isnan.js"></script>
+    <script src="http://stephen.band/fn/polyfills/number.isfinite.js"></script>
+    <script src="http://stephen.band/fn/polyfills/math.log10.js"></script>
+    <script src="http://stephen.band/fn/polyfills/symbol.js"></script>
+    <script src="http://stephen.band/fn/polyfills/promise.js"></script>
+    <script src="http://stephen.band/dom/polyfills/requestanimationframe.js"></script>
+    <script src="http://stephen.band/dom/polyfills/customevent.js"></script>
+    <script src="http://stephen.band/dom/polyfills/performance.js"></script-->
+
+    <!-- Dependencies -->
+
+    <script src="../sparky/axios/dist/axios.js"></script>
+
+    <!-- Debug -->
+
+    <script type="module">
+    import * as fn  from '../fn/fn.js';
+    import * as dom from '../dom/dom.js';
+    window.fn  = fn;
+    window.dom = dom;
+    </script>
+
+    <!-- Preprocess -->
+
+    <template id="module-doc">
+        <h1 class="grid-header text-3">{[0.section]}</h1>
+        <div sparky-fn="each" class="toggle-block block" toggleable id="{[section]}.{[name]}">
+            <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}"><a href="#{[section]}.{[name]}"><code class="js">{[name]}(<span class="params">{[params|join:', ']}</span>)</code></a></h3>
+            <div sparky-fn="replace:fragment"></div>
+        </div>
+    </template>
+
+    <template class="remove" id="html-code">
+        <code class="html-code block" sparky-fn="template:''"></code>
+    </template>
+
+    <template class="remove" id="js-code">
+        <code class="js-code block" sparky-fn="template:''"></code>
+    </template>
+
+    <template class="remove" id="css-code">
+        <code class="css-code block" sparky-fn="template:''"></code>
+    </template>
+
+
+    <!-- Preprocess docs-->
+
+    <script class="remove" type="module" src="../fn/build.js"></script>
+
+    <!-- Initialise -->
+
+    <script type="module">
+    import '../dom/js/dom.root.js';
+    import '../dom/js/dom.toggleable.js';
+    </script>
+
+    <!-- Test -->
+
+    <script type="module">
+    // Run tests
+    //import '../fn/test/test.js';
+    //import './test/sparky.test.js';
+    </script>
+
+    <script type="module">
+
+    </script>
+</body>
+</html>

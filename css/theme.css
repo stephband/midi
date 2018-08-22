@@ -1,3 +1,5 @@
+:root { --code-color: #dc0058; }
+
 html,
 body {
     background-color: #ffb700;
@@ -12,7 +14,7 @@ body {
 
 code,
 code > .params {
-    color: #dc0058;
+    color: var(--code-color);
 }
 
 .js.block,
