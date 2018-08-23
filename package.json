@@ -3,28 +3,33 @@
   "title": "MIDI",
   "description": "A hub for receiving, sending and filtering browser MIDI messages, and a library of functions for manipulating them.",
   "version": "0.9.0",
-  "homepage": "http://sound.io/midi",
+  "homepage": "http://stephen.band/midi",
   "author": {
     "name": "Stephen Band",
     "twitter": "stephband"
   },
-  "repository": { "type": "git", "url": "https://github.com/soundio/midi.git" },
-  "keywords": ["javascript", "browser"],
-  "bugs": { "url": "https://github.com/soundio/midi/issues" },
+  "repository": { "type": "git", "url": "https://github.com/stephband/midi.git" },
+  "bugs": { "url": "https://github.com/stephband/midi/issues" },
   "licenses": [{ "type": "MIT" }],
+  "keywords": [
+      "browser",
+      "web",
+      "library",
+      "functional",
+      "js",
+      "javascript",
+      "music",
+      "midi"
+  ],
+  "homepage": "http://stephen.band/midi/template.html",
+  "docs": "http://stephen.band/midi/template.html",
   "devDependencies": {
-    "karma": "latest",
-    "karma-chrome-launcher": "latest",
-    "karma-coverage": "latest",
-    "karma-firefox-launcher": "latest",
-    "karma-fixture": "^0.2.5",
-    "karma-nested-reporter": "^0.1.3",
-    "karma-qunit": "latest",
-    "karma-safari-launcher": "latest",
-    "qunit": "latest",
-    "qunitjs": "latest"
+      "eslint": "^4.4.1",
+      "rollup": "^0.58.2"
   },
   "scripts": {
-    "test": "karma start"
+      "lint": "eslint js/*.js",
+      "build-cjs": "rollup fn.js --o dist/fn-cjs-1.2.0.js --f cjs",
+      "build-closure": "rollup fn.js --o dist/fn-iife-1.2.0.js --f iife --n Fn"
   }
 }
