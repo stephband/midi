@@ -59,7 +59,7 @@ export function createMessage(channel, type, param, value) {
 			(/^note/.test(type)) ? noteToNumber(param) :
 			(type === 'control') ? controlToNumber(param) :
 			param ;
-		message[3] = limit(0, 127, value * 127);
+		message[2] = limit(0, 127, value * 127);
 	}
 
 	return message;
@@ -146,7 +146,8 @@ export function toType(message) {
 	var name = types[Math.floor(message[0] / 16) - 8];
 
 	// Catch type noteon with zero velocity and rename it as noteoff
-	return name === types[1] && message[2] === 0 ?
-		types[0] :
-		name ;
+	return name;
+    //name === types[1] && message[2] === 0 ?
+	//	types[0] :
+	//	name ;
 }

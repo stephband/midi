@@ -17,7 +17,7 @@ export function controlToNumber(name) {
 		return entry[1] === name;
 	});
 
-	return entry ? entry[0] : parseInt(name, 10);
+	return entry ? parseInt(entry[0], 10) : parseInt(name, 10);
 }
 
 /*

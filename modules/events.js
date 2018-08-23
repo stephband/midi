@@ -117,7 +117,7 @@ function isPastEvent(e) {
 export function createEvent(time, port, message) {
 	// Allow a margin of error for event invalidation
 	now = performance.now() + eventInvalidationTime;
-	const e = events.find(isPastEvent);
+	let e = events.find(isPastEvent);
 
 	if (!e) {
 		e = {};
