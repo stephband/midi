@@ -1,264 +1,160 @@
 
-if (window.console || window.console.log) {
-	console.log('MIDI        - http://github.com/soundio/midi');
-}
+import { remove } from '../../fn/fn.js';
 
-import { ap, cache, curry, deprecate, each, get, isDefined, noop, nothing, overload, pipe, remove, rest, set, Stream, toClass } from '../../fn/fn.js';
-import { toStatus, toType } from './functions.js';
+const DEBUG = true;
+const store = [];
 
-var performance = window.performance;
+/*
+request()
 
-var assign      = Object.assign;
+A shortcut for `navigator.requestMIDIAcess()`. Where MIDI is supported, requests
+access to the browser's midi API, returning a promise, or where MIDI is not
+supported, returns a rejected promise.
 
+    request()
+    .catch(function(error) {
+        // Alert the user they don't have MIDI
+    })
+    .then(function(midi) {
+        // Do something with midi object
+    });
 
-// Routing
+Note that using the `MIDI` library you don't really need to touch the browser's
+lower-level `midi` object. MIDI functions and methods are available before the
+promise is resolved. For example, calling `on(query, fn)` will bind to
+incoming MIDI events when `request()` is resolved.
+*/
 
-function fireRoute(i, query, object, message) {
-	var name   = query[i++];
-	var branch = object[name];
+let promise;
 
-	if (name === undefined) {
-		branch && ap(message, branch);
-	}
-	else {
-		branch && fireRoute(i, query, branch, message);
-		object.undefined && ap(message, object.undefined);
-	}
-}
-
-function getRoute(i, query, object) {
-	var name   = query[i++];
-	var branch = object[name];
-
-	return name === undefined ?
-		branch :
-		branch && getRoute(i, query, branch) ;
-}
-
-function setRoute(i, query, object, fn) {
-	var name   = query[i++];
-	var branch = object[name];
-
-	return name === undefined ?
-		branch ? branch.push(fn) : (object[name] = [fn]) :
-		setRoute(i, query, branch || (object[name] = {}), fn) ;
-}
-
-function removeRoute(query, object, fn) {
-	// Handle queries of type [channel, type, name || byte1, byte2]
-	// or type [byte0, byte1, byte2]
-	var fns = typeof query[1] === 'string' ?
-		getRoute(0, toQuery(query), root) :
-		getRoute(0, query, root) ;
-
-	if (!fns) { return; }
-	remove(fns, fn);
-}
-
-
-// Transforms
-
-var get1  = get('1');
-var type1 = function(object) { return typeof object[1]; };
-var query = {};
-
-function toNoteQuery(data) {
-	query[0] = toStatus(data[0], data[1]);
-	query[1] = typeof data[2] === 'string' ?
-		nameToNumber(data[2]) :
-		data[2] ;
-	query[2] = data[3];
-	return query;
-}
-
-function toQuery(data) {
-	query[0] = toStatus(data[0], data[1]);
-	query[1] = data[2];
-	query[2] = data[3];
-	return query;
-}
-
-function toEvent(message) {
-	return {
-		timeStamp: performance.now(),
-		data:      message
-	};
-}
-
-// Important? Dunno.
-//
-//function send(port, data) {
-//	if (port) {
-//		port.send(data, 0);
-//	}
-//}
-
-
-// MIDI
-
-const root  = {};
-
-function push(e) {
-	fireRoute(0, e.data, root, e);
-}
-
-function Source(notify, stop, selector) {
-	const buffer = [];
-
-	function push() {
-		buffer.push.apply(buffer, arguments);
-		notify('push');
-	}
-
-	this._buffer   = buffer;
-	this._selector = selector;
-	this._push     = push;
-	this._stop     = stop;
-
-	MIDI.on(selector, push);
-}
-
-assign(Source.prototype, {
-	shift: function midi() {
-		return this._buffer.shift();
-	},
-
-	stop: function() {
-		MIDI.off(this._selector, this._push);
-		this._stop(this._buffer.length);
-	}
-});
-
-export default function MIDI(selector) {
-	/*
-	Creates a stream of incoming MIDI event objects.
-
-	    MIDI().each(console.log);
-
-	<p>MIDI may be passed a selector that preselects which events enter the
-	stream. A selector is either an array in the form of a MIDI message
-	`[status, data1, data2]`:</p>
-
-	    MIDI([144])                // CH1, NOTEON, all numbers
-	    MIDI([144, 60])            // CH1, NOTEON, C3
-	    MIDI([176, 7, 0])          // CH1, CC7, value 0
-
-	or more conveniently an array of interpreted data of the form
-	`[channel, type, data1, data2]`:
-
-	    MIDI([1, 'noteon'])        // CH1, NOTEON, all numbers
-	    MIDI([1, 'noteoff', 60])   // CH1, NOTEOFF, C3
-	    MIDI([2, 'note', 'C3'])    // CH2, NOTEON and NOTEOFF, C3
-	    MIDI([1, 'control', 7])    // CH1, CC7
-
-	A MIDI stream is an instance of <a href="//stephen.band/fn/index.html#Stream">`Stream`</a>
-	, and can be mapped, filtered, consumed and stopped:
-
-	    const noteStream = MIDI([1, 'note'])
-	    .map(get('data'))
-	    .each(function(message) {
-		    // Do something with MIDI message
-	    });
-
-	    // Sometime later...
-	    noteStream.stop();
-
-	To discover more stream methods, read the Stream API at <a href="//stephen.band/fn/index.html#Stream">stephen.band/fn/index.html#Stream</a>
-	*/
-
-	return new Stream(Source, selector);
+export function request() {
+	// Cache the request so there's only ever one
+	return promise || (promise = navigator.requestMIDIAccess ?
+		navigator
+		.requestMIDIAccess()
+		.then(function(midi) {
+			if (DEBUG) { console.group('%cMIDI: %cports', 'color: #d8a012; font-weight: bold;', 'color: inherit; font-weight: 300'); }
+			if (DEBUG) { window.midi = midi; }
+			setupPorts(midi);
+			if (DEBUG) { console.groupEnd(); }
+			return midi;
+		})
+		.catch(function(e) {
+			console.log('MIDI access denied.', e);
+		}) :
+		Promise
+		.reject("This browser does not support Web MIDI.")
+		.catch(function(e) {
+			console.log(e);
+		})
+	);
 }
 
 /*
-.on(selector, fn)
+transmit(e)
 
-Registers a handler `fn` for incoming MIDI events that
-match object `selector`. See the `MIDI()` constructor
-above for a description of selectors.
-
-    MIDI.on(['note'], function(e) {
-	    // Do something with notes
-    });
+Send a MIDI event.
 */
 
-assign(MIDI, {
-	on: overload(type1, {
-		'string': overload(get1, {
-			'note': function(data, fn) {
-				var query = toNoteQuery(data);
+export let transmit = function send() {};
 
-				query[0] = toStatus(data[0], 'noteon');
-				setRoute(0, query, root, fn);
+function createSendFn(outputs, tree) {
+	return function send(portName, data, time) {
+		var port = this.output(portName);
 
-				query[0] = toStatus(data[0], 'noteoff');
-				setRoute(0, query, root, fn);
-			},
-
-			'noteon': function(data, fn) {
-				var query = toNoteQuery(data);
-				setRoute(0, query, root, fn);
-			},
-
-			'noteoff': function(data, fn) {
-				var query = toNoteQuery(data);
-				setRoute(0, query, root, fn);
-			},
-
-			default: function(data, fn) {
-				var query = toQuery(data);
-				setRoute(0, query, root, fn);
-			}
-		}),
-
-		default: function(query, fn) {
-			setRoute(0, query, root, fn)
+		if (port) {
+			port.send(data, time || 0);
 		}
-	}),
-
-	off: overload(type1, {
-		'string': overload(get1, {
-			'note': function(data, fn) {
-				var query = toNoteQuery(data);
-
-				query[0] = toStatus(data[0], 'noteon');
-				removeRoute(query, root, fn);
-
-				query[0] = toStatus(data[0], 'noteoff');
-				removeRoute(query, root, fn);
-			},
-
-			'noteon': function(data, fn) {
-				var query = toNoteQuery(data);
-				removeRoute(query, root, fn);
-			},
-
-			'noteoff': function(data, fn) {
-				var query = toNoteQuery(data);
-				removeRoute(query, root, fn);
-			},
-
-			default: function(query, fn) {
-				var query = toQuery(data);
-				removeRoute(query, root, fn);
-			}
-		}),
-
-		default: function(query, fn) {
-			removeRoute(query, root, fn);
+		else {
+			console.warn('MIDI: .send() output port not found:', port);
 		}
-	}),
 
-	trigger: overload(type1, {
-		'string': overload(get1, {
-			noteon:  pipe(toNoteQuery, toEvent, push),
-			noteoff: pipe(toNoteQuery, toEvent, push),
-			default: pipe(toQuery, toEvent, push)
-		}),
+		return this;
+	};
+}
 
-		default: pipe(toEvent, push)
-	}),
 
-	output:    noop,
+// Handle connections
 
-	send:      noop
-});
+function listen(port) {
+	// It's suggested here that we need to keep a reference to midi inputs
+	// hanging around to avoid garbage collection:
+	// https://code.google.com/p/chromium/issues/detail?id=163795#c123
+	store.push(port);
+	port.onmidimessage = function(e) {
+
+	};
+}
+
+function unlisten(port) {
+	remove(store, port);
+	port.onmidimessage = null;
+}
+
+
+
+function createPortFn(ports) {
+	return function getPort(id) {
+		var port;
+
+		if (typeof id === 'string') {
+			for (port of ports) {
+				if (port[1].name === id) { return port[1]; }
+			}
+		}
+		else {
+			for (port of ports) {
+				if (port[0] === id) { return port[1]; }
+			}
+		}
+	};
+}
+
+var MIDI = {};
+
+function updateOutputs(midi) {
+	var arr;
+
+	if (!MIDI.outputs) { MIDI.outputs = []; }
+
+	MIDI.outputs.length = 0;
+
+	for (arr of midi.outputs) {
+		var id = arr[0];
+		var output = arr[1];
+		console.log('MIDI: Output detected:', output.name, output.id);
+		// Store outputs
+		MIDI.outputs.push(output);
+	}
+
+	MIDI.output = createPortFn(midi.outputs);
+	transmit = createSendFn(midi.outputs, outputs);
+}
+
+function statechange(e) {
+	var port = e.port;
+
+	if (port.state === 'connected') {
+		listen(port);
+	}
+	else if (port.state === 'disconnected') {
+		unlisten(port);
+	}
+}
+
+function setupPorts(midi) {
+	var entry, port;
+
+	for (entry of midi.inputs) {
+		port = entry[1];
+		console.log('MIDI: Input detected:', port.name, port.id, port.state);
+		listen(port);
+	}
+
+	for (entry of midi.outputs) {
+		port = entry[1];
+		console.log('MIDI: Output detected:', port.name, port.id, port.state);
+	}
+
+	midi.onstatechange = statechange;
+}
