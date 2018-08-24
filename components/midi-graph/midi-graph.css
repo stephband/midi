@@ -1,6 +1,6 @@
 /* .index */
 
-.note_index {
+.midi-graph-index {
 	padding-left: 3.3333%;
 	padding-right: 3.3333%;
 	white-space: nowrap;
@@ -10,7 +10,8 @@
 	border-bottom-right-radius: 0.25rem;
 }
 
-.note_index > li {
+.midi-graph-index > li {
+	display: inline-block;
 	font-family: "Andale Mono", Helvetica, Arial, sans-serif;
 	font-weight: bold;
 	font-size: 0.8125rem;
@@ -27,13 +28,13 @@
 	color: #666666;
 }
 
-.note_index > li.on {
+.midi-graph-index > li.on {
 	visibility: visible;
 }
 
 /* canvas */
 
-.midi_canvas {
+.midi-graph-canvas {
 	display: block;
 	width: 100%;
 	height: auto;

@@ -1,4 +1,6 @@
-:root { --code-color: #dc0058; }
+:root {
+    --param-fg: #dc0058;
+}
 
 html,
 body {
@@ -14,7 +16,7 @@ body {
 
 code,
 code > .params {
-    color: var(--code-color);
+    color: var(--param-fg);
 }
 
 .js.block,

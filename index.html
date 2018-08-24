@@ -20,22 +20,159 @@
     <link rel="stylesheet" href="../fn/css/docs.css" />
     <link rel="stylesheet" href="../fn/css/tests.css" />
     <link rel="stylesheet" href="css/theme.css" />
-	<link rel="stylesheet" href="css/midi-graph.css" />
+	<link rel="stylesheet" href="components/midi-graph/midi-graph.css" />
 </head>
 
 <body>
-    <header fn="import:'package.json'" class="l-grid grid" id="header">
-        <div class="grid-header bottom-align">
-            <h1>{[title]} <span class="text-6">{[version]}</span></h1>
+    <header fn="import:'package.json'" class="1-grid grid" id="header">
+        <h1 class="grid-0">{[title]} <span class="text-6">{[version]}</span></h1>
+
+        <div class="grid-1">
             <p class="text-8">{[description]}</p>
 
             <ul class="link-index index">
-        		<li>repo: <a href="http://github.com/stephband/midi">github.com/stephband/midi</a></li>
+        		<li>repo: <a href="{[repository.url]}">{[repository.url]}</a></li>
+                <li>bugs: <a href="{[bugs.url]}">{[bugs.url]}</a></li>
         	</ul>
         </div>
     </header>
 
-	<canvas class="midi-graph block" id="midi-graph" width="960"></canvas>
+    <section class="demo-block block site-grid grid">
+        <div class="midi-graph grid-1" id="midi-graph">
+        	<canvas class="midi-graph-canvas" width="1920" height="320"></canvas>
+
+        	<ul class="midi-graph-index index">
+        		 <li>C</li
+        		><li>C♯</li
+        		><li>D</li
+        		><li>E♭</li
+        		><li>E</li
+        		><li>F</li
+        		><li>F♯</li
+        		><li>G</li
+        		><li>G♯</li
+        		><li>A</li
+        		><li>B♭</li
+        		><li>B</li
+        		><li>C</li
+        		><li>C♯</li
+        		><li>D</li
+        		><li>E♭</li
+        		><li>E</li
+        		><li>F</li
+        		><li>F♯</li
+        		><li>G</li
+        		><li>G♯</li
+        		><li>A</li
+        		><li>B♭</li
+        		><li>B</li
+        		><li>C</li
+        		><li>C♯</li
+        		><li>D</li
+        		><li>E♭</li
+        		><li>E</li
+        		><li>F</li
+        		><li>F♯</li
+        		><li>G</li
+        		><li>G♯</li
+        		><li>A</li
+        		><li>B♭</li
+        		><li>B</li
+        		><li>C</li
+        		><li>C♯</li
+        		><li>D</li
+        		><li>E♭</li
+        		><li>E</li
+        		><li>F</li
+        		><li>F♯</li
+        		><li>G</li
+        		><li>G♯</li
+        		><li>A</li
+        		><li>B♭</li
+        		><li>B</li
+        		><li>C</li
+        		><li>C♯</li
+        		><li>D</li
+        		><li>E♭</li
+        		><li>E</li
+        		><li>F</li
+        		><li>F♯</li
+        		><li>G</li
+        		><li>G♯</li
+        		><li>A</li
+        		><li>B♭</li
+        		><li>B</li
+        		><li>C</li
+        		><li>C♯</li
+        		><li>D</li
+        		><li>E♭</li
+        		><li>E</li
+        		><li>F</li
+        		><li>F♯</li
+        		><li>G</li
+        		><li>G♯</li
+        		><li>A</li
+        		><li>B♭</li
+        		><li>B</li
+        		><li>C</li
+        		><li>C♯</li
+        		><li>D</li
+        		><li>E♭</li
+        		><li>E</li
+        		><li>F</li
+        		><li>F♯</li
+        		><li>G</li
+        		><li>G♯</li
+        		><li>A</li
+        		><li>B♭</li
+        		><li>B</li
+        		><li>C</li
+        		><li>C♯</li
+        		><li>D</li
+        		><li>E♭</li
+        		><li>E</li
+        		><li>F</li
+        		><li>F♯</li
+        		><li>G</li
+        		><li>G♯</li
+        		><li>A</li
+        		><li>B♭</li
+        		><li>B</li
+        		><li>C</li
+        		><li>C♯</li
+        		><li>D</li
+        		><li>E♭</li
+        		><li>E</li
+        		><li>F</li
+        		><li>F♯</li
+        		><li>G</li
+        		><li>G♯</li
+        		><li>A</li
+        		><li>B♭</li
+        		><li>B</li
+        		><li>C</li
+        		><li>C♯</li
+        		><li>D</li
+        		><li>E♭</li
+        		><li>E</li
+        		><li>F</li
+        		><li>F♯</li
+        		><li>G</li
+        		><li>G♯</li
+        		><li>A</li
+        		><li>B♭</li
+        		><li>B</li
+        		><li>C</li
+        		><li>C♯</li
+        		><li>D</li
+        		><li>E♭</li
+        		><li>E</li
+        		><li>F</li
+        		><li>F♯</li
+        		><li>G</li>
+        	</ul>
+        </div>
+    </section>
 
     <article class="6-grid grid">
         <header class="grid-0">
@@ -44,7 +181,6 @@
         </header>
 
         <section class="grid-1">
-            <h1 class="text-3"><code>MIDI</code></h1>
             <article fn="docs:'./modules/events.js','./modules/midi.js' each append:body" class="toggle-block block" toggleable id="{[name]}">
                 <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
                     <a href="#{[name]}">
@@ -112,7 +248,9 @@
     import '../dom/js/dom.root.js';
     import '../dom/js/dom.toggleable.js';
     import * as MIDI from './midi.js';
-    window.MIDI = MIDI;
+    Object.assign(window, MIDI);
+
+    import './components/midi-graph/midi-graph.js';
     </script>
 
     <!-- Tests -->
