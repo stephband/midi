@@ -105,7 +105,7 @@ export function isPitch(message) {
 normalise(message)
 
 Many keyboards transmit `'noteon'` with velocity `0` rather than `'noteoff'`
-messages. `normaliseNote` <em>mutates</em> these messages to `'noteoff'`
+messages. `normalise()` <em>mutates</em> these messages to `'noteoff'`
 messages.
 
     normalise([145,80,0]);  // [129,80,0]
