@@ -1,4 +1,14 @@
 
+/*
+<midi-graph>
+
+    import 'http://stephen.band/midi/components/midi-graph/midi-graph.js';
+
+The `midi-graph` custom element plots incoming events on a graph. The current
+version supports notes, control change and pitch bend events.
+
+*/
+
 import { noop, overload, toInt } from '../../../fn/fn.js';
 import { append, define, query, trigger, empty, now } from '../../../dom/dom.js';
 import { print } from '../../modules/print.js';
@@ -294,9 +304,6 @@ function updateControl(state, data) {
 }
 
 
-// Define the custom element <midi-graph>
-// define(name, setup, attributes, shadow)
-
 const lis = Array
 	.from({length: 128})
 	.map(function(n, i) {
@@ -304,6 +311,7 @@ const lis = Array
 	})
 	.join('');
 
+// define(name, setup, attributes, shadow)
 define('midi-graph', function setup(node) {
 	// Todo: get options from attributes?
 	var options = {};

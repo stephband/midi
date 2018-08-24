@@ -41,7 +41,7 @@
         <div class="midi-graph grid-1" id="midi-graph">
             <p class="text-8 hint" id="instrument-hint">Plug in a MIDI instrument to try out the <code>&lt;midi-graph&gt;</code> component&hellip;</p>
 
-            <midi-graph></midi-graph>
+            <midi-graph/>
         </div>
     </section>
 
@@ -110,6 +110,25 @@
         </section>
     </article>
 
+    <article class="1-2-grid grid">
+        <header class="grid-0">
+            <h1 class="text-2" style="font-size: 1.875rem;">Custom elements</h1>
+        </header>
+
+        <section class="grid-1">
+            <h1 class="text-3"><code>&lt;midi-graph&gt;</code></h1>
+            <pre><code>import 'http://stephen.band/midi/components/midi-graph/midi-graph.js';</code></pre>
+
+            <article fn="docs:'./components/midi-graph/midi-graph.js' each append:body" class="block" id="{[name]}">
+                <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
+                    <a href="#{[name]}">
+                        <code fn="html:title" class="language-html"></code>
+                    </a>
+                </h3>
+            </article>
+        </section>
+    </article>
+
     <!-- Templating -->
     <script type="module">
     import '../fn/docs.js';
@@ -133,10 +152,14 @@
     import { classes, get } from '../dom/dom.js';
     var cls = classes(get('instrument-hint'));
     cls.add('active');
-    MIDI.on([], function removeHint(e) {
-        MIDI.off([], removeHint);
-        cls.remove('active');
-    });
+
+    // Wait for tests to run
+    setTimeout(function() {
+        MIDI.on([], function removeHint(e) {
+            MIDI.off([], removeHint);
+            cls.remove('active');
+        });
+    }, 1000);
     </script>
 
     <!-- Tests -->
