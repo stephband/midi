@@ -1,5 +1,6 @@
 
 import { now } from '../../../dom/dom.js';
+import { isNote, isControl, isPitch, bytesToSignedFloat, toChannel } from '../../midi.js';
 
 var defaults = {
 		paddingLeft:  1 / 30,
@@ -34,28 +35,8 @@ var colors = [
 var rhsl = /^(?:hsl\()?\s?(\d{1,3}(?:\.\d+)?)\s?,\s?(\d{1,3}(?:\.\d+)?)%\s?,\s?(\d{1,3}(?:\.\d+)?)%\s?\)?$/;
 
 
-function isNote(data) {
-	return data[0] > 127 && data[0] < 160 ;
-}
-
-function isControl(data) {
-	return data[0] > 175 && data[0] < 192 ;
-}
-
-function isPitch(data) {
-	return data[0] > 223 && data[0] < 240 ;
-}
-
-function pitchToInt(data) {
-	return (data[2] << 7 | data[1]) - 8192 ;
-}
-
 function pitchToFloat(data, range) {
-	return range * pitchToInt(data) / 8191 ;
-}
-
-function returnChannel(data) {
-	return data[0] % 16 + 1;
+	return range * bytesToSignedFloat(data[1], data[2]) ;
 }
 
 function toHSL(h, s, l, a) {
@@ -219,12 +200,12 @@ function renderNames(nodes, set, state) {
 	}
 }
 
-function toInteger(str) {
+function toInt(str) {
 	return parseInt(str, 10);
 }
 
 function hslToArray(hsl) {
-	return rhsl.exec(hsl).splice(1, 3).map(toInteger);
+	return rhsl.exec(hsl).splice(1, 3).map(toInt);
 }
 
 function createSettings(options, node) {
@@ -266,7 +247,7 @@ function createSettings(options, node) {
 }
 
 function updateNoteRender(state, data) {
-	var channel = returnChannel(data) - 1;
+	var channel = toChannel(data) - 1;
 	var notesRender = state[channel].notesRender;
 	var notesActual = state[channel].notes;
 	var render  = notesRender[data[1]] || 0;
@@ -286,7 +267,7 @@ function updateNoteRender(state, data) {
 }
 
 function updateCcColor(state, set, cc, now) {
-	var channel = returnChannel(cc.data) - 1;
+	var channel = toChannel(cc.data) - 1;
 	var color = set.colors[channel];
 	var fade = (defaults.fadeDuration - now + cc.time) / defaults.fadeDuration;
 
@@ -299,15 +280,15 @@ function updateCcColor(state, set, cc, now) {
 }
 
 function updateNote(state, data) {
-	state[returnChannel(data) - 1].notes[data[1]] = data[0] < 144 ? 0 : data[2] ;
+	state[toChannel(data) - 1].notes[data[1]] = data[0] < 144 ? 0 : data[2] ;
 }
 
 function updateControl(state, data) {
-	var obj = state[returnChannel(data) - 1].ccs[data[1]];
+	var obj = state[toChannel(data) - 1].ccs[data[1]];
 
 	if (!obj) {
 		obj = {};
-		state[returnChannel(data) - 1].ccs[data[1]] = obj;
+		state[toChannel(data) - 1].ccs[data[1]] = obj;
 	}
 
 	obj.data = data;
@@ -411,7 +392,7 @@ export function MIDIGraph(options) {
 		}
 
 		if (isPitch(e.data)) {
-			state[returnChannel(e.data) - 1].pitch = pitchToFloat(e.data, options.range || 2);
+			state[toChannel(e.data) - 1].pitch = pitchToFloat(e.data, options.range || 2);
 			queueRender(render);
 			return;
 		}
