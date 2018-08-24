@@ -14,8 +14,8 @@
     </script>
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:100,300,400,500,700" />
-    <link rel="stylesheet" href="http://stephen.band/bolt/dist/bolt.css" />
-    <link rel="stylesheet" href="http://stephen.band/dom/css/dom.css" />
+    <link rel="stylesheet" href="../bolt/dist/bolt.css" />
+    <link rel="stylesheet" href="../dom/css/dom.css" />
     <link rel="stylesheet" href="../fn/css/prism.cruncher.css" />
     <link rel="stylesheet" href="../fn/css/docs.css" />
     <link rel="stylesheet" href="../fn/css/tests.css" />
@@ -39,7 +39,7 @@
 
     <section class="demo-block block site-grid grid">
         <div class="midi-graph grid-1" id="midi-graph">
-            <p class="text-8">Plug in a MIDI instrument and take it for a spin&hellip;</p>
+            <p class="text-8 hint" id="instrument-hint">Plug in a MIDI instrument to try out the <code>&lt;midi-graph&gt;</code> component&hellip;</p>
 
         	<canvas class="midi-graph-canvas" width="1920" height="320"></canvas>
 
@@ -176,14 +176,18 @@
         </div>
     </section>
 
-    <article class="6-grid grid">
+    <article class="1-2-3-grid grid">
         <header class="grid-0">
-            <h1 class="text-2" style="font-size: 1.875rem;">MIDI</h1>
+            <h1 class="text-2" style="font-size: 1.875rem;">Functions</h1>
             <!--p>A MIDI message is an array of 3 integers.</p-->
+            <p>Import functions:</p>
+            <pre><code>import { on, send } from 'http://stephen.band/midi/module.js';</code></pre>
+            <p>On this page, all functions have been imported and assigned to <code>window</code> so that you can play with them in the console.</p>
         </header>
 
         <section class="grid-1">
-            <article fn="docs:'./modules/events.js','./modules/midi.js' each append:body" class="toggle-block block" toggleable id="{[name]}">
+            <h1 class="text-3">send & receive</h1>
+            <article fn="docs:'./modules/events.js','./modules/midi.js?send' each append:body" class="toggle-block block" toggleable id="{[name]}">
                 <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
                     <a href="#{[name]}">
                         <code fn="html:title" class="language-js"></code>
@@ -191,15 +195,19 @@
                 </h3>
             </article>
         </section>
-    </article>
 
-    <article class="6-grid grid">
-        <header class="grid-0">
-            <h1 class="text-2">Functions</h1>
-            <!--p>A MIDI message is an array of 3 integers.</p-->
-        </header>
+        <section class="grid-2">
+            <h1 class="text-3">ports</h1>
+            <article fn="docs:'./modules/midi.js?request,inputs,outputs' each append:body" class="toggle-block block" toggleable id="{[name]}">
+                <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
+                    <a href="#{[name]}">
+                        <code fn="html:title" class="language-js"></code>
+                    </a>
+                </h3>
+            </article>
+        </section>
 
-        <section class="grid-1">
+        <section class="grid-3">
             <h1 class="text-3">messages</h1>
             <article fn="docs:'./modules/messages.js' each append:body" class="toggle-block block" toggleable id="{[name]}">
                 <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
@@ -210,7 +218,7 @@
             </article>
         </section>
 
-        <section class="grid-2">
+        <section class="grid-4">
             <h1 class="text-3">data</h1>
             <article fn="docs:'./modules/data.js' each append: body" class="toggle-block block" toggleable id="{[name]}">
                 <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
@@ -221,7 +229,7 @@
             </article>
         </section>
 
-        <section class="grid-3">
+        <section class="grid-5">
             <h1 class="text-3">maths</h1>
             <article fn="docs:'./modules/maths.js' each append:body" class="toggle-block block" toggleable id="{[name]}">
                 <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
@@ -252,7 +260,17 @@
     import * as MIDI from './midi.js';
     Object.assign(window, MIDI);
 
-    import './components/midi-graph/midi-graph.js';
+    import MIDIGraph from './components/midi-graph/midi-graph.js';
+    const graph = MIDIGraph({});
+    MIDI.on([], graph.in);
+
+    import { classes, get } from '../dom/dom.js';
+    var cls = classes(get('instrument-hint'));
+    cls.add('active');
+    MIDI.on([], function removeHint(e) {
+        MIDI.off([], removeHint);
+        cls.remove('active');
+    });
     </script>
 
     <!-- Tests -->

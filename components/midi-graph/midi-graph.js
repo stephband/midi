@@ -295,7 +295,7 @@ function updateControl(state, data) {
 	obj.time = now();
 }
 
-export function MIDIGraph(options) {
+export default function MIDIGraph(options) {
 	var graph = Object.create(Object.prototype);
 
 	var node = options.node ?
@@ -306,7 +306,7 @@ export function MIDIGraph(options) {
 
 	var canvasNode = node.querySelector('canvas');
 	var notesNode  = node.querySelector('.midi-graph-index');
-	var noteNodes = notesNode.querySelectorAll('li');
+	var noteNodes  = notesNode.querySelectorAll('li');
 
 	if (!canvasNode.getContext) {
 		throw new Error('options.node must contain a canvas element.');
@@ -377,22 +377,22 @@ export function MIDIGraph(options) {
 		};
 	}
 
-	graph.in = function(e) {
-		if (isNote(e.data)) {
-			notes.push(e.data);
-			updateNote(state, e.data, queueRender);
+	graph.in = function(time, port, message) {
+		if (isNote(message)) {
+			notes.push(message);
+			updateNote(state, message, queueRender);
 			queueRender(render);
 			return;
 		}
 
-		if (isControl(e.data)) {
-			updateControl(state, e.data);
+		if (isControl(message)) {
+			updateControl(state, message);
 			queueRender(render);
 			return;
 		}
 
-		if (isPitch(e.data)) {
-			state[toChannel(e.data) - 1].pitch = pitchToFloat(e.data, options.range || 2);
+		if (isPitch(message)) {
+			state[toChannel(message) - 1].pitch = pitchToFloat(message, options.range || 2);
 			queueRender(render);
 			return;
 		}
@@ -402,6 +402,3 @@ export function MIDIGraph(options) {
 }
 
 MIDIGraph.defaults = defaults;
-
-// Set up
-MIDIGraph({});

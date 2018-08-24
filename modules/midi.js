@@ -1,8 +1,34 @@
 
-import { remove } from '../../fn/fn.js';
+import { print, printGroup, printGroupEnd } from './print.js';
+import { fire } from './events.js';
 
 const DEBUG = true;
-const store = [];
+const empty = new Map();
+
+let midi = {
+    inputs: empty,
+    outputs: empty
+};
+
+/*
+inputs()
+
+Returns a map of MIDI input ports, keyed by port id.
+*/
+
+export function inputs() {
+    return midi.inputs;
+}
+
+/*
+outputs()
+
+Returns a map of MIDI output ports, keyed by port id.
+*/
+
+export function outputs() {
+    return midi.outputs;
+}
 
 /*
 request()
@@ -25,6 +51,57 @@ promise is resolved. For example, calling `on(query, fn)` will bind to
 incoming MIDI events when `request()` is resolved.
 */
 
+function listen(port) {
+	// It's suggested here that we need to keep a reference to midi inputs
+	// hanging around to avoid garbage collection:
+	// https://code.google.com/p/chromium/issues/detail?id=163795#c123
+	//store.push(port);
+
+	port.onmidimessage = fire;
+}
+
+function unlisten(port) {
+    // Free port up for garbage collection.
+	//const i = store.indexOf(port);
+    //if (i > -1) { store.splice(i, 1); }
+
+	port.onmidimessage = null;
+}
+
+function setup(midi) {
+	var entry, port;
+
+	for (entry of midi.inputs) {
+		port = entry[1];
+
+        if (DEBUG) { print(port.type + ' ' + port.state, port); }
+
+        if (port.state === 'connected') {
+            listen(port);
+        }
+	}
+
+	for (entry of midi.outputs) {
+		port = entry[1];
+        if (DEBUG) { print(port.type + ' ' + port.state, port); }
+	}
+}
+
+function statechange(e) {
+	var port = e.port;
+
+    if (DEBUG) { print(port.type + ' ' + port.state, port); }
+
+    if (port.type === 'input') {
+        if (port.state === 'connected') {
+            listen(port);
+        }
+        else {
+            unlisten(port);
+        }
+    }
+}
+
 let promise;
 
 export function request() {
@@ -32,129 +109,80 @@ export function request() {
 	return promise || (promise = navigator.requestMIDIAccess ?
 		navigator
 		.requestMIDIAccess()
-		.then(function(midi) {
-			if (DEBUG) { console.group('%cMIDI: %cports', 'color: #d8a012; font-weight: bold;', 'color: inherit; font-weight: 300'); }
-			if (DEBUG) { window.midi = midi; }
-			setupPorts(midi);
-			if (DEBUG) { console.groupEnd(); }
+		.then(function(midiAccess) {
+            if (DEBUG) { printGroup('initialise MIDI access'); }
+
+            midi = midiAccess;
+            setup(midi);
+            midi.onstatechange = statechange;
+
+			if (DEBUG) { printGroupEnd(); }
 			return midi;
-		})
-		.catch(function(e) {
-			console.log('MIDI access denied.', e);
+		}, function(e) {
+            print('access denied');
 		}) :
-		Promise
-		.reject("This browser does not support Web MIDI.")
-		.catch(function(e) {
-			console.log(e);
-		})
+		Promise.reject("This browser does not support Web MIDI.")
 	);
 }
 
 /*
-transmit(e)
+send(time, port, message)
 
-Send a MIDI event.
+Cues `message` to be sent to `port` at `time`. Where `time` is in the past
+the message is sent immediately. `port` may be a MIDI output, the
+id of a MIDI output, or a string identifying the start of the output port name
+or manufacturer, in that order. The last two options are less performant as
+some searching has to be done.
+
+    send(0, 'id', [144, 69, 96]);
+
+Also accepts a parameter list of the form `(time, port, chan, type, param, value)`,
+where the last four parameters are passed to `createMessage()` to create
+the MIDI message. This call is equivalent to the above:
+
+    send(0, 'id', 1, 'noteon', 'A4', 0.75);
 */
 
-export let transmit = function send() {};
+function findOutputPort(string) {
+    string = string.toLowercase();
 
-function createSendFn(outputs, tree) {
-	return function send(portName, data, time) {
-		var port = this.output(portName);
+    // At this point, string is not an id of a port nor an actual port.
+    // We're going to try and find it by name
+    let entry;
+    for (entry of midi.outputs) {
+        let port = entry[1];
+        let name = port.name && port.name.toLowercase();
 
-		if (port) {
-			port.send(data, time || 0);
-		}
-		else {
-			console.warn('MIDI: .send() output port not found:', port);
-		}
+        if (name.startsWith(string)) {
+            return port;
+        }
+    }
 
-		return this;
-	};
+    for (entry of midi.outputs) {
+        let port = entry[1];
+        let manu = port.manufacturer && port.manufacturer.toLowercase();
+
+        if (manu.startsWith(string)) {
+            return port;
+        }
+    }
 }
 
+export function send(time, port, message) {
+    // Support parameters (time, port, chan, type, param, value)
+    if (typeof message === 'number') {
+        message = createMessage(arguments[2], arguments[3], arguments[4], arguments[5]);
+    }
 
-// Handle connections
+    // Spec example:
+    // https://webaudio.github.io/web-midi-api/#sending-midi-messages-to-an-output-device
+    if (typeof port === 'object') {
+        return port.send(message, time);
+    }
 
-function listen(port) {
-	// It's suggested here that we need to keep a reference to midi inputs
-	// hanging around to avoid garbage collection:
-	// https://code.google.com/p/chromium/issues/detail?id=163795#c123
-	store.push(port);
-	port.onmidimessage = function(e) {
+    port = midi.inputs.get(port) || findOutputPort(port);
 
-	};
-}
-
-function unlisten(port) {
-	remove(store, port);
-	port.onmidimessage = null;
-}
-
-
-
-function createPortFn(ports) {
-	return function getPort(id) {
-		var port;
-
-		if (typeof id === 'string') {
-			for (port of ports) {
-				if (port[1].name === id) { return port[1]; }
-			}
-		}
-		else {
-			for (port of ports) {
-				if (port[0] === id) { return port[1]; }
-			}
-		}
-	};
-}
-
-var MIDI = {};
-
-function updateOutputs(midi) {
-	var arr;
-
-	if (!MIDI.outputs) { MIDI.outputs = []; }
-
-	MIDI.outputs.length = 0;
-
-	for (arr of midi.outputs) {
-		var id = arr[0];
-		var output = arr[1];
-		console.log('MIDI: Output detected:', output.name, output.id);
-		// Store outputs
-		MIDI.outputs.push(output);
-	}
-
-	MIDI.output = createPortFn(midi.outputs);
-	transmit = createSendFn(midi.outputs, outputs);
-}
-
-function statechange(e) {
-	var port = e.port;
-
-	if (port.state === 'connected') {
-		listen(port);
-	}
-	else if (port.state === 'disconnected') {
-		unlisten(port);
-	}
-}
-
-function setupPorts(midi) {
-	var entry, port;
-
-	for (entry of midi.inputs) {
-		port = entry[1];
-		console.log('MIDI: Input detected:', port.name, port.id, port.state);
-		listen(port);
-	}
-
-	for (entry of midi.outputs) {
-		port = entry[1];
-		console.log('MIDI: Output detected:', port.name, port.id, port.state);
-	}
-
-	midi.onstatechange = statechange;
+    if (port) {
+        port.send(message, time);
+    }
 }

@@ -1,7 +1,7 @@
 var app_console = new App('#app_console');
 
 (function(jQuery, app, undefined){
-	var debug = true; //window.debug;
+	var debug = true;
 
 	var eventMax = 200;
 
@@ -30,7 +30,7 @@ var app_console = new App('#app_console');
 	}
 
 	// View functions
-	
+
 	jQuery.extend(app.views, {
 		console: function(node, data) {
 			var elem = jQuery(node);
@@ -60,7 +60,7 @@ console.log(e);
 					tdNodes[6].textContent = e.data2;
 
 					var trNode = template.cloneNode(true);
-	
+
 					// Put the new node in the table
 					//node.appendChild(trNode);
 					node.insertBefore(trNode, node.firstChild);
@@ -74,15 +74,15 @@ console.log(e);
 							});
 						})(node.querySelector('tr:first-child'));
 					}
-	
+
 					// Keep a list of nodes so we can throw them away when the table
 					// gets too big.
 					list.push(node.querySelector('tr:first-child'));
-	
+
 					if (list.length > eventMax) {
 						node.removeChild(list.shift());
 					}
-	
+
 					//rootNode.scrollTop = 10000000000;
 				});
 			})

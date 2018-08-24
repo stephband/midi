@@ -1,7 +1,6 @@
 
-if (window.console || window.console.log) {
-	console.log('%cMIDI        %c- http://github.com/stephband/midi', 'color: #d8a012; font-weight: bold;', 'color: inherit;');
-}
+import { print } from './modules/print.js';
+print('       - http://github.com/stephband/midi');
 
 const thing = {};
 export default thing;
@@ -44,16 +43,12 @@ export {
 } from './modules/messages.js';
 
 export {
-    createEvent,
     on,
     off,
     trigger
 } from './modules/events.js';
 
-export {
-    request,
-    transmit
-} from './modules/midi.js';
+export * from './modules/midi.js';
 
 import { request } from './modules/midi.js';
 

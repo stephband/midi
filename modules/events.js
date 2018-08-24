@@ -1,27 +1,48 @@
 
-import { ap, cache, curry, deprecate, each, get, isDefined, noop, nothing, overload, pipe, remove, rest, set, Stream, toClass } from '../../fn/fn.js';
 import { toStatus, controlToNumber, noteToNumber } from './data.js';
-import { toType } from './messages.js';
+import { normalise, toType } from './messages.js';
 import { request } from './midi.js';
 
 const assign      = Object.assign;
 const performance = window.performance;
 
 
+// Utilities
+
+function overload(fn, map) {
+    return function overload() {
+        const key     = fn.apply(null, arguments);
+        const handler = (map[key] || map.default);
+        if (!handler) { throw new Error('overload() no handler for "' + key + '"'); }
+        return handler.apply(this, arguments);
+    };
+}
+
+function remove(array, value) {
+    var i = array.indexOf(value);
+    if (i !== -1) { array.splice(i, 1); }
+}
+
+
 // Routing
 
 const root  = {};
 
-export function fire(i, tree, e) {
+export function fire(e) {
+	normalise(e.data);
+	fireRoute(0, root, e);
+}
+
+function fireRoute(i, tree, e) {
 	var name   = e.data[i++];
 	var branch = tree[name];
 
 	if (name === undefined) {
-		branch && ap(e, branch);
+		branch && branch.forEach(fn => fn(e.receivedTime, e.target, e.data));
 	}
 	else {
-		branch && fire(i, branch, e);
-		tree.undefined && ap(e, tree.undefined);
+		branch && fireRoute(i, branch, e);
+		tree.undefined && tree.undefined.forEach(fn => fn(e.receivedTime, e.target, e.data));
 	}
 }
 
@@ -83,38 +104,19 @@ function toQuery(data) {
 
 // Transforms
 
-var get1     = function(object) { return object[1]; };
-var type1    = function(object) { return typeof object[1]; };
-var typeArg1 = function() { return typeof arguments[1]; };
-
-
-
-/*
-createEvent(time, port, message)
-
-Creates a MIDI event object of the form:
-
-    {
-        data: message,
-        target: port,
-        recievedTime: time
-    }
-
-Events are pooled to avoid eating memory and triggering the garbage collector.
-An event object becomes invalid after it's `receivedTime` property becomes less
-than the current DOM time, `window.performance.now()`. If event objects need to
-be stored for some reason they should be cloned first.
-*/
+function get1(object) { return object[1]; };
+function type1(object) { return typeof object[1]; };
+function typeArg2() { return typeof arguments[2]; };
 
 const events = [];
 const eventInvalidationTime = 500;
 let now;
 
 function isPastEvent(e) {
-	return e.time < now;
+	return e.receivedTime < now;
 }
 
-export function createEvent(time, port, message) {
+function createEvent(time, port, message) {
 	// Allow a margin of error for event invalidation
 	now = performance.now() + eventInvalidationTime;
 	let e = events.find(isPastEvent);
@@ -124,9 +126,9 @@ export function createEvent(time, port, message) {
 		events.push(e);
 	}
 
-	e.time   = time;
-	e.target = port;
-	e.data   = message;
+	e.receivedTime = time;
+	e.target       = port;
+	e.data         = message;
 
 	return e;
 }
@@ -134,9 +136,9 @@ export function createEvent(time, port, message) {
 /*
 on(selector, fn)
 
-Registers a handler `fn` for incoming MIDI events that match object `selector`.
+Registers a handler `fn` for incoming MIDI messages that match object `selector`.
 
-    on(['note'], function(e) {
+    on(['note'], function(time, port, message) {
 	    // Do something with noteon and noteoff event objects
     });
 
@@ -144,8 +146,8 @@ A selector is either an array in the form of a MIDI message
 `[status, data1, data2]`:
 
 	on([144], fn)              // CH1, NOTEON, all numbers
-	on([144, 60])              // CH1, NOTEON, C3
-	on([176, 7, 0])            // CH1, CC7, value 0
+	on([144, 60], fn)          // CH1, NOTEON, C3
+	on([176, 7, 0], fn)        // CH1, CC7, value 0
 
 or more conveniently an array of interpretive data of the form
 `[channel, type, data1, data2]`:
@@ -240,22 +242,30 @@ export const off = overload(type1, {
 });
 
 /*
-trigger(chan, type, param, value)
+trigger(time, port, message)
 
-Simulates an incoming MIDI message, firing listeners with matching selectors.
+Mainly useful for debugging, `trigger()` simulates an incoming MIDI message,
+firing listeners with matching selectors.
 
-    trigger(1, 'noteon', 'C6', 64);
+    trigger(0, null, [128, 69, 88]);
+
+Trigger also accepts a longer parameter list of the form
+`trigger(time, port, chan, type, param, value)`, where the last four parameters
+are passed to `createMessage()` in order to create the message.
+
+    trigger(0, null, 1, 'noteon', 'A4', 0.75);
 */
 
-export const trigger = overload(typeArg1, {
-	'string': function(chan, type, param, value) {
+export const trigger = overload(typeArg2, {
+	'number': function(time, port, chan, type, param, value) {
 		const message = createMessage(chan, type, param, value);
-		const e       = createEvent(performance.now(), undefined, message);
-		fire(0, root, e);
+		const now     = performance.now();
+		const e       = createEvent(time > now ? time : now, undefined, message);
+		fire(e);
 	},
 
-	'default': function(message) {
+	'default': function(time, port, message) {
 		const e = createEvent(performance.now(), undefined, message);
-		fire(0, root, e);
+		fire(e);
 	}
 });
