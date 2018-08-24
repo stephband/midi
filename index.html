@@ -41,138 +41,7 @@
         <div class="midi-graph grid-1" id="midi-graph">
             <p class="text-8 hint" id="instrument-hint">Plug in a MIDI instrument to try out the <code>&lt;midi-graph&gt;</code> component&hellip;</p>
 
-        	<canvas class="midi-graph-canvas" width="1920" height="320"></canvas>
-
-        	<ul class="midi-graph-index index">
-        		 <li>C</li
-        		><li>C♯</li
-        		><li>D</li
-        		><li>E♭</li
-        		><li>E</li
-        		><li>F</li
-        		><li>F♯</li
-        		><li>G</li
-        		><li>G♯</li
-        		><li>A</li
-        		><li>B♭</li
-        		><li>B</li
-        		><li>C</li
-        		><li>C♯</li
-        		><li>D</li
-        		><li>E♭</li
-        		><li>E</li
-        		><li>F</li
-        		><li>F♯</li
-        		><li>G</li
-        		><li>G♯</li
-        		><li>A</li
-        		><li>B♭</li
-        		><li>B</li
-        		><li>C</li
-        		><li>C♯</li
-        		><li>D</li
-        		><li>E♭</li
-        		><li>E</li
-        		><li>F</li
-        		><li>F♯</li
-        		><li>G</li
-        		><li>G♯</li
-        		><li>A</li
-        		><li>B♭</li
-        		><li>B</li
-        		><li>C</li
-        		><li>C♯</li
-        		><li>D</li
-        		><li>E♭</li
-        		><li>E</li
-        		><li>F</li
-        		><li>F♯</li
-        		><li>G</li
-        		><li>G♯</li
-        		><li>A</li
-        		><li>B♭</li
-        		><li>B</li
-        		><li>C</li
-        		><li>C♯</li
-        		><li>D</li
-        		><li>E♭</li
-        		><li>E</li
-        		><li>F</li
-        		><li>F♯</li
-        		><li>G</li
-        		><li>G♯</li
-        		><li>A</li
-        		><li>B♭</li
-        		><li>B</li
-        		><li>C</li
-        		><li>C♯</li
-        		><li>D</li
-        		><li>E♭</li
-        		><li>E</li
-        		><li>F</li
-        		><li>F♯</li
-        		><li>G</li
-        		><li>G♯</li
-        		><li>A</li
-        		><li>B♭</li
-        		><li>B</li
-        		><li>C</li
-        		><li>C♯</li
-        		><li>D</li
-        		><li>E♭</li
-        		><li>E</li
-        		><li>F</li
-        		><li>F♯</li
-        		><li>G</li
-        		><li>G♯</li
-        		><li>A</li
-        		><li>B♭</li
-        		><li>B</li
-        		><li>C</li
-        		><li>C♯</li
-        		><li>D</li
-        		><li>E♭</li
-        		><li>E</li
-        		><li>F</li
-        		><li>F♯</li
-        		><li>G</li
-        		><li>G♯</li
-        		><li>A</li
-        		><li>B♭</li
-        		><li>B</li
-        		><li>C</li
-        		><li>C♯</li
-        		><li>D</li
-        		><li>E♭</li
-        		><li>E</li
-        		><li>F</li
-        		><li>F♯</li
-        		><li>G</li
-        		><li>G♯</li
-        		><li>A</li
-        		><li>B♭</li
-        		><li>B</li
-        		><li>C</li
-        		><li>C♯</li
-        		><li>D</li
-        		><li>E♭</li
-        		><li>E</li
-        		><li>F</li
-        		><li>F♯</li
-        		><li>G</li
-        		><li>G♯</li
-        		><li>A</li
-        		><li>B♭</li
-        		><li>B</li
-        		><li>C</li
-        		><li>C♯</li
-        		><li>D</li
-        		><li>E♭</li
-        		><li>E</li
-        		><li>F</li
-        		><li>F♯</li
-        		><li>G</li>
-        	</ul>
+            <midi-graph></midi-graph>
         </div>
     </section>
 
@@ -181,7 +50,7 @@
             <h1 class="text-2" style="font-size: 1.875rem;">Functions</h1>
             <!--p>A MIDI message is an array of 3 integers.</p-->
             <p>Import functions:</p>
-            <pre><code>import { on, send } from 'http://stephen.band/midi/module.js';</code></pre>
+            <pre><code>import { on, off } from 'http://stephen.band/midi/module.js';</code></pre>
             <p>On this page, all functions have been imported and assigned to <code>window</code> so that you can play with them in the console.</p>
         </header>
 
@@ -255,14 +124,11 @@
 
     <!-- Document interactivity -->
     <script type="module">
+    import './components/midi-graph/midi-graph.js';
     import '../dom/js/dom.root.js';
     import '../dom/js/dom.toggleable.js';
     import * as MIDI from './midi.js';
     Object.assign(window, MIDI);
-
-    import MIDIGraph from './components/midi-graph/midi-graph.js';
-    const graph = MIDIGraph({});
-    MIDI.on([], graph.in);
 
     import { classes, get } from '../dom/dom.js';
     var cls = classes(get('instrument-hint'));

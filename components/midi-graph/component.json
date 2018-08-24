@@ -1,8 +1,7 @@
 {
 	"name": "midi-graph",
-	"repo": "stephband/midi-graph",
 	"description": "A live graph of MIDI events",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"keywords": [],
 	"dependencies": {
 		"cruncher/app.js": "*",

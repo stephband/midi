@@ -1,6 +1,7 @@
 /* .index */
 
-.midi-graph-index {
+.midi-graph-ul {
+	margin: 0;
 	padding-left: 3.3333%;
 	padding-right: 3.3333%;
 	white-space: nowrap;
@@ -10,7 +11,7 @@
 	border-bottom-right-radius: 0.25rem;
 }
 
-.midi-graph-index > li {
+.midi-graph-ul > li {
 	display: inline-block;
 	font-family: "Andale Mono", Helvetica, Arial, sans-serif;
 	font-weight: bold;
@@ -29,7 +30,7 @@
 	color: #666666;
 }
 
-.midi-graph-index > li.on {
+.midi-graph-ul > li.on {
 	visibility: visible;
 }
 

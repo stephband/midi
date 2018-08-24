@@ -1,6 +1,6 @@
 
 import { toStatus, controlToNumber, noteToNumber } from './data.js';
-import { normalise, toType } from './messages.js';
+import { toType } from './messages.js';
 import { request } from './midi.js';
 
 const assign      = Object.assign;
@@ -29,7 +29,6 @@ function remove(array, value) {
 const root  = {};
 
 export function fire(e) {
-	normalise(e.data);
 	fireRoute(0, root, e);
 }
 

@@ -1,6 +1,8 @@
 
-import { now } from '../../../dom/dom.js';
-import { isNote, isControl, isPitch, bytesToSignedFloat, toChannel } from '../../midi.js';
+import { noop, overload, toInt } from '../../../fn/fn.js';
+import { append, define, query, trigger, empty, now } from '../../../dom/dom.js';
+import { print } from '../../modules/print.js';
+import { bytesToSignedFloat, isNote, isControl, isPitch, toChannel, numberToNote, on, toType } from '../../midi.js';
 
 var defaults = {
 		paddingLeft:  1 / 30,
@@ -200,10 +202,6 @@ function renderNames(nodes, set, state) {
 	}
 }
 
-function toInt(str) {
-	return parseInt(str, 10);
-}
-
 function hslToArray(hsl) {
 	return rhsl.exec(hsl).splice(1, 3).map(toInt);
 }
@@ -295,32 +293,31 @@ function updateControl(state, data) {
 	obj.time = now();
 }
 
-export default function MIDIGraph(options) {
-	var graph = Object.create(Object.prototype);
 
-	var node = options.node ?
-			typeof options.node === 'string' ?
-			document.querySelector(options.node) :
-			options.node :
-			document.getElementById('midi-graph') ;
+// Define the custom element <midi-graph>
+// define(name, setup, attributes, shadow)
 
-	var canvasNode = node.querySelector('canvas');
-	var notesNode  = node.querySelector('.midi-graph-index');
-	var noteNodes  = notesNode.querySelectorAll('li');
+const lis = Array
+	.from({length: 128})
+	.map(function(n, i) {
+		return '<li>' + numberToNote(i) + '</li>';
+	})
+	.join('');
 
-	if (!canvasNode.getContext) {
-		throw new Error('options.node must contain a canvas element.');
-	}
+define('midi-graph', function setup(node) {
+	// Todo: get options from attributes?
+	var options = {};
 
-	var context = canvasNode.getContext('2d');
-	var settings = createSettings(options, canvasNode);
+	const canvasNode = node.shadowRoot.querySelector('canvas');
+	const notesNode  = node.shadowRoot.querySelector('ul');
+	const noteNodes  = notesNode.querySelectorAll('li');
+	const context    = canvasNode.getContext('2d');
+	const settings   = createSettings(options, canvasNode);
 
 	var state = [];
 	var notes = [];
 	var count = 16;
 	var queued = false;
-
-	console.log('MIDIGraph instance created', node, graph);
 
 	function render(now) {
 		var c = 16,
@@ -377,28 +374,49 @@ export default function MIDIGraph(options) {
 		};
 	}
 
-	graph.in = function(time, port, message) {
-		if (isNote(message)) {
+	node.input = overload(toType, {
+		'noteon': function(message) {
 			notes.push(message);
 			updateNote(state, message, queueRender);
 			queueRender(render);
 			return;
-		}
+		},
 
-		if (isControl(message)) {
+		'noteoff': function(message) {
+			notes.push(message);
+			updateNote(state, message, queueRender);
+			queueRender(render);
+			return;
+		},
+
+		'control': function(message) {
 			updateControl(state, message);
 			queueRender(render);
 			return;
-		}
+		},
 
-		if (isPitch(message)) {
+		'pitch': function(message) {
 			state[toChannel(message) - 1].pitch = pitchToFloat(message, options.range || 2);
 			queueRender(render);
 			return;
-		}
-	};
+		},
 
-	return graph;
-}
+		'default': noop
+	});
 
-MIDIGraph.defaults = defaults;
+	var sourceAttr = node.getAttribute('source');
+
+	if (!sourceAttr || sourceAttr === 'all') {
+		on([], function(time, port, message) {
+			node.input(message);
+		});
+	}
+
+	print('<midi-graph> initialised', node);
+}, {}, `
+	<link rel="stylesheet" href="components/midi-graph/midi-graph.css"/>
+	<canvas class="midi-graph-canvas" width="1920" height="320"></canvas>
+	<ul class="midi-graph-ul">
+		${lis}
+	</ul>
+`);
