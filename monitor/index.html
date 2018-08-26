@@ -15,13 +15,26 @@
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:100,300,400,500,700" />
     <style>
+        html,
         body {
-            margin: 0;
-            padding: 0;
+            overflow: hidden;
         }
 
-        midi-monitor {
-            width: 100%;
+        body {
+            margin: 0;
+            padding-left: 0;
+            padding-right: 0;
+            font-family: Helvetica, Arial, sans-serif;
+        	font-style: none;
+        	text-transform: none;
+        }
+
+        body > midi-monitor {
+            position: fixed;
+            top: 0;
+            left: 0.1875rem;
+            right: 0.1875rem;
+            width: auto;
             height: 100%;
         }
     </style>
