@@ -37,21 +37,19 @@
         </div>
     </header>
 
-    <section class="demo-block block site-grid grid">
+    <div class="demo-block block site-grid grid">
         <div class="midi-graph grid-1" id="midi-graph">
             <p class="text-8 hint" id="instrument-hint">Plug in a MIDI instrument to try out the <code>&lt;midi-graph&gt;</code> component&hellip;</p>
-
             <midi-graph/>
         </div>
-    </section>
+    </div>
 
-    <article class="1-2-3-grid grid">
+    <section class="1-2-3-grid grid">
         <header class="grid-0">
-            <h1 class="text-2" style="font-size: 1.875rem;">Functions</h1>
-            <!--p>A MIDI message is an array of 3 integers.</p-->
+            <h2 class="text-2" style="font-size: 1.875rem;">Functions</h2>
             <p>Import functions:</p>
-            <pre><code>import { on, off } from 'http://stephen.band/midi/module.js';</code></pre>
-            <p>On this page, all functions have been imported and assigned to <code>window</code> so that you can play with them in the console.</p>
+            <pre><code>import { on, off } from 'http://stephen.band/midi/midi.js';</code></pre>
+            <p>On this page, all the following functions have been imported and assigned to <code>window</code> so that you may play with them in the console.</p>
         </header>
 
         <section class="grid-1">
@@ -78,7 +76,7 @@
 
         <section class="grid-3">
             <h1 class="text-3">messages</h1>
-            <article fn="docs:'./modules/messages.js' each append:body" class="toggle-block block" toggleable id="{[name]}">
+            <article fn="docs:'./modules/messages.js' each append:body" class="toggle-block doc-block block" toggleable id="{[name]}">
                 <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
                     <a href="#{[name]}">
                         <code fn="html:title" class="language-js"></code>
@@ -108,26 +106,29 @@
                 </h3>
             </article>
         </section>
-    </article>
+    </section>
 
-    <article class="1-2-grid grid">
+    <section class="1-2-grid grid">
         <header class="grid-0">
-            <h1 class="text-2" style="font-size: 1.875rem;">Custom elements</h1>
+            <h2 class="text-2" style="font-size: 1.875rem;">Custom elements</h2>
         </header>
 
-        <section class="grid-1">
-            <h1 class="text-3"><code>&lt;midi-graph&gt;</code></h1>
-            <pre><code>import 'http://stephen.band/midi/components/midi-graph/midi-graph.js';</code></pre>
+        <article fn="docs:'./components/midi-graph/midi-graph.js' each append:body" class="grid-1" id="{[name]}">
+            <h3 class="text-3">
+                <a href="#{[name]}">
+                    <code fn="html:title" class="language-html"></code>
+                </a>
+            </h3>
+        </article>
 
-            <article fn="docs:'./components/midi-graph/midi-graph.js' each append:body" class="block" id="{[name]}">
-                <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
-                    <a href="#{[name]}">
-                        <code fn="html:title" class="language-html"></code>
-                    </a>
-                </h3>
-            </article>
-        </section>
-    </article>
+        <article fn="docs:'./components/midi-monitor/midi-monitor.js' each append:body" class="grid-2" id="{[name]}">
+            <h3 class="text-3">
+                <a href="#{[name]}">
+                    <code fn="html:title" class="language-html"></code>
+                </a>
+            </h3>
+        </article>
+    </section>
 
     <!-- Templating -->
     <script type="module">
@@ -144,10 +145,11 @@
     <!-- Document interactivity -->
     <script type="module">
     import './components/midi-graph/midi-graph.js';
+    import './components/midi-monitor/midi-monitor.js';
     import '../dom/js/dom.root.js';
     import '../dom/js/dom.toggleable.js';
     import * as MIDI from './midi.js';
-    Object.assign(window, MIDI);
+    //Object.assign(window, MIDI);
 
     import { classes, get } from '../dom/dom.js';
     var cls = classes(get('instrument-hint'));

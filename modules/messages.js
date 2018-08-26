@@ -1,68 +1,107 @@
-import { floatToInt14, limit  } from './maths.js';
+import { signedFloatToInt14, limit  } from './maths.js';
 import { toStatus, noteToNumber, controlToNumber, statusNumbers } from './data.js';
 
 /*
 createMessage(chan, type, param, value)
 
-Creates a MIDI message, a Uint8Array of three values, where channel `chan` is an
+Creates a MIDI message – a Uint8Array of three values – where channel `chan` is an
 integer in the range `1`-`16` and `type` is a string that determines the meaning
 of `param` and `value`.
 
-Where `type` is `'noteon'` or `'noteoff'`:
+#### Create type `'noteon'` or `'noteoff'`:
 
-- `param`: either a note name, for example 'C4', or an integer in the range 0-127
-- `value`: a float in the range 0-1 representing velocity
+- `param`: an integer in the range `0`-`127`, or a note name string eg. `'Eb4'`.
+- `value`: a float in the range `0`-`1` representing velocity.
 
 ```
 createMessage(1, 'noteon', 'C3', 0.75);
 ```
 
-Where `type` is `'pitch'`:
+#### Create type `'control'`:
 
-- `'param'`: a bend range in semitones
-- `'value'`: a positive or negative float within that range representing a pitch
-  bend in semitones
+- `param`: an integer in the range `0`-`127`, or a control name string eg. `'modulation'`.
+- `value`: a float in the range `0`-`1` representing control value.
+
+```
+createMessage(1, 'control', 'modulation', 1);
+```
+
+#### Create type `'pitch'`:
+
+- `param`: a bend range in semitones.
+- `value`: a positive or negative float within that range representing a pitch
+  bend in semitones.
 
 ```
 createMessage(1, 'pitch', 2, 0.25);
 ```
 
-Where `type` is `'control'`:
+#### Create type `'polytouch'`:
 
-- `param`: either a controller name (for example 'volume') or an integer in the range 0-127
-- `value`: a float in the range 0-1 representing controller value
-
-```
-createMessage(1, 'control', 'modulation', 1);
-```
-For other types ():
-
-- `param`: an integer in the range 0-127
-- `value`: a float in the range 0-1
+- `param`: an integer in the range `0`-`127`, or a note name string eg. `'Eb4'`.
+- `value`: a float in the range `0`-`1` representing force.
 
 ```
-createMessage(1, 'program', 24, 1);
+createMessage(1, 'polytouch', 'C3', 0.25);
 ```
+
+#### Create type `'channeltouch'`:
+
+- `param`: an integer in the range `0`-`1`.
+- `value`: unused.
+
+```
+createMessage(1, 'channeltouch', 0.5);
+```
+
+#### Create type `'program'`:
+
+- `param`: an integer in the range `0`-`127`.
+- `value`: unused.
+
+```
+createMessage(1, 'program', 24);
+```
+
 */
+
+function createNote(param, value, message) {
+    message[1] = typeof param === 'number' ? param : noteToNumber(param);
+    message[2] = limit(0, 127, value * 127);
+}
+
+const creators = {
+    'noteon': createNote,
+    'noteoff': createNote,
+    'polytouch': createNote,
+
+    'channeltouch': function(param, value, message) {
+        message[1] = limit(0, 127, value * 127);
+        message[2] = 0;
+    },
+
+    'control': function(param, value, message) {
+        message[1] = typeof param === 'number' ? param : controlToNumber(param);
+        message[2] = limit(0, 127, value * 127);
+    },
+
+    'pitch': function(param, value, message) {
+        const int14 = signedFloatToInt14(value/param);
+		message[1] = int14 & 127; // LSB
+		message[2] = int14 >> 7;  // MSB
+    },
+
+    'program': function(param, value, message) {
+        message[1] = param;
+        message[2] = 0;
+    }
+};
 
 export function createMessage(channel, type, param, value) {
 	var message = new Uint8Array(3);
 	message[0] = toStatus(channel, type);
-
-	if (type === 'pitch') {
-		const int14 = floatToInt14((param + value) / (param * 2));
-		message[1] = int14 & 127; // LSB
-		message[2] = int14 >> 7;  // MSB
-	}
-	else {
-		message[1] = typeof param === 'number' ? param :
-			(/^note/.test(type)) ? noteToNumber(param) :
-			(type === 'control') ? controlToNumber(param) :
-			param ;
-		message[2] = limit(0, 127, value * 127);
-	}
-
-	return message;
+    creators[type](param, value, message);
+    return message;
 }
 
 /*
@@ -105,10 +144,14 @@ export function isPitch(message) {
 normalise(message)
 
 Many keyboards transmit `'noteon'` with velocity `0` rather than `'noteoff'`
-messages. `normalise()` <em>mutates</em> these messages to `'noteoff'`
-messages.
+messages. This is because MIDI allows messages with the same type to be sent
+together, omitting the status byte and saving bandwidth. The MIDI spec requires
+that both forms are treated identically. `normalise()` <em>mutates</em>
+'noteon'` messages with velocity `0` to `'noteoff'` messages.
 
     normalise([145,80,0]);  // [129,80,0]
+
+Note that the MIDI library automatically normalises incoming messages.
 */
 
 export function normalise(message) {

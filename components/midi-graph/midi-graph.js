@@ -2,14 +2,24 @@
 /*
 <midi-graph>
 
-    import 'http://stephen.band/midi/components/midi-graph/midi-graph.js';
+Import the custom element:
 
-The `midi-graph` custom element plots incoming events on a graph. The current
-version supports notes, control change and pitch bend events.
+```
+import '//stephen.band/midi/components/midi-graph/midi-graph.js';
+```
+
+The `<midi-graph>` element plots incoming messages on a graph. The current
+version displays notes, control change and pitch bend messages.
+
+```html
+<midi-graph>
+```
+
+<midi-graph/>
 
 */
 
-import { noop, overload, toInt } from '../../../fn/fn.js';
+import { get, noop, overload, toInt } from '../../../fn/fn.js';
 import { append, define, query, trigger, empty, now } from '../../../dom/dom.js';
 import { print } from '../../modules/print.js';
 import { bytesToSignedFloat, isNote, isControl, isPitch, toChannel, numberToNote, on, toType } from '../../midi.js';
@@ -45,7 +55,6 @@ var colors = [
 	];
 
 var rhsl = /^(?:hsl\()?\s?(\d{1,3}(?:\.\d+)?)\s?,\s?(\d{1,3}(?:\.\d+)?)%\s?,\s?(\d{1,3}(?:\.\d+)?)%\s?\)?$/;
-
 
 function pitchToFloat(data, range) {
 	return range * bytesToSignedFloat(data[1], data[2]) ;
@@ -254,12 +263,12 @@ function createSettings(options, node) {
 	};
 }
 
-function updateNoteRender(state, data) {
-	var channel = toChannel(data) - 1;
+function updateNoteRender(state, message) {
+	var channel     = toChannel(message) - 1;
 	var notesRender = state[channel].notesRender;
 	var notesActual = state[channel].notes;
-	var render  = notesRender[data[1]] || 0;
-	var actual  = notesActual[data[1]];
+	var render      = notesRender[message[1]] || 0;
+	var actual      = notesActual[message[1]];
 
 	// Render value has reached actual value
 	if (render === actual) {
@@ -267,7 +276,7 @@ function updateNoteRender(state, data) {
 	}
 
 	// Render value requires further iteration
-	notesRender[data[1]] = (actual - render < 2) ?
+	notesRender[message[1]] = (actual - render < 2) ?
 		actual :
 		render + (actual - render) * defaults.ease ;
 
@@ -287,8 +296,8 @@ function updateCcColor(state, set, cc, now) {
 	return true;
 }
 
-function updateNote(state, data) {
-	state[toChannel(data) - 1].notes[data[1]] = data[0] < 144 ? 0 : data[2] ;
+function updateNote(state, message) {
+	state[toChannel(message) - 1].notes[message[1]] = message[0] < 144 ? 0 : message[2] ;
 }
 
 function updateControl(state, data) {
@@ -387,20 +396,17 @@ define('midi-graph', function setup(node) {
 			notes.push(message);
 			updateNote(state, message, queueRender);
 			queueRender(render);
-			return;
 		},
 
 		'noteoff': function(message) {
 			notes.push(message);
 			updateNote(state, message, queueRender);
 			queueRender(render);
-			return;
 		},
 
 		'control': function(message) {
 			updateControl(state, message);
 			queueRender(render);
-			return;
 		},
 
 		'pitch': function(message) {
@@ -416,6 +422,8 @@ define('midi-graph', function setup(node) {
 
 	if (!sourceAttr || sourceAttr === 'all') {
 		on([], function(time, port, message) {
+			// Don't respond to internally triggered events
+			if (!port) { return; }
 			node.input(message);
 		});
 	}

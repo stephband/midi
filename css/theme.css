@@ -22,3 +22,8 @@ code > .params {
 code.block {
 
 }
+
+pre + midi-graph,
+pre + midi-monitor {
+    margin-top: 1.875rem;
+}

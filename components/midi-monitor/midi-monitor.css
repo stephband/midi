@@ -1,52 +1,69 @@
-.midi-monitor {
-	max-width: 28.5rem;
-	background-color: rgb(245,245,245);
+
+:host {
+	display: block;
+	width: 100%;
+	/* default height */
+	height: 28.125rem;
+	/* Hide the body-block scollbar */
+	overflow: hidden;
 }
 
 /* .block */
 
-.head_block,
-.body_block {
+.block {
+	display: block;
+	box-sizing: border-box;
+}
+
+.head-block,
+.body-block {
+	width: calc(100% + 1rem);
+	margin-left: 0;
 	/* Move the scrollbar over to the right of the container's right edge. */
 	margin-right: -1rem;
 	padding-right: 1rem;
 }
 
-.head_block {
-	background-color: white;
+.head-block {
+	height: 1.875rem;
+	border-bottom: 1px solid rgba(0,0,0,0.4);
 }
 
-.head_block .console_table {
-	border-bottom: 1px solid #999999;
+.head-block .console-table {
+
 }
 
-.body_block {
-	height: 31.25rem;
+.body-block {
+	height: calc(100% - 31px);
 	overflow: auto;
 	margin-bottom: 1.5rem;
 }
 
-.body_block .console_table {
+.body-block .console-table {
 	/*background-color: rgba(15, 15, 15, 0.04);*/
 }
 
 
 /* table */
 
-.console_table {
+.console-table {
 	margin: 0;
+	width: 100%;
+	border-spacing: 1px;
 }
 
-.console_table > tbody {
+.console-table > tbody {
 	overflow: auto;
 }
 
-.console_table th {
+.console-table th {
 	font-size: 0.75rem;
 	font-weight: normal;
+	line-height: 1.5rem;
+	white-space: nowrap;
 }
 
-.console_table td {
+.console-table td {
 	padding-top: 0.0625rem;
 	padding-bottom: 0.0625rem;
 	line-height: 1.125rem;
@@ -57,67 +74,75 @@
 	white-space: nowrap;
 }
 
-.console_table td,
-.console_table th {
+.console-table td,
+.console-table th {
+	box-sizing: border-box;
 	text-align: right;
+	padding-right: 0.125rem;
 }
 
-.console_table td {
+.console-table td {
 	font-family: 'Andale Mono', monospace;
 }
 
-.console_table .time_td,
-.console_table .time_th {
+.console-table .time-td,
+.console-table .time-th {
 	width: 6rem;
 	text-align: left;
+	padding-left: 0.125rem;
+	padding-right: 0;
 }
 
-.console_table .port_td,
-.console_table .port_th {
-	width: 4.5rem;
+.console-table .port-td,
+.console-table .port-th {
+	/*width: 4.5rem;*/
 	text-align: left;
+	padding-left: 0.125rem;
+	padding-right: 0;
 }
 
-.console_table .time_td,
-.console_table .port_td {
+.console-table .time-td,
+.console-table .port-td {
 	font-size: 0.625rem;
 }
 
-.console_table .type_td,
-.console_table .type_th {
+.console-table .type-td,
+.console-table .type-th {
 	width: 6rem;
 	text-align: left;
+	padding-left: 0.125rem;
+	padding-right: 0;
 }
 
-.console_table .type_td {
+.console-table .type-td {
 	text-transform: uppercase;
 }
 
-.console_table .chan_td,
-.console_table .chan_th {
+.console-table .chan-td,
+.console-table .chan-th {
 	width: 3rem;
 }
 
-.console_table .num_td,
-.console_table .num_th {
+.console-table .num-td,
+.console-table .num-th {
 	width: 3rem;
 }
 
-.console_table .note_td,
-.console_table .note_th {
+.console-table .note-td,
+.console-table .note-th {
 	width: 3rem;
 }
 
-.console_table .val_td,
-.console_table .val_th {
+.console-table .val-td,
+.console-table .val-th {
 	width: 3rem;
 }
 
-.console_table tr.on .type_td {
+.console-table tr.on .type-td {
 	position: relative;
 }
 
-.console_table tr.on .type_td:after {
+.console-table tr.on .type-td:after {
 	content: ' ';
 	position: absolute;
 	height: 0.625rem;
@@ -128,11 +153,11 @@
 	border-radius: 0.5rem;
 }
 
-.console_table > tbody > tr:nth-child(odd) > td {
-	background-color: rgb(240,240,240);
+.console-table > tbody > tr:nth-child(odd) > td {
+	background-color: rgba(0,0,0,0.03);
 }
 
-.console_table > thead > tr > td,
-.console_table > tbody > tr > td {
-	background-color: rgb(250,250,250);
+.console-table > thead > tr > td,
+.console-table > tbody > tr > td {
+	background-color: rgba(255,255,255,0.03);
 }

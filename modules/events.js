@@ -1,6 +1,6 @@
 
 import { toStatus, controlToNumber, noteToNumber } from './data.js';
-import { toType } from './messages.js';
+import { normalise, toType } from './messages.js';
 import { request } from './midi.js';
 
 const assign      = Object.assign;
@@ -29,6 +29,7 @@ function remove(array, value) {
 const root  = {};
 
 export function fire(e) {
+    normalise(e.data);
 	fireRoute(0, root, e);
 }
 
@@ -37,11 +38,11 @@ function fireRoute(i, tree, e) {
 	var branch = tree[name];
 
 	if (name === undefined) {
-		branch && branch.forEach(fn => fn(e.receivedTime, e.target, e.data));
+		branch && branch.forEach(fn => fn(e.timeStamp, e.target, e.data));
 	}
 	else {
 		branch && fireRoute(i, branch, e);
-		tree.undefined && tree.undefined.forEach(fn => fn(e.receivedTime, e.target, e.data));
+		tree.undefined && tree.undefined.forEach(fn => fn(e.timeStamp, e.target, e.data));
 	}
 }
 
@@ -112,7 +113,7 @@ const eventInvalidationTime = 500;
 let now;
 
 function isPastEvent(e) {
-	return e.receivedTime < now;
+	return e.timeStamp < now;
 }
 
 function createEvent(time, port, message) {
@@ -125,9 +126,9 @@ function createEvent(time, port, message) {
 		events.push(e);
 	}
 
-	e.receivedTime = time;
-	e.target       = port;
-	e.data         = message;
+	e.timeStamp = time;
+	e.target    = port;
+	e.data      = message;
 
 	return e;
 }
