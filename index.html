@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="js"><head class="MIDI">
+<html lang="en" class="js"><head>
     <meta charset="utf-8">
     <meta name="author" content="@stephband">
     <meta name="description" content="Documentation for MIDI. Receive, manipulate and transmit browser MIDI messages.">
@@ -38,7 +38,7 @@
 
     <div class="demo-block block site-grid grid">
         <div class="midi-graph grid-1" id="midi-graph">
-            <p class="text-8 hint active" id="instrument-hint">Plug in a MIDI instrument to try out the <code>&lt;midi-graph&gt;</code> component…</p>
+            <p class="text-8 hint" id="instrument-hint">Plug in a MIDI instrument to try out the <code>&lt;midi-graph&gt;</code> component…</p>
             <midi-graph>
         </midi-graph></div>
     </div>
@@ -47,7 +47,7 @@
         <header class="grid-0">
             <h2 class="text-2" style="font-size: 1.875rem;">Functions</h2>
             <p>Import functions:</p>
-            <pre><code>import { on, off } from 'http://stephen.band/midi/midi.js';</code></pre>
+            <pre class=" language-js"><code class=" language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span> on<span class="token punctuation">,</span> off <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'http://stephen.band/midi/midi.js'</span><span class="token punctuation">;</span></code></pre>
             <p>On this page, all the following functions have been imported and assigned to <code>window</code> so that you may play with them in the console.</p>
         </header>
 
@@ -484,20 +484,22 @@ version displays notes, control change and pitch bend messages.</p>
     import '../dom/js/dom.root.js';
     import '../dom/js/dom.toggleable.js';
     import * as MIDI from './midi.js';
-    //Object.assign(window, MIDI);
+    Object.assign(window, MIDI);
 
     import { classes, get } from '../dom/dom.js';
-    var cls = classes(get('instrument-hint'));
-    cls.add('active');
 
-    // Wait for tests to run
-    MIDI.on([], function removeHint(time, port, message) {
-        // Test events have no port, and we want to ignore them
-        if (!port) { return; }
+    setTimeout(function() {
+        var cls = classes(get('instrument-hint'));
+        cls.add('active');
 
-        MIDI.off([], removeHint);
-        cls.remove('active');
-    });
+        MIDI.on([], function removeHint(time, port, message) {
+            // Test events have no port, and we want to ignore them
+            if (!port) { return; }
+
+            MIDI.off([], removeHint);
+            cls.remove('active');
+        });
+    }, 2000);
     </script>
 
     <!-- Tests -->

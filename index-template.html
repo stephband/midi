@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head template-fn="import:package.json" class="{[name]}">
+<head template-fn="import:package.json">
     <meta charset="utf-8" />
     <meta name="author" content="@{[author.twitter]}" />
     <meta name="description" content="Documentation for {[title]}. {[description]}" />
@@ -139,20 +139,22 @@
     import '../dom/js/dom.root.js';
     import '../dom/js/dom.toggleable.js';
     import * as MIDI from './midi.js';
-    //Object.assign(window, MIDI);
+    Object.assign(window, MIDI);
 
     import { classes, get } from '../dom/dom.js';
-    var cls = classes(get('instrument-hint'));
-    cls.add('active');
 
-    // Wait for tests to run
-    MIDI.on([], function removeHint(time, port, message) {
-        // Test events have no port, and we want to ignore them
-        if (!port) { return; }
+    setTimeout(function() {
+        var cls = classes(get('instrument-hint'));
+        cls.add('active');
 
-        MIDI.off([], removeHint);
-        cls.remove('active');
-    });
+        MIDI.on([], function removeHint(time, port, message) {
+            // Test events have no port, and we want to ignore them
+            if (!port) { return; }
+
+            MIDI.off([], removeHint);
+            cls.remove('active');
+        });
+    }, 2000);
     </script>
 
     <!-- Tests -->
