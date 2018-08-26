@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="@stephband" />
+    <meta name="description" content="MIDI monitor" />
+    <meta name="viewport" content="width=device-width" />
+
+    <title>MIDI Monitor</title>
+
+    <script>
+    document.documentElement.className = 'js';
+    window.DEBUG = true;
+    </script>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:100,300,400,500,700" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        midi-monitor {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <midi-monitor>
+    <script type="module" src="../components/midi-monitor/midi-monitor.js"></script>
+</body>

@@ -220,7 +220,9 @@ define('midi-monitor', function setup(node) {
 
 	print('<midi-monitor> initialised', node);
 }, {}, `
-<link rel="stylesheet" href="components/midi-monitor/midi-monitor.css"/>
+<!-- We have to use absolute paths for CSS inside the shadow DOM because we do
+not know where the root document is. -->
+<link rel="stylesheet" href="http://stephen.band/components/midi-monitor/midi-monitor.css"/>
 
 <div class="head-block block">
 	<table class="console-table">

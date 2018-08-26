@@ -430,9 +430,9 @@ define('midi-graph', function setup(node) {
 
 	print('<midi-graph> initialised', node);
 }, {}, `
-	<link rel="stylesheet" href="components/midi-graph/midi-graph.css"/>
-	<canvas class="midi-graph-canvas" width="1920" height="320"></canvas>
-	<ul class="midi-graph-ul">
-		${lis}
-	</ul>
+<!-- We have to use absolute paths for CSS inside the shadow DOM because we do
+not know where the root document is. -->
+<link rel="stylesheet" href="http://stephen.band/components/midi-graph/midi-graph.css"/>
+<canvas class="midi-graph-canvas" width="1920" height="320"></canvas>
+<ul class="midi-graph-ul">${lis}</ul>
 `);
