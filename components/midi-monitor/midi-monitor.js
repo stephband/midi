@@ -14,7 +14,9 @@ The `<midi-monitor>` element plots incoming messages in a rolling list.
 <midi-monitor>
 ```
 
-<midi-monitor>
+<midi-monitor></midi-monitor>
+
+There is a full-page MIDI monitor at [stephen.band/midi/monitor/](http://stephen.band/midi/monitor/).
 
 */
 

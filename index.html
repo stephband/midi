@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="js"><head>
+<html lang="en" class="js mouse"><head>
     <meta charset="utf-8">
     <meta name="author" content="@stephband">
     <meta name="description" content="Documentation for MIDI. Receive, manipulate and transmit browser MIDI messages.">
@@ -24,14 +24,14 @@
 
 <body>
     <header class="1-grid grid" id="header">
-        <h1 class="grid-0">MIDI <span class="text-6">0.9.1</span></h1>
+        <h1 class="grid-0">MIDI <span class="text-6">0.9.2</span></h1>
 
         <div class="grid-1">
-            <p class="text-8">Receive, manipulate and transmit browser MIDI messages.</p>
+            <p class="text-8">Receive, manipulate and transmit browser MIDI messages. Note that currently, only Chrome supports the <a href="https://caniuse.com/#feat=midi">WebMIDI API</a>.</p>
 
             <ul class="link-index index">
-        		<li>repo: <a href="https://github.com/stephband/midi.git">https://github.com/stephband/midi.git</a></li>
-                <li>bugs: <a href="https://github.com/stephband/midi/issues">https://github.com/stephband/midi/issues</a></li>
+        		<li><strong>repo:</strong> <a href="https://github.com/stephband/midi.git">https://github.com/stephband/midi.git</a></li>
+                <li><strong>bugs:</strong> <a href="https://github.com/stephband/midi/issues">https://github.com/stephband/midi/issues</a></li>
         	</ul>
         </div>
     </header>
@@ -470,9 +470,9 @@ version displays notes, control change and pitch bend messages.</p>
         <p>Import the custom element:</p>
 <pre><code><span class="token keyword">import</span> <span class="token string">'//stephen.band/midi/components/midi-monitor/midi-monitor.js'</span><span class="token punctuation">;</span></code></pre><p>The <code>&lt;midi-monitor&gt;</code> element plots incoming messages in a rolling list.</p>
 <pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>midi-monitor</span><span class="token punctuation">&gt;</span></span></code></pre>
-<midi-monitor>
-
-</midi-monitor></article>
+<p><midi-monitor></midi-monitor></p>
+<p>There is a full-page MIDI monitor at <a href="http://stephen.band/midi/monitor/">stephen.band/midi/monitor/</a>.</p>
+</article>
     </section>
 
 
