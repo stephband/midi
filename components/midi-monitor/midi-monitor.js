@@ -190,6 +190,7 @@ define('midi-monitor', function setup(node) {
 
 	function renderEntries() {
 		frame = null;
+
 		let n = -1;
 		let entry;
 

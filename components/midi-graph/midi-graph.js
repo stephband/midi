@@ -312,7 +312,6 @@ function updateControl(state, data) {
 	obj.time = now();
 }
 
-
 const lis = Array
 	.from({length: 128})
 	.map(function(n, i) {
@@ -330,17 +329,21 @@ define('midi-graph', function setup(node) {
 	const noteNodes  = notesNode.querySelectorAll('li');
 	const context    = canvasNode.getContext('2d');
 	const settings   = createSettings(options, canvasNode);
+	const state      = [];
+	const notes      = [];
 
-	var state = [];
-	var notes = [];
-	var count = 16;
-	var queued = false;
+	let count = 16;
+	let frame;
+
+	function requestRender() {
+		if (frame) { return; }
+		frame = window.requestAnimationFrame(render);
+	}
 
 	function render(now) {
-		var c = 16,
-			i, cc;
+		frame = null;
 
-		queued = false;
+		let c = 16, i, cc;
 
 		i = notes.length;
 
@@ -348,7 +351,7 @@ define('midi-graph', function setup(node) {
 		// continue being animated.
 		while (i--) {
 			if (updateNoteRender(state, notes[i])) {
-				queueRender();
+				requestRender();
 			}
 			else {
 				notes.splice(i, 1);
@@ -366,20 +369,13 @@ define('midi-graph', function setup(node) {
 				if (!cc) { continue; }
 
 				if (updateCcColor(state, settings, cc, now)) {
-					queueRender();
+					requestRender();
 				}
 			}
 		}
 
 		renderGraph(context, settings, state);
 		renderNames(noteNodes, settings, state);
-	}
-
-	function queueRender() {
-		if (queued === true) { return; }
-
-		window.requestAnimationFrame(render);
-		queued = true;
 	}
 
 	while (count--) {
@@ -394,24 +390,24 @@ define('midi-graph', function setup(node) {
 	node.input = overload(toType, {
 		'noteon': function(message) {
 			notes.push(message);
-			updateNote(state, message, queueRender);
-			queueRender(render);
+			updateNote(state, message, requestRender);
+			requestRender(render);
 		},
 
 		'noteoff': function(message) {
 			notes.push(message);
-			updateNote(state, message, queueRender);
-			queueRender(render);
+			updateNote(state, message, requestRender);
+			requestRender(render);
 		},
 
 		'control': function(message) {
 			updateControl(state, message);
-			queueRender(render);
+			requestRender(render);
 		},
 
 		'pitch': function(message) {
 			state[toChannel(message) - 1].pitch = pitchToFloat(message, options.range || 2);
-			queueRender(render);
+			requestRender(render);
 			return;
 		},
 
