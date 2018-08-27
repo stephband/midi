@@ -2,16 +2,11 @@
 /*
 <midi-graph>
 
-Import the custom element:
-
-```
-import '//stephen.band/midi/components/midi-graph/midi-graph.js';
-```
-
 The `<midi-graph>` element plots incoming messages on a graph. The current
 version displays notes, control change and pitch bend messages.
 
 ```html
+<script type="module" src="//stephen.band/midi/components/midi-graph/midi-graph.js"></script>
 <midi-graph>
 ```
 
@@ -417,10 +412,10 @@ define('midi-graph', function setup(node) {
 	var sourceAttr = node.getAttribute('source');
 
 	if (!sourceAttr || sourceAttr === 'all') {
-		on([], function(time, port, message) {
-			// Don't respond to internally triggered events
-			if (!port) { return; }
-			node.input(message);
+		on([], function(e) {
+			// Ignore internally .trigger()ed events
+			if (!e.target || !e.target.onmidimessage) { return; }
+			node.input(e.data);
 		});
 	}
 

@@ -6,7 +6,7 @@ createMessage(chan, type, param, value)
 
 Creates a MIDI message – a Uint8Array of three values – where channel `chan` is an
 integer in the range `1`-`16` and `type` is a string that determines the meaning
-of `param` and `value`.
+of `param` and `value`...
 
 #### Create type `'noteon'` or `'noteoff'`:
 
@@ -66,7 +66,7 @@ createMessage(1, 'program', 24);
 */
 
 function createNote(param, value, message) {
-    message[1] = typeof param === 'number' ? param : noteToNumber(param);
+    message[1] = typeof param === 'string' ? noteToNumber(param) : param ;
     message[2] = limit(0, 127, value * 127);
 }
 
@@ -81,7 +81,7 @@ const creators = {
     },
 
     'control': function(param, value, message) {
-        message[1] = typeof param === 'number' ? param : controlToNumber(param);
+        message[1] = typeof param === 'string' ? controlToNumber(param) : param ;
         message[2] = limit(0, 127, value * 127);
     },
 
@@ -119,7 +119,7 @@ export function isControl(message) {
 /*
 isNote(message)
 
-Returns `true` where message is a note, otherwise `false`.
+Returns `true` where message is a noteon or noteoff, otherwise `false`.
 
     isNote([145,80,20]);           // true
 */

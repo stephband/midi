@@ -14,8 +14,7 @@ let midi = {
 /*
 inputs()
 
-Returns a map of MIDI input ports from the underlying MIDIAccess object, keyed
-by port id.
+Returns the map of MIDI input ports from the underlying MIDIAccess object.
 */
 
 export function inputs() {
@@ -35,8 +34,7 @@ export function getInput(id) {
 /*
 outputs()
 
-Returns a map of MIDI output ports from the underlying MIDIAccess object, keyed
-by port id.
+Returns the map of MIDI output ports from the underlying MIDIAccess object.
 */
 
 export function outputs() {
@@ -56,22 +54,15 @@ export function getOutput(id) {
 /*
 request()
 
-A shortcut for `navigator.requestMIDIAcess()`. Where MIDI is supported, requests
-access to the browser's midi API, returning a promise, or where MIDI is not
-supported, returns a rejected promise.
+Returns a promise that resolves to the midiAccess object where it is
+available. Where the underlying `navigator.requestMIDIAccess()` method is
+undefined, or where MIDI is unavailable for some reason, returns a rejected
+promise. Library functions are available to use without requesting the midiAccess
+object, but this request is useful for alerting the user.
 
-    request()
-    .catch(function(error) {
+    request().catch(function(error) {
         // Alert the user they don't have MIDI
-    })
-    .then(function(midi) {
-        // Do something with midi object
     });
-
-Note that using the `MIDI` library you don't really need to touch the browser's
-lower-level `midi` object. MIDI functions and methods are available before the
-promise is resolved. For example, calling `on(query, fn)` will bind to
-incoming MIDI events when `request()` is resolved.
 */
 
 function listen(port) {
@@ -176,18 +167,16 @@ function findOutputPort(string) {
 /*
 send(event)
 
-Where `event` is an object with three properties, `target` (a MIDI output port),
-`timeStamp` (a DOM time), and `data` (a MIDI message), cues the message
-to be sent to the port. If `timeStamp` is in the past the message is sent
-immediately.
+Cues a message to be sent to an output port. The object `event` must have the
+same structure as an incoming MIDI event object:
 
     send({
-        target:    port,
-        timeStamp: 2400.56,
-        data:      [144, 69, 96]
+        target:    // a MIDI output port
+        timeStamp: // a DOM timeStamp
+        data:      // a MIDI message
     });
 
-Event objects can be constructed (from a pool) using `createEvent()`.
+If `timeStamp` is in the past the message is sent immediately.
 */
 
 export function sendEvent(e) {
@@ -199,14 +188,14 @@ export function sendEvent(e) {
 /*
 send(time, port, message)
 
-Cues `message` to be sent to `port` at `time`. Where `time` is in the past
+Cues a `message` to be sent to an output `port`. Where `time` is in the past
 the message is sent immediately. `port` may be a MIDI output port or the
 id of a MIDI output port.
 
     send(0, 'id', [144, 69, 96]);
 */
 
-export function sendMessage(time, port, message) {
+function sendMessage(time, port, message) {
     if (typeof port === 'string') {
         port = midi.inputs.get(port) || findOutputPort(port);
 
@@ -221,7 +210,7 @@ export function sendMessage(time, port, message) {
 /*
 send(time, port, chan, type, param, value)
 
-As `send(time, port, message)`, but the last 4 parameters are passed to
+Like `send(time, port, message)`, but the last 4 parameters are passed to
 `createMessage()` to create the MIDI message before sending.
 
     send(0, 'id', 1, 'noteon', 'A4', 0.75);

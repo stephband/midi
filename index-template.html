@@ -33,7 +33,7 @@
         <h1 class="grid-0 midi-icon">{[title]} <span class="text-6">{[version]}</span></h1>
 
         <div class="grid-1">
-            <p class="text-8">{[description]} Note that currently, only Chrome supports the <a href="https://caniuse.com/#feat=midi">WebMIDI API</a>.</p>
+            <p class="text-8">{[description]} <span id="support-hint" style="color: #bf004c;"></span> Currently, only Chrome supports the <a href="https://caniuse.com/#feat=midi">WebMIDI API</a>.</p>
 
             <ul class="link-index index">
         		<li><strong>repo:</strong> <a href="{[repository.url]}">{[repository.url]}</a></li>
@@ -53,13 +53,17 @@
         <header class="grid-0">
             <h2 class="text-2" style="font-size: 1.875rem;">Functions</h2>
             <p>Import functions:</p>
-            <pre><code class="language-js">import { on, off } from 'http://stephen.band/midi/midi.js';</code></pre>
-            <p>On this page, all the following functions have been imported and assigned to <code>window</code> so that you may play with them in the console.</p>
+            <pre><code class="language-js">// One at a time
+import { on, off } from 'http://stephen.band/midi/midi.js';
+
+// Or import them all to an object
+import * as MIDI from 'http://stephen.band/midi/midi.js';</code></pre>
+            <p>On this page, all functions have been imported to the object <code>MIDI</code> so that you may play with them in the console.</p>
         </header>
 
         <section class="grid-1">
-            <h1 class="text-3">send & receive</h1>
-            <article template-fn="docs:'./modules/events.js','./modules/midi.js?send' each append:body" class="toggle-block block" toggleable id="{[id]}">
+            <h1 class="text-3">availability</h1>
+            <article template-fn="docs:'./modules/midi.js?request' each append:body" class="toggle-block block" toggleable id="{[id]}">
                 <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
                     <a href="#{[id]}">
                         <code template-fn="html:title" class="language-js"></code>
@@ -69,8 +73,8 @@
         </section>
 
         <section class="grid-2">
-            <h1 class="text-3">ports</h1>
-            <article template-fn="docs:'./modules/midi.js?request,getInput,getOutput,inputs,outputs' each append:body" class="toggle-block block" toggleable id="{[id]}">
+            <h1 class="text-3">receive</h1>
+            <article template-fn="docs:'./modules/midi.js?inputs,getInput','./modules/events.js' each append:body" class="toggle-block block" toggleable id="{[id]}">
                 <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
                     <a href="#{[id]}">
                         <code template-fn="html:title" class="language-js"></code>
@@ -80,6 +84,17 @@
         </section>
 
         <section class="grid-3">
+            <h1 class="text-3">send</h1>
+            <article template-fn="docs:'./modules/midi.js?outputs,getOutput,send' each append:body" class="toggle-block block" toggleable id="{[id]}">
+                <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
+                    <a href="#{[id]}">
+                        <code template-fn="html:title" class="language-js"></code>
+                    </a>
+                </h3>
+            </article>
+        </section>
+
+        <section class="grid-4">
             <h1 class="text-3">messages</h1>
             <article template-fn="docs:'./modules/messages.js' each append:body" class="toggle-block doc-block block" toggleable id="{[id]}">
                 <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
@@ -90,7 +105,7 @@
             </article>
         </section>
 
-        <section class="grid-4">
+        <section class="grid-5">
             <h1 class="text-3">data</h1>
             <article template-fn="docs:'./modules/data.js' each append: body" class="toggle-block block" toggleable id="{[id]}">
                 <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
@@ -101,7 +116,7 @@
             </article>
         </section>
 
-        <section class="grid-5">
+        <section class="grid-6">
             <h1 class="text-3">maths</h1>
             <article template-fn="docs:'./modules/maths.js' each append:body" class="toggle-block block" toggleable id="{[id]}">
                 <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
@@ -138,23 +153,29 @@
     <script remove-template type="module" src="../fn/docs-build.js"></script>
 
     <!-- Document interactivity -->
+    <script type="module" src="./components/midi-graph/midi-graph.js"></script>
+    <script type="module" src="./components/midi-monitor/midi-monitor.js"></script>
     <script type="module">
-    import './components/midi-graph/midi-graph.js';
-    import './components/midi-monitor/midi-monitor.js';
     import '../dom/js/dom.root.js';
     import '../dom/js/dom.toggleable.js';
     import * as MIDI from './midi.js';
-    Object.assign(window, MIDI);
+    window.MIDI = MIDI;
 
     import { classes, get } from '../dom/dom.js';
+
+    MIDI
+    .request()
+    .catch(function() {
+        get('support-hint').innerHTML = 'This browser does not support MIDI.';
+    });
 
     setTimeout(function() {
         var cls = classes(get('instrument-hint'));
         cls.add('active');
 
-        MIDI.on([], function removeHint(time, port, message) {
+        MIDI.on([], function removeHint(e) {
             // Test events have no port, and we want to ignore them
-            if (!port) { return; }
+            if (!e.target || !e.target.onmidimessage) { return; }
 
             MIDI.off([], removeHint);
             cls.remove('active');

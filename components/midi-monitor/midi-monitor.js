@@ -2,15 +2,10 @@
 /*
 <midi-monitor>
 
-Import the custom element:
-
-```
-import '//stephen.band/midi/components/midi-monitor/midi-monitor.js';
-```
-
-The `<midi-monitor>` element plots incoming messages in a rolling list.
+The `<midi-monitor>` element displays all incoming messages in a rolling list.
 
 ```html
+<script type="module" src="//stephen.band/midi/components/midi-monitor/midi-monitor.js"></script>
 <midi-monitor>
 ```
 
@@ -197,7 +192,7 @@ define('midi-monitor', function setup(node) {
 		// Render each entry in entries
 		while (++n < entries.length) {
 			entry = entries[n];
-			renderEntry(trTemplate, tdNodes, tbody, nodes, maxEntries, entry[0], entry[1], entry[2]);
+			renderEntry(trTemplate, tdNodes, tbody, nodes, maxEntries, entry.timeStamp, entry.target, entry.data);
 		}
 
 		// Clear out the entries queue
@@ -212,10 +207,11 @@ define('midi-monitor', function setup(node) {
 	}
 
 	// Listen to incoming MIDI
-	on([], function(time, port, message) {
-		if (!port) { return; }
+	on([], function(e) {
+		// Ignore internally .trigger()ed events
+		if (!e.target || !e.target.onmidimessage) { return; }
 
-		entries.push(arguments);
+		entries.push(e);
 
 		// Render asynchronously
 		requestRender();

@@ -48,4 +48,11 @@
 <body>
     <midi-monitor>
     <script type="module" src="../components/midi-monitor/midi-monitor.js"></script>
+    <script>
+    import { request } from '../midi.js';
+
+    request.catch(function() {
+        alert('Your browser does not support the WebMIDI API.');
+    });
+    </script>
 </body>
