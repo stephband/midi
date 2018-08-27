@@ -1,27 +1,11 @@
 
+import { overload, remove, toArgsLength } from './utils.js';
 import { toStatus, controlToNumber, noteToNumber } from './data.js';
 import { normalise, toType } from './messages.js';
 import { request } from './midi.js';
 
 const assign      = Object.assign;
 const performance = window.performance;
-
-
-// Utilities
-
-function overload(fn, map) {
-    return function overload() {
-        const key     = fn.apply(null, arguments);
-        const handler = (map[key] || map.default);
-        if (!handler) { throw new Error('overload() no handler for "' + key + '"'); }
-        return handler.apply(this, arguments);
-    };
-}
-
-function remove(array, value) {
-    var i = array.indexOf(value);
-    if (i !== -1) { array.splice(i, 1); }
-}
 
 
 // Routing
@@ -108,24 +92,51 @@ function get1(object) { return object[1]; };
 function type1(object) { return typeof object[1]; };
 function typeArg2() { return typeof arguments[2]; };
 
-const events = [];
+
+/*
+createEvent(time, port, message)
+
+Creates a MIDI event object from `time` (a DOM time), `port` (an MIDI port or
+the id of a MIDI port) and `message` (a MIDI message). While event objects
+are not actual DOM event objects, they deliberately mirror the structure of
+incoming event objects.
+
+    createEvent(2400.56, 'id', [144, 69, 96])
+
+    // {
+    //     timeStamp: 2400.56,
+    //     port: MIDIPort[id],
+    //     data: [144, 69, 96]
+    // }
+
+Event objects are pooled to avoid creating large numbers of objects, and they
+become invalid when DOM time advances beyond their `timeStamp`. If you need
+to store them, they should be cloned.
+*/
+
 const eventInvalidationTime = 500;
+const events = [];
+
 let now;
 
-function isPastEvent(e) {
+function isOutOfDate(e) {
 	return e.timeStamp < now;
 }
 
-function createEvent(time, port, message) {
+export function createEvent(time, port, message) {
 	// Allow a margin of error for event invalidation
 	now = performance.now() + eventInvalidationTime;
-	let e = events.find(isPastEvent);
 
+    // Find an unused event object in the pool
+	let e = events.find(isOutOfDate);
+
+    // If there is none, create one
 	if (!e) {
 		e = {};
 		events.push(e);
 	}
 
+    // Assign it some data
 	e.timeStamp = time;
 	e.target    = port;
 	e.data      = message;
@@ -256,16 +267,18 @@ are passed to `createMessage()` in order to create the message.
     trigger(0, null, 1, 'noteon', 'A4', 0.75);
 */
 
-export const trigger = overload(typeArg2, {
-	'number': function(time, port, chan, type, param, value) {
-		const message = createMessage(chan, type, param, value);
-		const now     = performance.now();
-		const e       = createEvent(time > now ? time : now, undefined, message);
+export const trigger = overload(toArgsLength, {
+    1: fire,
+
+	3: function(time, port, message) {
+		const e = createEvent(time, port, message);
 		fire(e);
 	},
 
-	'default': function(time, port, message) {
-		const e = createEvent(performance.now(), undefined, message);
+    default: function(time, port, chan, type, param, value) {
+		const message = createMessage(chan, type, param, value);
+		const now     = performance.now();
+		const e       = createEvent(time > now ? time : now, undefined, message);
 		fire(e);
 	}
 });

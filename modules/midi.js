@@ -1,4 +1,5 @@
 
+import { overload, remove, toArgsLength } from './utils.js';
 import { print, printGroup, printGroupEnd } from './print.js';
 import { fire } from './events.js';
 
@@ -13,7 +14,8 @@ let midi = {
 /*
 inputs()
 
-Returns a map of MIDI input ports, keyed by port id.
+Returns a map of MIDI input ports from the underlying MIDIAccess object, keyed
+by port id.
 */
 
 export function inputs() {
@@ -21,13 +23,34 @@ export function inputs() {
 }
 
 /*
+getInput(id)
+
+Returns an input port by id.
+*/
+
+export function getInput(id) {
+    return midi.inputs.get(id);
+}
+
+/*
 outputs()
 
-Returns a map of MIDI output ports, keyed by port id.
+Returns a map of MIDI output ports from the underlying MIDIAccess object, keyed
+by port id.
 */
 
 export function outputs() {
     return midi.outputs;
+}
+
+/*
+getOutput(id)
+
+Returns an output port by id.
+*/
+
+export function getOutput(id) {
+    return midi.outputs.get(id);
 }
 
 /*
@@ -125,24 +148,6 @@ export function request() {
 	);
 }
 
-/*
-send(time, port, message)
-
-Cues `message` to be sent to `port` at `time`. Where `time` is in the past
-the message is sent immediately. `port` may be a MIDI output, the
-id of a MIDI output, or a string identifying the start of the output port name
-or manufacturer, in that order. The last two options are less performant as
-some searching has to be done.
-
-    send(0, 'id', [144, 69, 96]);
-
-Also accepts a parameter list of the form `(time, port, chan, type, param, value)`,
-where the last four parameters are passed to `createMessage()` to create
-the MIDI message. This call is equivalent to the above:
-
-    send(0, 'id', 1, 'noteon', 'A4', 0.75);
-*/
-
 function findOutputPort(string) {
     string = string.toLowercase();
 
@@ -168,21 +173,67 @@ function findOutputPort(string) {
     }
 }
 
-export function send(time, port, message) {
-    // Support parameters (time, port, chan, type, param, value)
-    if (typeof message === 'number') {
-        message = createMessage(arguments[2], arguments[3], arguments[4], arguments[5]);
-    }
+/*
+send(event)
 
+Where `event` is an object with three properties, `target` (a MIDI output port),
+`timeStamp` (a DOM time), and `data` (a MIDI message), cues the message
+to be sent to the port. If `timeStamp` is in the past the message is sent
+immediately.
+
+    send({
+        target:    port,
+        timeStamp: 2400.56,
+        data:      [144, 69, 96]
+    });
+
+Event objects can be constructed (from a pool) using `createEvent()`.
+*/
+
+export function sendEvent(e) {
     // Spec example:
     // https://webaudio.github.io/web-midi-api/#sending-midi-messages-to-an-output-device
-    if (typeof port === 'object') {
-        return port.send(message, time);
-    }
-
-    port = midi.inputs.get(port) || findOutputPort(port);
-
-    if (port) {
-        port.send(message, time);
-    }
+    e.target.send(e.data, e.timeStamp);
 }
+
+/*
+send(time, port, message)
+
+Cues `message` to be sent to `port` at `time`. Where `time` is in the past
+the message is sent immediately. `port` may be a MIDI output port or the
+id of a MIDI output port.
+
+    send(0, 'id', [144, 69, 96]);
+*/
+
+export function sendMessage(time, port, message) {
+    if (typeof port === 'string') {
+        port = midi.inputs.get(port) || findOutputPort(port);
+
+        if (!port) {
+            print('Output port not found', port);
+        }
+    }
+
+    port.send(message, time);
+}
+
+/*
+send(time, port, chan, type, param, value)
+
+As `send(time, port, message)`, but the last 4 parameters are passed to
+`createMessage()` to create the MIDI message before sending.
+
+    send(0, 'id', 1, 'noteon', 'A4', 0.75);
+*/
+
+function sendParams(time, port, chan, type, param, value) {
+    const message = createMessage(chan, type, param, value);
+    return sendMessage(time, port, message);
+}
+
+export const send = overload(toArgsLength, {
+    1: sendEvent,
+    3: sendMessage,
+    default: sendParams
+});

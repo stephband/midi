@@ -59,9 +59,9 @@
 
         <section class="grid-1">
             <h1 class="text-3">send & receive</h1>
-            <article template-fn="docs:'./modules/events.js','./modules/midi.js?send' each append:body" class="toggle-block block" toggleable id="{[name]}">
+            <article template-fn="docs:'./modules/events.js','./modules/midi.js?send' each append:body" class="toggle-block block" toggleable id="{[id]}">
                 <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
-                    <a href="#{[name]}">
+                    <a href="#{[id]}">
                         <code template-fn="html:title" class="language-js"></code>
                     </a>
                 </h3>
@@ -70,9 +70,9 @@
 
         <section class="grid-2">
             <h1 class="text-3">ports</h1>
-            <article template-fn="docs:'./modules/midi.js?request,inputs,outputs' each append:body" class="toggle-block block" toggleable id="{[name]}">
+            <article template-fn="docs:'./modules/midi.js?request,getInput,getOutput,inputs,outputs' each append:body" class="toggle-block block" toggleable id="{[id]}">
                 <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
-                    <a href="#{[name]}">
+                    <a href="#{[id]}">
                         <code template-fn="html:title" class="language-js"></code>
                     </a>
                 </h3>
@@ -81,9 +81,9 @@
 
         <section class="grid-3">
             <h1 class="text-3">messages</h1>
-            <article template-fn="docs:'./modules/messages.js' each append:body" class="toggle-block doc-block block" toggleable id="{[name]}">
+            <article template-fn="docs:'./modules/messages.js' each append:body" class="toggle-block doc-block block" toggleable id="{[id]}">
                 <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
-                    <a href="#{[name]}">
+                    <a href="#{[id]}">
                         <code template-fn="html:title" class="language-js"></code>
                     </a>
                 </h3>
@@ -92,9 +92,9 @@
 
         <section class="grid-4">
             <h1 class="text-3">data</h1>
-            <article template-fn="docs:'./modules/data.js' each append: body" class="toggle-block block" toggleable id="{[name]}">
+            <article template-fn="docs:'./modules/data.js' each append: body" class="toggle-block block" toggleable id="{[id]}">
                 <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
-                    <a href="#{[name]}">
+                    <a href="#{[id]}">
                         <code template-fn="html:title" class="language-js"></code>
                     </a>
                 </h3>
@@ -103,9 +103,9 @@
 
         <section class="grid-5">
             <h1 class="text-3">maths</h1>
-            <article template-fn="docs:'./modules/maths.js' each append:body" class="toggle-block block" toggleable id="{[name]}">
+            <article template-fn="docs:'./modules/maths.js' each append:body" class="toggle-block block" toggleable id="{[id]}">
                 <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
-                    <a href="#{[name]}">
+                    <a href="#{[id]}">
                         <code template-fn="html:title" class="language-js"></code>
                     </a>
                 </h3>
@@ -118,17 +118,17 @@
             <h2 class="text-2" style="font-size: 1.875rem;">Custom elements</h2>
         </header>
 
-        <article template-fn="docs:'./components/midi-graph/midi-graph.js' each append:body" class="grid-1" id="{[name]}">
+        <article template-fn="docs:'./components/midi-graph/midi-graph.js' each append:body" class="grid-1" id="{[id]}">
             <h3 class="text-3">
-                <a href="#{[name]}">
+                <a href="#{[id]}">
                     <code template-fn="html:title" class="language-html"></code>
                 </a>
             </h3>
         </article>
 
-        <article template-fn="docs:'./components/midi-monitor/midi-monitor.js' each append:body" class="grid-2" id="{[name]}">
+        <article template-fn="docs:'./components/midi-monitor/midi-monitor.js' each append:body" class="grid-2" id="{[id]}">
             <h3 class="text-3">
-                <a href="#{[name]}">
+                <a href="#{[id]}">
                     <code template-fn="html:title" class="language-html"></code>
                 </a>
             </h3>
