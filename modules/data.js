@@ -21,10 +21,10 @@ export function controlToNumber(name) {
 }
 
 /*
-frequencyToNumber(ref, freq)
+frequencyToNumber(refFreq, freq)
 
-Returns freq as a float on the note number scale, where `freqA` is a reference
-frequency for middle A (A4). The standard reference frequency is `440`.
+Returns freq as a float on the note number scale, where `refFreq` is a reference
+frequency for middle A (A4), usually `440`.
 
     frequencyToNumber(440, 220);  // 57 (A3)
 	frequencyToNumber(440, 110);  // 45 (A2)
@@ -137,11 +137,10 @@ export function numberToControl(n) {
 }
 
 /*
-numberToFrequency(ref, n)
+numberToFrequency(refFreq, n)
 
 Given a note number `n`, returns the frequency of the fundamental tone of that
-note relative to the reference frequency for middle A (A4) `ref`. The standard
-reference frequency is `440`.
+note relative to the reference frequency for middle A (A4) `refFreq` (usually `440`).
 
     numberToFrequency(440, 69);  // 440
     numberToFrequency(440, 60);  // 261.625565

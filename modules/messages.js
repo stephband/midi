@@ -147,7 +147,7 @@ Many keyboards transmit `'noteon'` with velocity `0` rather than `'noteoff'`
 messages. This is because MIDI allows messages with the same type to be sent
 together, omitting the status byte and saving bandwidth. The MIDI spec requires
 that both forms are treated identically. `normalise()` <em>mutates</em>
-'noteon'` messages with velocity `0` to `'noteoff'` messages.
+`'noteon'` messages with velocity `0` to `'noteoff'` messages.
 
     normalise([145,80,0]);  // [129,80,0]
 
