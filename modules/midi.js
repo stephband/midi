@@ -1,7 +1,8 @@
 
-import { overload, remove, toArgsLength } from './utils.js';
 import { print, printGroup, printGroupEnd } from './print.js';
+import { overload, toArgsLength } from './utils.js';
 import { fire } from './events.js';
+import { createMessage } from './messages.js';
 
 const DEBUG = true;
 const empty = new Map();
@@ -145,9 +146,10 @@ function findOutputPort(string) {
     // At this point, string is not an id of a port nor an actual port.
     // We're going to try and find it by name
     let entry;
+
     for (entry of midi.outputs) {
-        let port = entry[1];
-        let name = port.name && port.name.toLowercase();
+        const port = entry[1];
+        const name = port.name && port.name.toLowercase();
 
         if (name.startsWith(string)) {
             return port;
@@ -155,8 +157,8 @@ function findOutputPort(string) {
     }
 
     for (entry of midi.outputs) {
-        let port = entry[1];
-        let manu = port.manufacturer && port.manufacturer.toLowercase();
+        const port = entry[1];
+        const manu = port.manufacturer && port.manufacturer.toLowercase();
 
         if (manu.startsWith(string)) {
             return port;

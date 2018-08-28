@@ -1,40 +1,46 @@
 {
-  "name": "MIDI",
-  "title": "MIDI",
-  "description": "Receive, manipulate and transmit browser MIDI messages.",
-  "version": "0.9.4",
-  "homepage": "http://stephen.band/midi",
-  "author": {
-    "name": "Stephen Band",
-    "twitter": "stephband"
-  },
-  "repository": {
-      "type": "git",
-      "url":  "https://github.com/stephband/midi.git"
-  },
-  "bugs": {
-      "url":  "https://github.com/stephband/midi/issues"
-  },
-  "licenses": [{ "type": "MIT" }],
-  "keywords": [
-      "browser",
-      "web",
-      "library",
-      "functional",
-      "js",
-      "javascript",
-      "music",
-      "midi"
-  ],
-  "homepage": "http://stephen.band/midi/template.html",
-  "docs": "http://stephen.band/midi/template.html",
-  "devDependencies": {
-      "eslint": "^4.4.1",
-      "rollup": "^0.58.2"
-  },
-  "scripts": {
-      "lint": "eslint js/*.js",
-      "build-cjs": "rollup fn.js --o dist/fn-cjs-1.2.0.js --f cjs",
-      "build-closure": "rollup fn.js --o dist/fn-iife-1.2.0.js --f iife --n Fn"
-  }
+    "name": "MIDI",
+    "title": "MIDI",
+    "description": "Receive, monitor, manipulate and transmit browser MIDI messages.",
+    "version": "0.9.4",
+    "homepage": "http://stephen.band/midi/index.html",
+    "author": {
+        "name": "Stephen Band",
+        "twitter": "stephband"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/stephband/midi.git"
+    },
+    "bugs": {
+        "url": "https://github.com/stephband/midi/issues"
+    },
+    "licenses": [
+        {
+            "type": "MIT"
+        }
+    ],
+    "keywords": [
+        "browser",
+        "web",
+        "library",
+        "functional",
+        "js",
+        "javascript",
+        "music",
+        "MIDI"
+    ],
+    "docs": "http://stephen.band/midi/index.html",
+    "devDependencies": {
+        "eslint": "^4.4.1",
+        "rollup": "^0.58.2"
+    },
+    "module": "midi.js",
+    "main": "dist/midi-0.9.4-cjs.js",
+    "scripts": {
+        "lint":          "eslint modules/*.js",
+        "build":         "npm run build-cjs && npm run build-closure",
+        "build-cjs":     "rollup midi.js --o dist/midi-cjs-0.9.4.js --f cjs",
+        "build-closure": "rollup midi.js --o dist/midi-0.9.4.js --f iife --n MIDI"
+    }
 }

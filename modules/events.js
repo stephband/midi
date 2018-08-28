@@ -1,10 +1,8 @@
 
 import { overload, remove, toArgsLength } from './utils.js';
 import { toStatus, controlToNumber, noteToNumber } from './data.js';
-import { createMessage, normalise, toType } from './messages.js';
-import { request } from './midi.js';
+import { createMessage, normalise } from './messages.js';
 
-const assign      = Object.assign;
 const performance = window.performance;
 
 
@@ -29,11 +27,11 @@ function fireRoute(i, tree, e) {
 	var branch = tree[name];
 
 	if (name === undefined) {
-		branch && branch.forEach(fn => fn(e));
+		branch && branch.forEach((fn) => fn(e));
 	}
 	else {
 		branch && fireRoute(i, branch, e);
-		tree['undefined'] && tree['undefined'].forEach(fn => fn(e));
+		tree['undefined'] && tree['undefined'].forEach((fn) => fn(e));
 	}
 }
 
@@ -90,9 +88,8 @@ function toQuery(selector) {
 
 // Transforms
 
-function get1(object) { return object[1]; };
-function type1(object) { return typeof object[1]; };
-function typeArg2() { return typeof arguments[2]; };
+function get1(object) { return object[1]; }
+function type1(object) { return typeof object[1]; }
 
 
 
@@ -278,7 +275,7 @@ const removeSelectorRoute = overload(type1, {
 			setRoute(query, root, fn);
 		},
 
-		'default': function(query, root, fn) {
+		'default': function(selector, root, fn) {
 			var query = toQuery(selector);
 			removeRoute(query, root, fn);
 		}

@@ -11,6 +11,7 @@ The `<midi-monitor>` element displays all incoming messages in a rolling list.
 
 <midi-monitor></midi-monitor>
 
+This module has external depencies.
 There is a full-page MIDI monitor at [stephen.band/midi/monitor/](http://stephen.band/midi/monitor/).
 
 */

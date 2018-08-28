@@ -2,9 +2,6 @@
 import { print } from './modules/print.js';
 print('       - http://github.com/stephband/midi');
 
-const thing = {};
-export default thing;
-
 export {
     bytesToInt14,
     bytesToSignedFloat,
