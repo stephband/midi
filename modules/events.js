@@ -310,17 +310,21 @@ As `trigger(port, message)`, where the last 4 parameters are passed to
     trigger(null, 1, 'noteon', 'A4', 0.75);
 */
 
+const internalPort = {
+    id: 'INTERNAL'
+};
+
 export const trigger = overload(toArgsLength, {
     1: fire,
 
 	2: function(port, message) {
-		const e = createEvent(performance.now(), port, message);
+		const e = createEvent(performance.now(), port ? port : internalPort, message);
 		fire(e);
 	},
 
     default: function(port, chan, type, param, value) {
 		const message = createMessage(chan, type, param, value);
-		const e       = createEvent(performance.now(), port, message);
+		const e       = createEvent(performance.now(), port ? port : internalPort, message);
 		fire(e);
 	}
 });
