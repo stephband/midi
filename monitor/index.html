@@ -23,6 +23,7 @@
         html,
         body {
             overflow: hidden;
+            background-color: white;
         }
 
         body {
@@ -40,15 +41,27 @@
             left: 0.1875rem;
             right: 0.1875rem;
             width: auto;
-            height: 100%;
+            height: calc(100vh - 20vw);
+        }
+
+        body > midi-graph {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: auto;
+            height: 20vw;
+            background-color: #272a2b;
         }
     </style>
 </head>
 
 <body>
-    <midi-monitor>
+    <midi-monitor></midi-monitor>
+    <midi-graph></midi-graph>
     <script type="module" src="../components/midi-monitor/midi-monitor.js"></script>
-    <script>
+    <script type="module" src="../components/midi-graph/midi-graph.js"></script>
+    <script type="module">
     import { request } from '../midi.js';
 
     request.catch(function() {
