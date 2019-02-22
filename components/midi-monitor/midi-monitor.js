@@ -16,7 +16,7 @@ There is a full-page MIDI monitor at [stephen.band/midi/monitor/](http://stephen
 
 */
 
-import { define } from '../../../dom/dom.js';
+import { element } from '../../../dom/dom.js';
 import { numberToNote, on, toChannel, toType } from '../../midi.js';
 import { print } from '../../modules/print.js';
 
@@ -58,13 +58,6 @@ function setState(chan, type, byte, value) {
 	const typeState = chanState[type] || (chanState[type] = {});
 	typeState[byte] = value;
 	return value;
-}
-
-function getState(chan, type, byte) {
-	const chanState = state[chan];
-	if (!chanState) { return; }
-	const typeState = chanState[type];
-	return typeState && typeState[byte];
 }
 
 function removeState(chan, type, byte) {
@@ -162,65 +155,8 @@ function renderEntry(trTemplate, tdNodes, tbody, nodes, maxEntries, time, port, 
 
 // Define custom element
 
-define('midi-monitor', function setup(node) {
-	const template   = node.shadowRoot.querySelector('template').content;
-	const trTemplate = template.querySelector('tr');
-	const tdNodes    = trTemplate.querySelectorAll('td');
-	const tbody      = node.shadowRoot.querySelector('#tbody');
-	const maxEntries = node.getAttribute('max-entries') ?
-		parseInt(node.getAttribute('max-entries'), 10) :
-		maxEntriesDefault ;
-
-	// A queue of entries yet to be rendered
-	const entries = [];
-
-	// A list of rendered nodes
-	const nodes   = [];
-
-	let frame;
-
-	function requestRender() {
-		if (frame) { return; }
-		frame = window.requestAnimationFrame(renderEntries);
-	}
-
-	function renderEntries() {
-		frame = null;
-
-		let n = -1;
-		let entry;
-
-		// Render each entry in entries
-		while (++n < entries.length) {
-			entry = entries[n];
-			renderEntry(trTemplate, tdNodes, tbody, nodes, maxEntries, entry.timeStamp, entry.target, entry.data);
-		}
-
-		// Clear out the entries queue
-		entries.length = 0;
-	}
-
-	// Populate monitor with a list of blank entries
-	let n = 20;
-
-	while (n--) {
-		renderBlank(trTemplate, tdNodes, tbody, nodes);
-	}
-
-	// Listen to incoming MIDI
-	on([], function(e) {
-		// Ignore internally .trigger()ed events
-		if (!e.target || !e.target.onmidimessage) { return; }
-
-		entries.push(e);
-
-		// Render asynchronously
-		requestRender();
-	});
-
-	print('<midi-monitor> initialised', node);
-}, {}, `
-<!-- We have to use absolute paths for CSS inside the shadow DOM because we do
+element('midi-monitor',
+`<!-- We have to use absolute paths for CSS inside the shadow DOM because we do
 not know where the root document is. -->
 <link rel="stylesheet" href="//stephen.band/midi/components/midi-monitor/midi-monitor.css"/>
 
@@ -256,4 +192,67 @@ not know where the root document is. -->
 		<td class="note-td"></td>
 		<td class="val-td"></td>
 	</tr>
-</template>`);
+</template>`, {
+
+}, {
+
+}, {
+	setup: function setup() {
+		const template   = this.shadowRoot.querySelector('template').content;
+		const trTemplate = template.querySelector('tr');
+		const tdNodes    = trTemplate.querySelectorAll('td');
+		const tbody      = this.shadowRoot.querySelector('#tbody');
+		const maxEntries = this.getAttribute('max-entries') ?
+			parseInt(this.getAttribute('max-entries'), 10) :
+			maxEntriesDefault ;
+
+		// A queue of entries yet to be rendered
+		const entries = [];
+
+		// A list of rendered nodes
+		const nodes   = [];
+
+		let frame;
+
+		function requestRender() {
+			if (frame) { return; }
+			frame = window.requestAnimationFrame(renderEntries);
+		}
+
+		function renderEntries() {
+			frame = null;
+
+			let n = -1;
+			let entry;
+
+			// Render each entry in entries
+			while (++n < entries.length) {
+				entry = entries[n];
+				renderEntry(trTemplate, tdNodes, tbody, nodes, maxEntries, entry.timeStamp, entry.target, entry.data);
+			}
+
+			// Clear out the entries queue
+			entries.length = 0;
+		}
+
+		// Populate monitor with a list of blank entries
+		let n = 20;
+
+		while (n--) {
+			renderBlank(trTemplate, tdNodes, tbody, nodes);
+		}
+
+		// Listen to incoming MIDI
+		on([], function(e) {
+			// Ignore internally .trigger()ed events
+			if (!e.target || !e.target.onmidimessage) { return; }
+
+			entries.push(e);
+
+			// Render asynchronously
+			requestRender();
+		});
+
+		print('<midi-monitor> initialised', this);
+	}
+});

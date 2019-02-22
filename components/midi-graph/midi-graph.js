@@ -16,7 +16,7 @@ This module has external dependencies.
 */
 
 import { noop, overload, toInt } from '../../../fn/fn.js';
-import { append, define, query, trigger, empty, now } from '../../../dom/dom.js';
+import { append, element, query, trigger, empty, now } from '../../../dom/dom.js';
 import { print } from '../../modules/print.js';
 import { bytesToSignedFloat, isNote, isControl, isPitch, toChannel, numberToNote, on, toType } from '../../midi.js';
 
@@ -316,115 +316,121 @@ const lis = Array
 	.join('');
 
 // define(name, setup, attributes, shadow)
-define('midi-graph', function setup(node) {
-	// Todo: get options from attributes?
-	var options = {};
-
-	const canvasNode = node.shadowRoot.querySelector('canvas');
-	const notesNode  = node.shadowRoot.querySelector('ul');
-	const noteNodes  = notesNode.querySelectorAll('li');
-	const context    = canvasNode.getContext('2d');
-	const settings   = createSettings(options, canvasNode);
-	const state      = [];
-	const notes      = [];
-
-	let count = 16;
-	let frame;
-
-	function requestRender() {
-		if (frame) { return; }
-		frame = window.requestAnimationFrame(render);
-	}
-
-	function render(now) {
-		frame = null;
-
-		let c = 16, i, cc;
-
-		i = notes.length;
-
-		// Look through updated notes to determine which ones need to
-		// continue being animated.
-		while (i--) {
-			if (updateNoteRender(state, notes[i])) {
-				requestRender();
-			}
-			else {
-				notes.splice(i, 1);
-			}
-		}
-
-		// Look through each channel's ccs to determine what still needs to
-		// be animated.
-		while (c--) {
-			i = state[c].ccs.length;
-
-			while (i--) {
-				cc = state[c].ccs[i];
-
-				if (!cc) { continue; }
-
-				if (updateCcColor(state, settings, cc, now)) {
-					requestRender();
-				}
-			}
-		}
-
-		renderGraph(context, settings, state);
-		renderNames(noteNodes, settings, state);
-	}
-
-	while (count--) {
-		state[count] = {
-			notesRender: [],
-			notes: [],
-			ccs: [],
-			pitch: 0
-		};
-	}
-
-	node.input = overload(toType, {
-		'noteon': function(message) {
-			notes.push(message);
-			updateNote(state, message, requestRender);
-			requestRender(render);
-		},
-
-		'noteoff': function(message) {
-			notes.push(message);
-			updateNote(state, message, requestRender);
-			requestRender(render);
-		},
-
-		'control': function(message) {
-			updateControl(state, message);
-			requestRender(render);
-		},
-
-		'pitch': function(message) {
-			state[toChannel(message) - 1].pitch = pitchToFloat(message, options.range || 2);
-			requestRender(render);
-			return;
-		},
-
-		'default': noop
-	});
-
-	var sourceAttr = node.getAttribute('source');
-
-	if (!sourceAttr || sourceAttr === 'all') {
-		on([], function(e) {
-			// Ignore internally .trigger()ed events
-			if (!e.target || !e.target.onmidimessage) { return; }
-			node.input(e.data);
-		});
-	}
-
-	print('<midi-graph> initialised', node);
-}, {}, `
-<!-- We have to use absolute paths for CSS inside the shadow DOM because we do
+element('midi-graph',
+`<!-- We have to use absolute paths for CSS inside the shadow DOM because we do
 not know where the root document is. -->
 <link rel="stylesheet" href="//stephen.band/midi/components/midi-graph/midi-graph.css"/>
 <canvas class="midi-graph-canvas" width="1920" height="320"></canvas>
 <ul class="midi-graph-ul">${lis}</ul>
-`);
+`, {
+	// Attributes
+}, {
+	// Properties
+}, {
+	setup: function setup() {
+		// Todo: get options from attributes?
+		var options = {};
+
+		const canvasNode = this.shadowRoot.querySelector('canvas');
+		const notesNode  = this.shadowRoot.querySelector('ul');
+		const noteNodes  = notesNode.querySelectorAll('li');
+		const context    = canvasNode.getContext('2d');
+		const settings   = createSettings(options, canvasNode);
+		const state      = [];
+		const notes      = [];
+
+		let count = 16;
+		let frame;
+
+		function requestRender() {
+			if (frame) { return; }
+			frame = window.requestAnimationFrame(render);
+		}
+
+		function render(now) {
+			frame = null;
+
+			let c = 16, i, cc;
+
+			i = notes.length;
+
+			// Look through updated notes to determine which ones need to
+			// continue being animated.
+			while (i--) {
+				if (updateNoteRender(state, notes[i])) {
+					requestRender();
+				}
+				else {
+					notes.splice(i, 1);
+				}
+			}
+
+			// Look through each channel's ccs to determine what still needs to
+			// be animated.
+			while (c--) {
+				i = state[c].ccs.length;
+
+				while (i--) {
+					cc = state[c].ccs[i];
+
+					if (!cc) { continue; }
+
+					if (updateCcColor(state, settings, cc, now)) {
+						requestRender();
+					}
+				}
+			}
+
+			renderGraph(context, settings, state);
+			renderNames(noteNodes, settings, state);
+		}
+
+		while (count--) {
+			state[count] = {
+				notesRender: [],
+				notes: [],
+				ccs: [],
+				pitch: 0
+			};
+		}
+
+		this.input = overload(toType, {
+			'noteon': function(message) {
+				notes.push(message);
+				updateNote(state, message, requestRender);
+				requestRender(render);
+			},
+
+			'noteoff': function(message) {
+				notes.push(message);
+				updateNote(state, message, requestRender);
+				requestRender(render);
+			},
+
+			'control': function(message) {
+				updateControl(state, message);
+				requestRender(render);
+			},
+
+			'pitch': function(message) {
+				state[toChannel(message) - 1].pitch = pitchToFloat(message, options.range || 2);
+				requestRender(render);
+				return;
+			},
+
+			'default': noop
+		});
+
+		var sourceAttr = this.getAttribute('source');
+
+		if (!sourceAttr || sourceAttr === 'all') {
+			on([], (e) => {
+				// Ignore internally .trigger()ed events
+				if (!e.target || !e.target.onmidimessage) { return; }
+				this.input(e.data);
+			});
+		}
+
+		print('<midi-graph> initialised', this);
+	}
+});
