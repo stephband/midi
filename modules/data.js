@@ -204,7 +204,7 @@ status byte.
 // channeltouch    208 - 223
 // pitch           224 - 240
 
-export const statusNumbers = {
+export const statuses = {
 	noteoff:      128,
 	noteon:       144,
 	polytouch:    160,
@@ -217,5 +217,5 @@ export const statusNumbers = {
 export function toStatus(channel, type) {
 	return channel > 0
 		&& channel < 17
-		&& statusNumbers[type] + channel - 1 ;
+		&& statuses[type] + channel - 1 ;
 }

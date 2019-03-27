@@ -1,5 +1,5 @@
 import { signedFloatToInt14, limit  } from './maths.js';
-import { toStatus, noteToNumber, controlToNumber, statusNumbers } from './data.js';
+import { toStatus, noteToNumber, controlToNumber, statuses } from './data.js';
 
 /*
 createMessage(chan, type, param, value)
@@ -183,7 +183,7 @@ Returns message type as one of the strings `'noteoff'`, `'noteon'`, `'polytouch'
     toType([145,80,20]);          // 'noteon'.
 */
 
-const types = Object.keys(statusNumbers);
+const types = Object.keys(statuses);
 
 export function toType(message) {
 	var name = types[Math.floor(message[0] / 16) - 8];

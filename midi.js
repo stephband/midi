@@ -26,7 +26,8 @@ export {
     numberToFrequency,
     numberToNote,
     numberToOctave,
-    toStatus
+    toStatus,
+    statuses
 } from './modules/data.js';
 
 export {
