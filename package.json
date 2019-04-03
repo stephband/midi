@@ -2,7 +2,7 @@
     "name": "MIDI",
     "title": "MIDI",
     "description": "Receive, monitor, manipulate and transmit browser MIDI messages.",
-    "version": "0.9.4",
+    "version": "0.9.5",
     "homepage": "http://stephen.band/midi/index.html",
     "author": {
         "name": "Stephen Band",
@@ -36,11 +36,11 @@
         "rollup": "^0.58.2"
     },
     "module": "midi.js",
-    "main": "dist/midi-0.9.4-cjs.js",
+    "main": "dist/midi-0.9.5-cjs.js",
     "scripts": {
         "lint":          "eslint modules/*.js",
         "build":         "npm run build-cjs && npm run build-closure",
-        "build-cjs":     "rollup midi.js --o dist/midi-cjs-0.9.4.js --f cjs",
-        "build-closure": "rollup midi.js --o dist/midi-0.9.4.js --f iife --n MIDI"
+        "build-cjs":     "rollup midi.js --o dist/midi-cjs-0.9.5.js --f cjs",
+        "build-closure": "rollup midi.js --o dist/midi-0.9.5.js --f iife --n MIDI"
     }
 }

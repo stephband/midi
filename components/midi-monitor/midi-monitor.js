@@ -16,7 +16,7 @@ There is a full-page MIDI monitor at [stephen.band/midi/monitor/](http://stephen
 
 */
 
-import { element } from '../../../dom/dom.js';
+import { element } from '../../../dom/module.js';
 import { numberToNote, on, toChannel, toType } from '../../midi.js';
 import { print } from '../../modules/print.js';
 

@@ -1,4 +1,4 @@
-import { test as group } from '../../fn/fn.js';
+import { test as group } from '../../fn/module.js';
 import * as MIDI from '../modules/events.js';
 
 group('MIDI listeners', function(test, log) {
