@@ -32,15 +32,15 @@
     ],
     "docs": "http://stephen.band/midi/index.html",
     "devDependencies": {
-        "eslint": "^4.4.1",
-        "rollup": "^0.58.2"
+        "eslint": "^5.16.0",
+        "rollup": "^1.8.0"
     },
     "module": "midi.js",
     "main": "dist/midi-0.9.5-cjs.js",
     "scripts": {
-        "lint":          "eslint modules/*.js",
-        "build":         "npm run build-cjs && npm run build-closure",
-        "build-cjs":     "rollup midi.js --o dist/midi-cjs-0.9.5.js --f cjs",
+        "lint": "eslint modules/*.js",
+        "build": "npm run build-cjs && npm run build-closure",
+        "build-cjs": "rollup midi.js --o dist/midi-cjs-0.9.5.js --f cjs",
         "build-closure": "rollup midi.js --o dist/midi-0.9.5.js --f iife --n MIDI"
     }
 }
