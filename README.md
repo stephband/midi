@@ -1,6 +1,6 @@
 # MIDI
 
-A library for receiving, sending and manipulating browser MIDI messages.
+Receive, transmit and manipulate browser MIDI events
 
 ## Documentation
 
