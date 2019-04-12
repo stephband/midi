@@ -8,6 +8,7 @@ export {
     floatToInt7,
     floatToInt14,
     int7ToFloat,
+    int7ToWeightedFloat,
     int7ToSignedFloat,
     int14ToFloat,
     int14ToSignedFloat,

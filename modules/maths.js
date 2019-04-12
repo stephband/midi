@@ -69,11 +69,27 @@ export function int7ToFloat(n) {
 }
 
 /*
+int7ToWeightedFloat(n)
+
+Returns a float in the range `0`-`1` for values of `n` in the range `0`-`127`.
+The input integer is mapped so that the value `64` returns exactly `0.5`, the
+centre of the range, as per the MIDI spec for controller values and their ilk.
+
+    int7ToSignedFloat(0);    // -1
+    int7ToSignedFloat(64);   // 0
+    int7ToSignedFloat(127);  // 1
+*/
+
+export function int7ToWeightedFloat(n) {
+	return n < 64 ? n / 128 : 0.5 + (n - 64) / 126 ;
+}
+
+/*
 int7ToSignedFloat(n)
 
 Returns a float in the range `-1`-`1` for values of `n` in the range `0`-`127`.
 The input integer is mapped so that the value `64` returns `0`, the centre of
-the range, as per the MIDI spec for modulation controller values and their ilk.
+the range, as per the MIDI spec for controller values and their ilk.
 
     int7ToSignedFloat(0);    // -1
     int7ToSignedFloat(64);   // 0

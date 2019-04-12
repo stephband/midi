@@ -85,8 +85,8 @@ const creators = {
         message[2] = limit(0, 127, value * 127);
     },
 
-    'pitch': function(param, value, message) {
-        const int14 = signedFloatToInt14(value/param);
+    'pitch': function(range, value, message) {
+        const int14 = signedFloatToInt14(value/range);
 		message[1] = int14 & 127; // LSB
 		message[2] = int14 >> 7;  // MSB
     },

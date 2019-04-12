@@ -11,6 +11,7 @@ const performance = window.performance;
 const roots = {};
 
 export function fire(e) {
+    // Normalise noteon 0 to noteoff
     normalise(e.data);
 
     // Fire port-specific listeners, if there are any
@@ -31,7 +32,7 @@ function fireRoute(i, tree, e) {
 	}
 	else {
 		branch && fireRoute(i, branch, e);
-		tree['undefined'] && tree['undefined'].forEach((fn) => fn(e));
+		tree.undefined && tree.undefined.forEach((fn) => fn(e));
 	}
 }
 
@@ -228,8 +229,32 @@ const setSelectorRoute = overload(type1, {
 		}
 	}),
 
-	'default': function(query, root, fn) {
-		setRoute(0, query, root, fn)
+	'default': function(selector, root, fn) {
+        // If the selector refers to a status use selector as query
+        if (selector[0] === undefined || selector[0] > 16) {
+            setRoute(0, selector, root, fn);
+            return;
+        }
+
+        // Otherwise, there being no message type, listen to everything
+        // on the given channel
+        selector[1] = 'note';
+        setSelectorRoute(selector, root, fn);
+
+        selector[1] = 'control';
+        setSelectorRoute(selector, root, fn);
+
+        selector[1] = 'pitch';
+        setSelectorRoute(selector, root, fn);
+
+        selector[1] = 'polytouch';
+        setSelectorRoute(selector, root, fn);
+
+        selector[1] = 'channeltouch';
+        setSelectorRoute(selector, root, fn);
+
+        selector[1] = 'program';
+        setSelectorRoute(selector, root, fn);
 	}
 });
 
@@ -281,8 +306,32 @@ const removeSelectorRoute = overload(type1, {
 		}
 	}),
 
-	'default': function(query, root, fn) {
-		removeRoute(query, root, fn);
+	'default': function(selector, root, fn) {
+        // If the selector refers to a status use selector as query
+        if (selector[0] === undefined || selector[0] > 16) {
+            removeRoute(selector, root, fn);
+            return;
+        }
+
+        // Otherwise, there being no message type, remove fn from
+        // all types for this channel
+        selector[1] = 'note';
+        removeSelectorRoute(selector, root, fn);
+
+        selector[1] = 'control';
+        removeSelectorRoute(selector, root, fn);
+
+        selector[1] = 'pitch';
+        removeSelectorRoute(selector, root, fn);
+
+        selector[1] = 'polytouch';
+        removeSelectorRoute(selector, root, fn);
+
+        selector[1] = 'channeltouch';
+        removeSelectorRoute(selector, root, fn);
+
+        selector[1] = 'program';
+        removeSelectorRoute(selector, root, fn);
 	}
 });
 
@@ -311,7 +360,7 @@ As `trigger(port, message)`, where the last 4 parameters are passed to
 */
 
 const internalPort = {
-    id: 'INTERNAL'
+    id: 'MIDI.trigger()'
 };
 
 export const trigger = overload(toArgsLength, {
