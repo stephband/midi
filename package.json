@@ -2,7 +2,7 @@
     "name": "MIDI",
     "title": "MIDI",
     "description": "Receive, monitor, manipulate and transmit browser MIDI messages.",
-    "version": "0.9.6",
+    "version": "1.0.0",
     "homepage": "http://stephen.band/midi/index.html",
     "author": {
         "name": "Stephen Band",

@@ -1,16 +1,18 @@
 :root {
     --param-fg: #dc0058;
+    background-color: #ffb700;
 }
 
 html,
 body {
     background-color: #ffb700;
+    background-image: linear-gradient(to top, #ff005e26 0%, #0000 33%, #0000 80%, #ffd76652 100%);
+    background-image: linear-gradient(to bottom, #ff006a42 0%, #0000 30rem);
 }
 
 body {
     color: #202223;
-    background-image: linear-gradient(to top, #ff005e26 0%, #0000 33%, #0000 80%, #ffd76652 100%);
-    background-image: linear-gradient(to bottom, #ff006a42 0%, #0000 30rem);
+
 }
 
 code,
@@ -34,12 +36,23 @@ pre + midi-monitor {
 }
 
 .midi-icon::before {
-    position: absolute;
     content: '';
     background-image: url('../images/logo.svg');
     background-size: 100% 100%;
     height: 2rem;
     width: 2rem;
-    left: -3.75rem;
-    top: 0.25rem;
+    position: relative;
+    top: 0.125rem;
+    left: -0.125rem;
+    display: inline-block;
+    margin-right: 0.75rem;
+}
+
+@media (min-width: 100em) {
+    .midi-icon::before {
+        position: absolute;
+        right: 0;
+        left: -3.75rem;
+        right: auto;
+    }
 }

@@ -1,25 +1,27 @@
 
 import { overload, remove, toArgsLength } from './utils.js';
-import { toStatus, controlToNumber, noteToNumber } from './data.js';
+import { toStatus, toControlNumber, toNoteNumber } from './data.js';
 import { createMessage, normalise } from './messages.js';
 
 const performance = window.performance;
 
 
-// Routing
+// Incoming message routing
 
-const roots = {};
+const ports = {};
 
 export function fire(e) {
     // Normalise noteon 0 to noteoff
     normalise(e.data);
 
-    // Fire port-specific listeners, if there are any
-    const portRoot = roots[e.target && e.target.id];
-	if (portRoot) { fireRoute(0, portRoot, e); }
+    // Fire port-specific listeners, if port is defined and there are any
+    if (e.target && e.target.id) {
+        const portRoot = ports[e.target.id];
+        if (portRoot) { fireRoute(0, portRoot, e); }
+    }
 
     // Fire port-generic listeners, if there are any
-    const allRoot = roots['undefined'];
+    const allRoot = ports['undefined'];
     if (allRoot) { fireRoute(0, allRoot, e); }
 }
 
@@ -60,38 +62,43 @@ function removeRoute(query, root, fn) {
 	remove(fns, fn);
 }
 
+
+// Queries
+
 const query = {};
 
 function toNoteQuery(selector) {
-	query[0] = toStatus(selector[0], selector[1]);
-	query[1] = typeof selector[2] === 'string' ?
-		noteToNumber(selector[2]) :
-		selector[2] ;
-	query[2] = selector[3];
+	query[0] = toStatus(selector.channel, selector.type);
+	query[1] = typeof selector.name === 'string' ?
+        toNoteNumber(selector.name) :
+		selector.name ;
+	query[2] = selector.value;
 	return query;
 }
 
 function toControlQuery(selector) {
-	query[0] = toStatus(selector[0], selector[1]);
-	query[1] = typeof selector[2] === 'string' ?
-		controlToNumber(selector[2]) :
-		selector[2] ;
-	query[2] = selector[3];
+	query[0] = toStatus(selector.channel, selector.type);
+	query[1] = typeof selector.name === 'string' ?
+		toControlNumber(selector.name) :
+		selector.name ;
+	query[2] = selector.value;
 	return query;
 }
 
 function toQuery(selector) {
-	query[0] = toStatus(selector[0], selector[1]);
-	query[1] = selector[2];
-	query[2] = selector[3];
+	query[0] = toStatus(selector.channel, selector.type);
+	query[1] = selector.name;
+	query[2] = selector.value;
 	return query;
 }
 
-// Transforms
-
-function get1(object) { return object[1]; }
-function type1(object) { return typeof object[1]; }
-
+function toSelectorType(object) {
+    // Loose duck type checking for index 0, so that we may accept
+    // objects as array selectors
+    return typeof object[0] === 'number' ? 'array' :
+        object.channel ? object.type :
+        'array' ;
+}
 
 
 //createEvent(time, port, message)
@@ -147,15 +154,7 @@ export function createEvent(time, port, message) {
 on(selector, fn)
 
 Registers a handler `fn` for incoming MIDI events that match object `selector`.
-
-    on([1, 'note'], function(e) {
-        // Do something with CH1 NOTEON and NOTEOFF event objects
-        const time    = e.timeStamp;
-        const port    = e.target;
-        const message = e.data;
-    });
-
-A selector is either an array in the form of a MIDI message
+A selector is either an array (or array-like) in the form of a MIDI message
 `[status, data1, data2]`:
 
     // Call fn on CH1 NOTEON events
@@ -167,100 +166,105 @@ A selector is either an array in the form of a MIDI message
     // Call fn on CH1 NOTEON C4 127 events
 	on([144, 60, 127], fn);
 
-or more conveniently an array of interpretive data of the form
-`[chan, type, param, value]`:
+or a bit more conveniently an object of interpretive data of the form
+`{channel, type, name, value}`:
 
     // Call fn on CH2 NOTEON events
-	on([2, 'noteon'], fn);
+	on({ channel: 2, type: 'noteon' }, fn);
 
     // Call fn on CH2 NOTEOFF C4 events
-	on([2, 'noteoff', 'C4'], fn)
+	on({ channel: 2, type: 'noteoff', name: 'C4' }, fn)
 
     // Call fn on CH2 NOTEON and NOTEOFF C4 events
-	on([2, 'note', 'C4'], fn)
+	on({ channel: 2, type: 'note', name: 'C4' }, fn)
 
-Finally, a selector may have a property `port`, the id of an input port.
+    // Call fn on CH4 CONTROL 1 0 events
+	on({ channel: 4, type: 'control', name: 'modulation', value: 0 }, fn)
 
-    // Call fn on CH4 CC events from port '012345'
-	on({ port: '012345', 0: 4, 1: 'control' }}, fn);
+Note that these selector properties are progressive. A selector may not have
+a `type` if it has no `channel`, it may not have a `name` without a `type`,
+and may not have a `value` without a `name` property. Selectors pre-create
+paths in a distribution tree that is optimised for incoming events to flow
+through.
 
-    // Call fn on CH4 CC 64 events from port '012345'
-	on({ port: '012345', 0: 4, 1: 'control', 2: 64 }}, fn);
+Finally, a selector may optionally have a property `port`, the id of an
+input port.
 
-Selectors pre-create paths in a filter tree through which incoming events flow,
-for performance.
+    // Call fn on CH4 CC 64 events from port '0123'
+	on({ port: '0123', 0: 179, 1: 64 }}, fn);
+
+    // Call fn on CH4 CC 64 events from port '0123'
+	on({ port: '0123', channel: 4, type: 'control', name: 64 }}, fn);
+
 */
 
-const setSelectorRoute = overload(type1, {
-	'string': overload(get1, {
-		'note': function(selector, root, fn) {
-			var query = toNoteQuery(selector);
+const setSelectorRoute = overload(toSelectorType, {
+    'array': function(selector, root, fn) {
+        // Use selector as query
+        setRoute(0, selector, root, fn);
+    },
 
-			query[0] = toStatus(selector[0], 'noteon');
-			setRoute(0, query, root, fn);
+    'note': function(selector, root, fn) {
+        var query = toNoteQuery(selector);
 
-			query[0] = toStatus(selector[0], 'noteoff');
-			setRoute(0, query, root, fn);
-		},
+        query[0] = toStatus(selector.channel, 'noteon');
+        setRoute(0, query, root, fn);
 
-		'noteon': function(selector, root, fn) {
-			var query = toNoteQuery(selector);
-			setRoute(0, query, root, fn);
-		},
+        query[0] = toStatus(selector.channel, 'noteoff');
+        setRoute(0, query, root, fn);
+    },
 
-		'noteoff': function(selector, root, fn) {
-			var query = toNoteQuery(selector);
-			setRoute(0, query, root, fn);
-		},
+    'noteon': function(selector, root, fn) {
+        var query = toNoteQuery(selector);
+        setRoute(0, query, root, fn);
+    },
 
-        'polytouch': function(selector, root, fn) {
-			var query = toNoteQuery(selector);
-			setRoute(0, query, root, fn);
-		},
+    'noteoff': function(selector, root, fn) {
+        var query = toNoteQuery(selector);
+        setRoute(0, query, root, fn);
+    },
 
-		'control': function(selector, root, fn) {
-			const query = toControlQuery(selector);
-			setRoute(0, query, root, fn);
-		},
+    'polytouch': function(selector, root, fn) {
+        var query = toNoteQuery(selector);
+        setRoute(0, query, root, fn);
+    },
 
-		'default': function(selector, root, fn) {
-			var query = toQuery(selector);
-			setRoute(0, query, root, fn);
-		}
-	}),
+    'control': function(selector, root, fn) {
+        const query = toControlQuery(selector);
+        setRoute(0, query, root, fn);
+    },
 
-	'default': function(selector, root, fn) {
-        // If the selector refers to a status use selector as query
-        if (selector[0] === undefined || selector[0] > 16) {
-            setRoute(0, selector, root, fn);
-            return;
-        }
+    'undefined': function(selector, root, fn) {
+        // Listen to everything on the given channel
 
-        // Otherwise, there being no message type, listen to everything
-        // on the given channel
-        selector[1] = 'note';
+        selector.type = 'note';
         setSelectorRoute(selector, root, fn);
 
-        selector[1] = 'control';
+        selector.type = 'control';
         setSelectorRoute(selector, root, fn);
 
-        selector[1] = 'pitch';
+        selector.type = 'pitch';
         setSelectorRoute(selector, root, fn);
 
-        selector[1] = 'polytouch';
+        selector.type = 'polytouch';
         setSelectorRoute(selector, root, fn);
 
-        selector[1] = 'channeltouch';
+        selector.type = 'channeltouch';
         setSelectorRoute(selector, root, fn);
 
-        selector[1] = 'program';
+        selector.type = 'program';
         setSelectorRoute(selector, root, fn);
-	}
+    },
+
+    default: function(selector, root, fn) {
+        var query = toQuery(selector);
+        setRoute(0, query, root, fn);
+    }
 });
 
 export function on(selector, fn) {
     const id = selector.port || 'undefined' ;
-    const root = roots[id] || (roots[id] = {});
+    const root = ports[id] || (ports[id] = {});
     setSelectorRoute(selector, root, fn);
 }
 
@@ -273,85 +277,86 @@ Removes an event listener 'fn' from MIDI events matching object 'selector'. Wher
     off(['note'], fn);
 */
 
-const removeSelectorRoute = overload(type1, {
-	'string': overload(get1, {
-		'note': function(selector, root, fn) {
-			var query = toNoteQuery(selector);
+const removeSelectorRoute = overload(toSelectorType, {
+    'array': function(selector, root, fn) {
+        removeRoute(selector, root, fn);
+    },
 
-			query[0] = toStatus(selector[0], 'noteon');
-			removeRoute(query, root, fn);
+    'note': function(selector, root, fn) {
+        var query = toNoteQuery(selector);
 
-			query[0] = toStatus(selector[0], 'noteoff');
-			removeRoute(query, root, fn);
-		},
+        query[0] = toStatus(selector.channel, 'noteon');
+        removeRoute(query, root, fn);
 
-		'noteon': function(selector, root, fn) {
-			var query = toNoteQuery(selector);
-			removeRoute(query, root, fn);
-		},
+        query[0] = toStatus(selector.channel, 'noteoff');
+        removeRoute(query, root, fn);
+    },
 
-		'noteoff': function(selector, root, fn) {
-			var query = toNoteQuery(selector);
-			removeRoute(query, root, fn);
-		},
+    'noteon': function(selector, root, fn) {
+        var query = toNoteQuery(selector);
+        removeRoute(query, root, fn);
+    },
 
-        'polytouch': function(selector, root, fn) {
-			var query = toNoteQuery(selector);
-			setRoute(query, root, fn);
-		},
+    'noteoff': function(selector, root, fn) {
+        var query = toNoteQuery(selector);
+        removeRoute(query, root, fn);
+    },
 
-		'default': function(selector, root, fn) {
-			var query = toQuery(selector);
-			removeRoute(query, root, fn);
-		}
-	}),
+    'polytouch': function(selector, root, fn) {
+        var query = toNoteQuery(selector);
+        removeRoute(query, root, fn);
+    },
 
-	'default': function(selector, root, fn) {
-        // If the selector refers to a status use selector as query
-        if (selector[0] === undefined || selector[0] > 16) {
-            removeRoute(selector, root, fn);
-            return;
-        }
+    'control': function(selector, root, fn) {
+        var query = toControlQuery(selector);
+        removeRoute(query, root, fn);
+    },
 
+    'undefined': function(selector, root, fn) {
         // Otherwise, there being no message type, remove fn from
         // all types for this channel
-        selector[1] = 'note';
+        selector.type = 'note';
         removeSelectorRoute(selector, root, fn);
 
-        selector[1] = 'control';
+        selector.type = 'control';
         removeSelectorRoute(selector, root, fn);
 
-        selector[1] = 'pitch';
+        selector.type = 'pitch';
         removeSelectorRoute(selector, root, fn);
 
-        selector[1] = 'polytouch';
+        selector.type = 'polytouch';
         removeSelectorRoute(selector, root, fn);
 
-        selector[1] = 'channeltouch';
+        selector.type = 'channeltouch';
         removeSelectorRoute(selector, root, fn);
 
-        selector[1] = 'program';
+        selector.type = 'program';
         removeSelectorRoute(selector, root, fn);
-	}
+    },
+
+    default: function(selector, root, fn) {
+        var query = toQuery(selector);
+        removeRoute(query, root, fn);
+    }
 });
 
 export function off(selector, fn) {
     const id = selector.port || 'undefined' ;
-    const root = roots[id] || (roots[id] = {});
+    const root = ports[id] || (ports[id] = {});
     removeSelectorRoute(selector, root, fn);
 }
 
 /*
 trigger(port, message)
 
-Simulates an incoming MIDI message and fires listeners with matching selectors.
+Simulates an incoming MIDI event and fires listeners with matching selectors.
 Useful for debugging.
 
     trigger(null, [128, 69, 88]);
 */
 
 /*
-trigger(port, chan, type, param, value)
+trigger(port, chan, type, name, value)
 
 As `trigger(port, message)`, where the last 4 parameters are passed to
 `createMessage()` to create the MIDI message before triggering.
@@ -360,7 +365,7 @@ As `trigger(port, message)`, where the last 4 parameters are passed to
 */
 
 const internalPort = {
-    id: 'MIDI.trigger()'
+    id: 'internal'
 };
 
 export const trigger = overload(toArgsLength, {
@@ -371,8 +376,8 @@ export const trigger = overload(toArgsLength, {
 		fire(e);
 	},
 
-    default: function(port, chan, type, param, value) {
-		const message = createMessage(chan, type, param, value);
+    default: function(port, chan, type, name, value) {
+		const message = createMessage(chan, type, name, value);
 		const e       = createEvent(performance.now(), port ? port : internalPort, message);
 		fire(e);
 	}

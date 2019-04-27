@@ -4,9 +4,7 @@ import {
     isControl,
     isNote,
     isPitch,
-    normalise,
-    toChannel,
-    toType
+    normalise
 } from '../modules/messages.js';
 
 test('MIDI message functions', function(run, log, fixture) {
@@ -47,24 +45,6 @@ test('MIDI message functions', function(run, log, fixture) {
         equals([128, 64, 1], normalise([128, 64, 1]));
         equals([128, 64, 0], normalise([144, 64, 0]));
         equals([144, 64, 1], normalise([144, 64, 1]));
-        done();
-	});
-
-    run('toChannel()', function(equals, done) {
-        equals(1, toChannel([128, 64, 0]));
-        equals(1, toChannel([128, 64, 1]));
-        equals(1, toChannel([144, 64, 0]));
-        equals(1, toChannel([144, 64, 1]));
-        equals(2, toChannel([161, 64, 1]));
-        done();
-	});
-
-    run('toType()', function(equals, done) {
-        equals('noteoff',   toType([128, 64, 0]));
-        equals('noteoff',   toType([128, 64, 1]));
-        equals('noteon',    toType([144, 64, 0]));
-        equals('noteon',    toType([144, 64, 1]));
-        equals('polytouch', toType([161, 64, 1]));
         done();
 	});
 });

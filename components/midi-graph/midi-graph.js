@@ -2,15 +2,15 @@
 /*
 <midi-graph>
 
-The `<midi-graph>` element plots incoming messages on a graph. The current
-version displays notes, control change and pitch bend messages.
+The `<midi-graph>` element plots incoming note, control change and pitch bend
+messages on a graph.
 
 ```html
 <script type="module" src="//stephen.band/midi/components/midi-graph/midi-graph.js"></script>
 <midi-graph>
 ```
 
-<midi-graph/>
+<midi-graph></midi-graph>
 
 This module has external dependencies.
 */
@@ -18,7 +18,7 @@ This module has external dependencies.
 import { noop, overload, toInt } from '../../../fn/module.js';
 import { element, now } from '../../../dom/module.js';
 import { print } from '../../modules/print.js';
-import { bytesToSignedFloat, toChannel, numberToNote, on, toType } from '../../midi.js';
+import { bytesToSignedFloat, toChannel, toNoteName, on, toType } from '../../module.js';
 
 var defaults = {
 		paddingLeft:  1 / 30,
@@ -260,7 +260,7 @@ function createSettings(options, node) {
 }
 
 function updateNoteRender(state, message) {
-	var channel     = toChannel(message) - 1;
+	var channel     = toChannel(message[0]) - 1;
 	var notesRender = state[channel].notesRender;
 	var notesActual = state[channel].notes;
 	var render      = notesRender[message[1]] || 0;
@@ -280,7 +280,7 @@ function updateNoteRender(state, message) {
 }
 
 function updateCcColor(state, set, cc, now) {
-	var channel = toChannel(cc.data) - 1;
+	var channel = toChannel(cc.data[0]) - 1;
 	var color = set.colors[channel];
 	var fade = (defaults.fadeDuration - now + cc.time) / defaults.fadeDuration;
 
@@ -293,15 +293,15 @@ function updateCcColor(state, set, cc, now) {
 }
 
 function updateNote(state, message) {
-	state[toChannel(message) - 1].notes[message[1]] = message[0] < 144 ? 0 : message[2] ;
+	state[toChannel(message[0]) - 1].notes[message[1]] = message[0] < 144 ? 0 : message[2] ;
 }
 
 function updateControl(state, data) {
-	var obj = state[toChannel(data) - 1].ccs[data[1]];
+	var obj = state[toChannel(data[0]) - 1].ccs[data[1]];
 
 	if (!obj) {
 		obj = {};
-		state[toChannel(data) - 1].ccs[data[1]] = obj;
+		state[toChannel(data[0]) - 1].ccs[data[1]] = obj;
 	}
 
 	obj.data = data;
@@ -311,7 +311,7 @@ function updateControl(state, data) {
 const lis = Array
 	.from({length: 128})
 	.map(function(n, i) {
-		return '<li>' + numberToNote(i) + '</li>';
+		return '<li>' + toNoteName(i) + '</li>';
 	})
 	.join('');
 
@@ -327,7 +327,7 @@ not know where the root document is. -->
 }, {
 	// Properties
 }, {
-	setup: function setup() {
+	setup: function setup(root) {
 		// Todo: get options from attributes?
 		var options = {};
 
@@ -394,7 +394,7 @@ not know where the root document is. -->
 			};
 		}
 
-		this.input = overload(toType, {
+		this.input = overload((message) => toType(message[0]), {
 			'noteon': function(message) {
 				notes.push(message);
 				updateNote(state, message, requestRender);
@@ -413,7 +413,7 @@ not know where the root document is. -->
 			},
 
 			'pitch': function(message) {
-				state[toChannel(message) - 1].pitch = pitchToFloat(message, options.range || 2);
+				state[toChannel(message[0]) - 1].pitch = pitchToFloat(message, options.range || 2);
 				requestRender(render);
 				return;
 			},

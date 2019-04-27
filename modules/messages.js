@@ -1,34 +1,34 @@
 import { signedFloatToInt14, limit  } from './maths.js';
-import { toStatus, noteToNumber, controlToNumber, statuses } from './data.js';
+import { toStatus, toNoteNumber, toControlNumber } from './data.js';
 
 /*
-createMessage(chan, type, param, value)
+createMessage(channel, type, name, value)
 
-Creates a MIDI message – a Uint8Array of three values – where channel `chan` is an
+Creates a MIDI message – a Uint8Array of three values – where `channel` is an
 integer in the range `1`-`16` and `type` is a string that determines the meaning
-of `param` and `value`...
+of `name` and `value`...
 
-#### Create type `'noteon'` or `'noteoff'`:
+#### for type `'noteon'` or `'noteoff'`:
 
-- `param`: an integer in the range `0`-`127`, or a note name string eg. `'Eb4'`.
+- `name`: an integer in the range `0`-`127`, or a note name string eg. `'Eb4'`.
 - `value`: a float in the range `0`-`1` representing velocity.
 
 ```
 createMessage(1, 'noteon', 'C3', 0.75);
 ```
 
-#### Create type `'control'`:
+#### for type `'control'`:
 
-- `param`: an integer in the range `0`-`127`, or a control name string eg. `'modulation'`.
+- `name`: an integer in the range `0`-`127`, or a control name string eg. `'modulation'`.
 - `value`: a float in the range `0`-`1` representing control value.
 
 ```
 createMessage(1, 'control', 'modulation', 1);
 ```
 
-#### Create type `'pitch'`:
+#### for type `'pitch'`:
 
-- `param`: a bend range in semitones.
+- `name`: a bend range in semitones.
 - `value`: a positive or negative float within that range representing a pitch
   bend in semitones.
 
@@ -36,27 +36,27 @@ createMessage(1, 'control', 'modulation', 1);
 createMessage(1, 'pitch', 2, 0.25);
 ```
 
-#### Create type `'polytouch'`:
+#### for type `'polytouch'`:
 
-- `param`: an integer in the range `0`-`127`, or a note name string eg. `'Eb4'`.
+- `name`: an integer in the range `0`-`127`, or a note name string eg. `'Eb4'`.
 - `value`: a float in the range `0`-`1` representing force.
 
 ```
 createMessage(1, 'polytouch', 'C3', 0.25);
 ```
 
-#### Create type `'channeltouch'`:
+#### for type `'channeltouch'`:
 
-- `param`: an integer in the range `0`-`1`.
+- `name`: an integer in the range `0`-`1`.
 - `value`: unused.
 
 ```
 createMessage(1, 'channeltouch', 0.5);
 ```
 
-#### Create type `'program'`:
+#### for type `'program'`:
 
-- `param`: an integer in the range `0`-`127`.
+- `name`: an integer in the range `0`-`127`.
 - `value`: unused.
 
 ```
@@ -65,23 +65,23 @@ createMessage(1, 'program', 24);
 
 */
 
-function createNote(param, value, message) {
-    message[1] = typeof param === 'string' ? noteToNumber(param) : param ;
+function createNote(name, value, message) {
+    message[1] = typeof name === 'string' ? toNoteNumber(name) : name ;
     message[2] = limit(0, 127, value * 127);
 }
 
-const creators = {
+const createData = {
     'noteon': createNote,
     'noteoff': createNote,
     'polytouch': createNote,
 
-    'channeltouch': function(param, value, message) {
+    'channeltouch': function(name, value, message) {
         message[1] = limit(0, 127, value * 127);
         message[2] = 0;
     },
 
-    'control': function(param, value, message) {
-        message[1] = typeof param === 'string' ? controlToNumber(param) : param ;
+    'control': function(name, value, message) {
+        message[1] = typeof name === 'string' ? toControlNumber(name) : name ;
         message[2] = limit(0, 127, value * 127);
     },
 
@@ -91,16 +91,16 @@ const creators = {
 		message[2] = int14 >> 7;  // MSB
     },
 
-    'program': function(param, value, message) {
-        message[1] = param;
+    'program': function(name, value, message) {
+        message[1] = name;
         message[2] = 0;
     }
 };
 
-export function createMessage(channel, type, param, value) {
+export function createMessage(channel, type, name, value) {
 	var message = new Uint8Array(3);
 	message[0] = toStatus(channel, type);
-    creators[type](param, value, message);
+    createData[type](name, value, message);
     return message;
 }
 
@@ -161,36 +161,4 @@ export function normalise(message) {
 	}
 
 	return message;
-}
-
-/*
-toChannel(message)
-
-Returns the MIDI channel as a number between `1` and `16`.
-
-    toChannel([145,80,20]);       // 2
-*/
-
-export function toChannel(message) {
-	return message[0] % 16 + 1;
-}
-
-/* toType(message)
-
-Returns message type as one of the strings `'noteoff'`, `'noteon'`, `'polytouch'`,
-`'control'`, `'program'`, `'channeltouch'` or `'pitch'`.
-
-    toType([145,80,20]);          // 'noteon'.
-*/
-
-const types = Object.keys(statuses);
-
-export function toType(message) {
-	var name = types[Math.floor(message[0] / 16) - 8];
-
-	// Catch type noteon with zero velocity and rename it as noteoff
-	return name;
-    //name === types[1] && message[2] === 0 ?
-	//	types[0] :
-	//	name ;
 }

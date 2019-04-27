@@ -58,8 +58,7 @@ request()
 Returns a promise that resolves to the midiAccess object where it is
 available. Where the underlying `navigator.requestMIDIAccess()` method is
 undefined, or where MIDI is unavailable for some reason, returns a rejected
-promise. Library functions are available to use without requesting the midiAccess
-object, but this request is useful for alerting the user.
+promise.
 
     request().catch(function(error) {
         // Alert the user they don't have MIDI
@@ -199,7 +198,7 @@ id of a MIDI output port.
 
 function sendMessage(time, port, message) {
     if (typeof port === 'string') {
-        port = midi.inputs.get(port) || findOutputPort(port);
+        port = midi.outputs.get(port) || findOutputPort(port);
 
         if (!port) {
             print('Output port not found', port);
@@ -210,7 +209,7 @@ function sendMessage(time, port, message) {
 }
 
 /*
-send(time, port, chan, type, param, value)
+send(time, port, chan, type, name, value)
 
 Like `send(time, port, message)`, but the last 4 parameters are passed to
 `createMessage()` to create the MIDI message before sending.
@@ -218,8 +217,8 @@ Like `send(time, port, message)`, but the last 4 parameters are passed to
     send(0, 'id', 1, 'noteon', 'A4', 0.75);
 */
 
-function sendParams(time, port, chan, type, param, value) {
-    const message = createMessage(chan, type, param, value);
+function sendParams(time, port, chan, type, name, value) {
+    const message = createMessage(chan, type, name, value);
     return sendMessage(time, port, message);
 }
 

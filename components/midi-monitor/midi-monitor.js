@@ -17,7 +17,7 @@ There is a full-page MIDI monitor at [stephen.band/midi/monitor/](http://stephen
 */
 
 import { element } from '../../../dom/module.js';
-import { numberToNote, on, toChannel, toType } from '../../midi.js';
+import { toNoteName, on, toChannel, toType } from '../../module.js';
 import { print } from '../../modules/print.js';
 
 var DEBUG = true;
@@ -98,8 +98,8 @@ function renderEntry(trTemplate, tdNodes, tbody, nodes, maxEntries, time, port, 
 	// explicitly log midi event objects.
 	//console.log(time, message);
 
-	const type = toType(message);
-	const chan = toChannel(message);
+	const type = toType(message[0]);
+	const chan = toChannel(message[0]);
 
 	// Populate the table cells
 	tdNodes[0].textContent = msToTime(time);
@@ -108,7 +108,7 @@ function renderEntry(trTemplate, tdNodes, tbody, nodes, maxEntries, time, port, 
 	tdNodes[3].textContent = chan;
 	tdNodes[4].textContent = message[1];
 	tdNodes[5].textContent = (type === 'noteon' || type === 'noteoff' || type === 'polytouch') ?
-		numberToNote(message[1]) :
+		toNoteName(message[1]) :
 		'' ;
 	tdNodes[6].textContent = message[2];
 
@@ -128,7 +128,7 @@ function renderEntry(trTemplate, tdNodes, tbody, nodes, maxEntries, time, port, 
 		// Support noteon val 0
 		else {
 			let data = removeState(chan, 'note', message[1]);
-			console.log(data);
+
 			if (data) {
 				data.node.removeAttribute('class');
 			}
@@ -154,6 +154,7 @@ function renderEntry(trTemplate, tdNodes, tbody, nodes, maxEntries, time, port, 
 
 
 // Define custom element
+// element(name, template, attributes, properties, options)
 
 element('midi-monitor',
 `<!-- We have to use absolute paths for CSS inside the shadow DOM because we do
@@ -192,16 +193,12 @@ not know where the root document is. -->
 		<td class="note-td"></td>
 		<td class="val-td"></td>
 	</tr>
-</template>`, {
-
-}, {
-
-}, {
-	setup: function setup() {
-		const template   = this.shadowRoot.querySelector('template').content;
+</template>`, {}, {}, {
+	setup: function setup(root) {
+		const template   = root.querySelector('template').content;
 		const trTemplate = template.querySelector('tr');
 		const tdNodes    = trTemplate.querySelectorAll('td');
-		const tbody      = this.shadowRoot.querySelector('#tbody');
+		const tbody      = root.querySelector('#tbody');
 		const maxEntries = this.getAttribute('max-entries') ?
 			parseInt(this.getAttribute('max-entries'), 10) :
 			maxEntriesDefault ;

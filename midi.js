@@ -72,7 +72,7 @@ function floatToInt14(n) {
 /*
 int7ToFloat(n)
 
-Returns a float in the range `0`-`1` for values of `n` in the range `0`-`16383`.
+Returns a float in the range `0`-`1` for values of `n` in the range `0`-`127`.
 
     int7ToFloat(64);      // 0.503937
 */
@@ -82,11 +82,27 @@ function int7ToFloat(n) {
 }
 
 /*
+int7ToWeightedFloat(n)
+
+Returns a float in the range `0`-`1` for values of `n` in the range `0`-`127`.
+The input integer is mapped so that the value `64` returns exactly `0.5`, the
+centre of the range, as per the MIDI spec for controller values and their ilk.
+
+    int7ToSignedFloat(0);    // 0
+    int7ToSignedFloat(64);   // 0.5
+    int7ToSignedFloat(127);  // 1
+*/
+
+function int7ToWeightedFloat(n) {
+	return n < 64 ? n / 128 : 0.5 + (n - 64) / 126 ;
+}
+
+/*
 int7ToSignedFloat(n)
 
 Returns a float in the range `-1`-`1` for values of `n` in the range `0`-`127`.
 The input integer is mapped so that the value `64` returns `0`, the centre of
-the range, as per the MIDI spec for modulation controller values and their ilk.
+the range, as per the MIDI spec for controller values and their ilk.
 
     int7ToSignedFloat(0);    // -1
     int7ToSignedFloat(64);   // 0
@@ -108,6 +124,23 @@ Returns a float in the range `0`-`1` for values of `n` in the range `0`-`16383`.
 function int14ToFloat(n) {
 	return n / 16383;
 }
+
+/*
+int14ToWeightedFloat(n)
+
+Returns a float in the range `0`-`1` for values of `n` in the range `0`-`16383`.
+The input integer is mapped so that the value `8192` returns `0.5`, the centre of
+the range, as per the MIDI spec for pitch bend values and their ilk.
+
+    int14ToWeightedFloat(0);      // 0
+    int14ToWeightedFloat(8192);   // 0.5
+    int14ToWeightedFloat(16383);  // 1
+*/
+
+function int14ToWeightedFloat(n) {
+	return n < 8192 ? n / 16384 : 0.5 + (n - 8192) / 16382 ;
+}
+
 
 /*
 int14ToSignedFloat(n)
@@ -195,56 +228,95 @@ function signedFloatToInt14(n) {
         n > 1 ? 16383 : 8192 + Math.round(n * 8191) ;
 }
 
+/*
+weightedFloatToInt7(n)
+
+Returns an integer in the 7-bit range `0`-`127` for values of `n` between
+`0`-`1`. The input value `0.5` maps exactly to the value `64`, as per
+the MIDI spec for modulation control values and their ilk.
+
+    weightedFloatToInt7(0);   // 0
+    weightedFloatToInt7(0.5); // 64
+    weightedFloatToInt7(1);   // 127
+
+Values lower than `-1` return `0`, while values greater than `1` return `127`.
+*/
+
+function weightedFloatToInt7(n) {
+	return n <= 0.5 ?
+        n <= 0 ? 0 : Math.round(n * 128) :
+        n >= 1 ? 127 : 64 + Math.round((n - 0.5) * 126) ;
+}
+
+/*
+weightedFloatToInt14(n)
+
+Returns an integer in the 14-bit range `0`-`16383` for values of `n` between
+`-1`-`1`. The input value `0` maps exactly to the value `8192`, as per
+the MIDI spec for pitch bend values and their ilk.
+
+    weightedFloatToInt14(0);   // 0
+    weightedFloatToInt14(0.5); // 8192
+    weightedFloatToInt14(1);   // 16383
+
+Values lower than `-1` return `0`, while values greater than `1` return `16383`.
+*/
+
+function weightedFloatToInt14(n) {
+	return n <= 0.5 ?
+        n <= 0 ? 0 : Math.round(n * 16384) :
+        n >= 1 ? 16383 : 8192 + Math.round((n - 0.5) * 16382) ;
+}
+
 const entries = Object.entries;
 const A4      = 69;
 
+
 /*
-controlToNumber(name)
+floatToFrequency(ref, n)
 
-Returns a value in the range `0`-`127` from a shorthand controller `name`.
+Given a note number `n`, returns the frequency of the fundamental tone of that
+note. `ref` is a reference frequency for middle A4/69 (usually `440`).
 
-    controlToNumber('volume')   // 7
-	controlToNumber('sustain')  // 64
-	controlToNumber('98')       // 98
+    floatToFrequency(440, 69);  // 440
+    floatToFrequency(440, 60);  // 261.625565
+    floatToFrequency(442, 69);  // 442
+    floatToFrequency(442, 60);  // 262.814772
 */
 
-function controlToNumber(name) {
-	const entry = entries(controlNames).find(function(entry) {
-		return entry[1] === name;
-	});
-
-	return entry ? parseInt(entry[0], 10) : parseInt(name, 10);
+function floatToFrequency(ref, n) {
+	return ref * Math.pow(2, (n - A4) / 12);
 }
 
-/*
-frequencyToNumber(refFreq, freq)
 
-Returns `freq` as a float on the note number scale. `refFreq` is a reference
+/*
+frequencyToFloat(ref, frequency)
+
+Returns `frequency` as a float on the note number scale. `ref` is a reference
 frequency for middle A4/69 (usually `440`).
 
-    frequencyToNumber(440, 220);  // 57 (A3)
-	frequencyToNumber(440, 110);  // 45 (A2)
+    frequencyToFloat(440, 220);  // 57 (A3)
+	frequencyToFloat(440, 110);  // 45 (A2)
 
-Accuracy is limited to a 0.000001 semitones to prevent floating point
-rounding errors screwing up round-trip calculations.
+Output is rounded to 32 bits to mitigate floating point rounding errors.
 */
 
-function frequencyToNumber(ref, freq) {
+function frequencyToFloat(ref, freq) {
 	var number = A4 + 12 * Math.log(freq / ref) / Math.log(2);
 
-	// Rounded it to nearest 1,000,000th to avoid floating point errors and
-	// return whole semitone numbers where possible. Surely no-one needs
-	// more accuracy than a millionth of a semitone?
-	return Math.round(1000000 * number) / 1000000;
+	// Rounded it to nearest 32-bit value to avoid floating point errors
+	// and return whole semitone numbers where possible.
+	return Math.fround(number);
 }
 
+
 /*
-normaliseNote(name)
+normaliseNoteName(name)
 
 Replaces the characters `'b'` and `'#'` with the unicode musical characters `'♭'`
 and `'♯'` respectively.
 
-    normaliseNote('Eb6');      // 'E♭6'
+    normaliseNoteName('Eb6');      // 'E♭6'
 */
 
 const rTextSymbol = /b|#/g;
@@ -258,42 +330,22 @@ function replaceSymbol($0) {
 	return unicodeSymbols[$0];
 }
 
-function normaliseNote(name) {
+function normaliseNoteName(name) {
 	return name.replace(rTextSymbol, replaceSymbol);
 }
 
-/*
-noteToNumber(name)
-
-Given a note name, returns a value in the range 0-127.
-
-    noteToNumber('D6');     // 86
-*/
-
-const noteNumbers = {
-	'C':  0, 'C♯': 1, 'D♭': 1, 'D': 2, 'D♯': 3, 'E♭': 3, 'E': 4,
-	'F':  5, 'F♯': 6, 'G♭': 6, 'G': 7, 'G♯': 8, 'A♭': 8, 'A': 9,
-	'A♯': 10, 'B♭': 10, 'B': 11
-};
-
-const rnotename   = /^([A-G][♭♯]?)(-?\d)$/;
-
-function noteToNumber(str) {
-	var r = rnotename.exec(normaliseNote(str));
-	return (parseInt(r[2], 10) + 1) * 12 + noteNumbers[r[1]];
-}
 
 /*
-numberToControl(n)
+toControlName(n)
 
 Returns a shorthand controller name from a value in the range `0`-`127`. Not all
 contollers have a standardised name, and this library implements only the
 more common ones. Where a name is not found, returns the controller number as a
 string.
 
-    numberToControl(7);       // 'volume'
-	numberToControl(64);      // 'sustain'
-	numberToControl(98);      // '98'
+    toControlName(7);       // 'volume'
+	toControlName(64);      // 'sustain'
+	toControlName(98);      // '98'
 
 Standardised controller names are defined at
 [midi.org/specifications-old/](https://www.midi.org/specifications-old/item/table-3-control-change-messages-data-bytes-2).
@@ -315,7 +367,7 @@ const controlNames = {
 	67:  'soft',
 	68:  'legato',
 	69:  'hold',
-	84:  'portamento amount',
+	84:  'portamento',
 	91:  'reverb',
 	92:  'tremolo',
 	93:  'chorus',
@@ -331,51 +383,78 @@ const controlNames = {
 	127: 'polyphonic'
 };
 
-function numberToControl(n) {
+function toControlName(n) {
 	return controlNames[n] || ('' + n);
 }
 
+
 /*
-numberToFrequency(refFreq, n)
+toControlNumber(name)
 
-Given a note number `n`, returns the frequency of the fundamental tone of that
-note. `refFreq` is a reference frequency for middle A4/69 (usually `440`).
+Returns a value in the range `0`-`127` from a shorthand controller `name`.
 
-    numberToFrequency(440, 69);  // 440
-    numberToFrequency(440, 60);  // 261.625565
-    numberToFrequency(442, 69);  // 442
-    numberToFrequency(442, 60);  // 262.814772
+    toControlNumber('volume')   // 7
+	toControlNumber('sustain')  // 64
+	toControlNumber('98')       // 98
 */
 
-function numberToFrequency(ref, n) {
-	return ref * Math.pow(2, (n - A4) / 12);
+function toControlNumber(name) {
+	const entry = entries(controlNames).find(function(entry) {
+		return entry[1] === name;
+	});
+
+	return entry ? parseInt(entry[0], 10) : parseInt(name, 10);
 }
 
+
 /*
-numberToNote(n)
+toNoteName(n)
 
 Returns note name from a value in the range 0-127.
 
-    numberToNote(69);       // 'A4'
+    toNoteName(69);       // 'A4'
 */
 
 const noteNames = [
 	'C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'B♭', 'B'
 ];
 
-function numberToNote(n) {
-	return noteNames[n % 12] + numberToOctave(n);
+function toNoteName(n) {
+	return noteNames[n % 12] + toNoteOctave(n);
 }
 
+
 /*
-numberToOctave(n)
+toNoteNumber(name)
+
+Given a note name, returns a value in the range 0-127.
+
+    toNoteNumber('D6');     // 86
+*/
+
+const noteNumbers = {
+	'C':  0, 'C♯': 1, 'D♭': 1, 'D': 2, 'D♯': 3, 'E♭': 3, 'E': 4,
+	'F':  5, 'F♯': 6, 'G♭': 6, 'G': 7, 'G♯': 8, 'A♭': 8, 'A': 9,
+	'A♯': 10, 'B♭': 10, 'B': 11
+};
+
+const rnotename   = /^([A-G][♭♯]?)(-?\d)$/;
+
+function toNoteNumber(str) {
+	var r = rnotename.exec(normaliseNoteName(str));
+	return (parseInt(r[2], 10) + 1) * 12 + noteNumbers[r[1]];
+}
+
+
+/*
+toNoteOctave(n)
 
 Where `n` is a note number, returns the numerical octave.
 
-    numberToOctave(69);     // 4
+    toNoteOctave(69);     // 4
 */
 
-function numberToOctave(n) {
+function toNoteOctave(n) {
 	return Math.floor(n / 12) - 1;
 }
 
@@ -416,34 +495,62 @@ function toStatus(channel, type) {
 		&& statuses[type] + channel - 1 ;
 }
 
+
 /*
-createMessage(chan, type, param, value)
+toChannel(status)
 
-Creates a MIDI message – a Uint8Array of three values – where channel `chan` is an
+Returns the MIDI channel as a number between `1` and `16`.
+
+    toChannel(145);       // 2
+*/
+
+function toChannel(status) {
+	return status % 16 + 1;
+}
+
+
+/* toType(status)
+
+Returns message type as one of the strings `'noteoff'`, `'noteon'`, `'polytouch'`,
+`'control'`, `'program'`, `'channeltouch'` or `'pitch'`.
+
+    toType(145);          // 'noteon'.
+*/
+
+const types = Object.keys(statuses);
+
+function toType(status) {
+	return types[Math.floor(status / 16) - 8];
+}
+
+/*
+createMessage(channel, type, name, value)
+
+Creates a MIDI message – a Uint8Array of three values – where `channel` is an
 integer in the range `1`-`16` and `type` is a string that determines the meaning
-of `param` and `value`...
+of `name` and `value`...
 
-#### Create type `'noteon'` or `'noteoff'`:
+#### for type `'noteon'` or `'noteoff'`:
 
-- `param`: an integer in the range `0`-`127`, or a note name string eg. `'Eb4'`.
+- `name`: an integer in the range `0`-`127`, or a note name string eg. `'Eb4'`.
 - `value`: a float in the range `0`-`1` representing velocity.
 
 ```
 createMessage(1, 'noteon', 'C3', 0.75);
 ```
 
-#### Create type `'control'`:
+#### for type `'control'`:
 
-- `param`: an integer in the range `0`-`127`, or a control name string eg. `'modulation'`.
+- `name`: an integer in the range `0`-`127`, or a control name string eg. `'modulation'`.
 - `value`: a float in the range `0`-`1` representing control value.
 
 ```
 createMessage(1, 'control', 'modulation', 1);
 ```
 
-#### Create type `'pitch'`:
+#### for type `'pitch'`:
 
-- `param`: a bend range in semitones.
+- `name`: a bend range in semitones.
 - `value`: a positive or negative float within that range representing a pitch
   bend in semitones.
 
@@ -451,27 +558,27 @@ createMessage(1, 'control', 'modulation', 1);
 createMessage(1, 'pitch', 2, 0.25);
 ```
 
-#### Create type `'polytouch'`:
+#### for type `'polytouch'`:
 
-- `param`: an integer in the range `0`-`127`, or a note name string eg. `'Eb4'`.
+- `name`: an integer in the range `0`-`127`, or a note name string eg. `'Eb4'`.
 - `value`: a float in the range `0`-`1` representing force.
 
 ```
 createMessage(1, 'polytouch', 'C3', 0.25);
 ```
 
-#### Create type `'channeltouch'`:
+#### for type `'channeltouch'`:
 
-- `param`: an integer in the range `0`-`1`.
+- `name`: an integer in the range `0`-`1`.
 - `value`: unused.
 
 ```
 createMessage(1, 'channeltouch', 0.5);
 ```
 
-#### Create type `'program'`:
+#### for type `'program'`:
 
-- `param`: an integer in the range `0`-`127`.
+- `name`: an integer in the range `0`-`127`.
 - `value`: unused.
 
 ```
@@ -480,42 +587,42 @@ createMessage(1, 'program', 24);
 
 */
 
-function createNote(param, value, message) {
-    message[1] = typeof param === 'string' ? noteToNumber(param) : param ;
+function createNote(name, value, message) {
+    message[1] = typeof name === 'string' ? toNoteNumber(name) : name ;
     message[2] = limit(0, 127, value * 127);
 }
 
-const creators = {
+const createData = {
     'noteon': createNote,
     'noteoff': createNote,
     'polytouch': createNote,
 
-    'channeltouch': function(param, value, message) {
+    'channeltouch': function(name, value, message) {
         message[1] = limit(0, 127, value * 127);
         message[2] = 0;
     },
 
-    'control': function(param, value, message) {
-        message[1] = typeof param === 'string' ? controlToNumber(param) : param ;
+    'control': function(name, value, message) {
+        message[1] = typeof name === 'string' ? toControlNumber(name) : name ;
         message[2] = limit(0, 127, value * 127);
     },
 
-    'pitch': function(param, value, message) {
-        const int14 = signedFloatToInt14(value/param);
+    'pitch': function(range, value, message) {
+        const int14 = signedFloatToInt14(value/range);
 		message[1] = int14 & 127; // LSB
 		message[2] = int14 >> 7;  // MSB
     },
 
-    'program': function(param, value, message) {
-        message[1] = param;
+    'program': function(name, value, message) {
+        message[1] = name;
         message[2] = 0;
     }
 };
 
-function createMessage(channel, type, param, value) {
+function createMessage(channel, type, name, value) {
 	var message = new Uint8Array(3);
 	message[0] = toStatus(channel, type);
-    creators[type](param, value, message);
+    createData[type](name, value, message);
     return message;
 }
 
@@ -578,38 +685,6 @@ function normalise(message) {
 	return message;
 }
 
-/*
-toChannel(message)
-
-Returns the MIDI channel as a number between `1` and `16`.
-
-    toChannel([145,80,20]);       // 2
-*/
-
-function toChannel(message) {
-	return message[0] % 16 + 1;
-}
-
-/* toType(message)
-
-Returns message type as one of the strings `'noteoff'`, `'noteon'`, `'polytouch'`,
-`'control'`, `'program'`, `'channeltouch'` or `'pitch'`.
-
-    toType([145,80,20]);          // 'noteon'.
-*/
-
-const types = Object.keys(statuses);
-
-function toType(message) {
-	var name = types[Math.floor(message[0] / 16) - 8];
-
-	// Catch type noteon with zero velocity and rename it as noteoff
-	return name;
-    //name === types[1] && message[2] === 0 ?
-	//	types[0] :
-	//	name ;
-}
-
 // Utilities
 
 function toArgsLength() {
@@ -633,19 +708,22 @@ function remove(array, value) {
 const performance = window.performance;
 
 
-// Routing
+// Incoming message routing
 
-const roots = {};
+const ports = {};
 
 function fire(e) {
+    // Normalise noteon 0 to noteoff
     normalise(e.data);
 
-    // Fire port-specific listeners, if there are any
-    const portRoot = roots[e.target && e.target.id];
-	if (portRoot) { fireRoute(0, portRoot, e); }
+    // Fire port-specific listeners, if port is defined and there are any
+    if (e.target && e.target.id) {
+        const portRoot = ports[e.target.id];
+        if (portRoot) { fireRoute(0, portRoot, e); }
+    }
 
     // Fire port-generic listeners, if there are any
-    const allRoot = roots['undefined'];
+    const allRoot = ports['undefined'];
     if (allRoot) { fireRoute(0, allRoot, e); }
 }
 
@@ -658,7 +736,7 @@ function fireRoute(i, tree, e) {
 	}
 	else {
 		branch && fireRoute(i, branch, e);
-		tree['undefined'] && tree['undefined'].forEach((fn) => fn(e));
+		tree.undefined && tree.undefined.forEach((fn) => fn(e));
 	}
 }
 
@@ -686,38 +764,43 @@ function removeRoute(query, root, fn) {
 	remove(fns, fn);
 }
 
+
+// Queries
+
 const query = {};
 
 function toNoteQuery(selector) {
-	query[0] = toStatus(selector[0], selector[1]);
-	query[1] = typeof selector[2] === 'string' ?
-		noteToNumber(selector[2]) :
-		selector[2] ;
-	query[2] = selector[3];
+	query[0] = toStatus(selector.channel, selector.type);
+	query[1] = typeof selector.name === 'string' ?
+        toNoteNumber(selector.name) :
+		selector.name ;
+	query[2] = selector.value;
 	return query;
 }
 
 function toControlQuery(selector) {
-	query[0] = toStatus(selector[0], selector[1]);
-	query[1] = typeof selector[2] === 'string' ?
-		controlToNumber(selector[2]) :
-		selector[2] ;
-	query[2] = selector[3];
+	query[0] = toStatus(selector.channel, selector.type);
+	query[1] = typeof selector.name === 'string' ?
+		toControlNumber(selector.name) :
+		selector.name ;
+	query[2] = selector.value;
 	return query;
 }
 
 function toQuery(selector) {
-	query[0] = toStatus(selector[0], selector[1]);
-	query[1] = selector[2];
-	query[2] = selector[3];
+	query[0] = toStatus(selector.channel, selector.type);
+	query[1] = selector.name;
+	query[2] = selector.value;
 	return query;
 }
 
-// Transforms
-
-function get1(object) { return object[1]; }
-function type1(object) { return typeof object[1]; }
-
+function toSelectorType(object) {
+    // Loose duck type checking for index 0, so that we may accept
+    // objects as array selectors
+    return typeof object[0] === 'number' ? 'array' :
+        object.channel ? object.type :
+        'array' ;
+}
 
 
 //createEvent(time, port, message)
@@ -773,15 +856,7 @@ function createEvent(time, port, message) {
 on(selector, fn)
 
 Registers a handler `fn` for incoming MIDI events that match object `selector`.
-
-    on([1, 'note'], function(e) {
-        // Do something with CH1 NOTEON and NOTEOFF event objects
-        const time    = e.timeStamp;
-        const port    = e.target;
-        const message = e.data;
-    });
-
-A selector is either an array in the form of a MIDI message
+A selector is either an array (or array-like) in the form of a MIDI message
 `[status, data1, data2]`:
 
     // Call fn on CH1 NOTEON events
@@ -793,76 +868,105 @@ A selector is either an array in the form of a MIDI message
     // Call fn on CH1 NOTEON C4 127 events
 	on([144, 60, 127], fn);
 
-or more conveniently an array of interpretive data of the form
-`[chan, type, param, value]`:
+or a bit more conveniently an object of interpretive data of the form
+`{channel, type, name, value}`:
 
     // Call fn on CH2 NOTEON events
-	on([2, 'noteon'], fn);
+	on({ channel: 2, type: 'noteon' }, fn);
 
     // Call fn on CH2 NOTEOFF C4 events
-	on([2, 'noteoff', 'C4'], fn)
+	on({ channel: 2, type: 'noteoff', name: 'C4' }, fn)
 
     // Call fn on CH2 NOTEON and NOTEOFF C4 events
-	on([2, 'note', 'C4'], fn)
+	on({ channel: 2, type: 'note', name: 'C4' }, fn)
 
-Finally, a selector may have a property `port`, the id of an input port.
+    // Call fn on CH4 CONTROL 1 0 events
+	on({ channel: 4, type: 'control', name: 'modulation', value: 0 }, fn)
 
-    // Call fn on CH4 CC events from port '012345'
-	on({ port: '012345', 0: 4, 1: 'control' }}, fn);
+Note that these selector properties are progressive. A selector may not have
+a `type` if it has no `channel`, it may not have a `name` without a `type`,
+and may not have a `value` without a `name` property. Selectors pre-create
+paths in a distribution tree that is optimised for incoming events to flow
+through.
 
-    // Call fn on CH4 CC 64 events from port '012345'
-	on({ port: '012345', 0: 4, 1: 'control', 2: 64 }}, fn);
+Finally, a selector may optionally have a property `port`, the id of an
+input port.
 
-Selectors pre-create paths in a filter tree through which incoming events flow,
-for performance.
+    // Call fn on CH4 CC 64 events from port '0123'
+	on({ port: '0123', 0: 179, 1: 64 }}, fn);
+
+    // Call fn on CH4 CC 64 events from port '0123'
+	on({ port: '0123', channel: 4, type: 'control', name: 64 }}, fn);
+
 */
 
-const setSelectorRoute = overload(type1, {
-	'string': overload(get1, {
-		'note': function(selector, root, fn) {
-			var query = toNoteQuery(selector);
+const setSelectorRoute = overload(toSelectorType, {
+    'array': function(selector, root, fn) {
+        // Use selector as query
+        setRoute(0, selector, root, fn);
+    },
 
-			query[0] = toStatus(selector[0], 'noteon');
-			setRoute(0, query, root, fn);
+    'note': function(selector, root, fn) {
+        var query = toNoteQuery(selector);
 
-			query[0] = toStatus(selector[0], 'noteoff');
-			setRoute(0, query, root, fn);
-		},
+        query[0] = toStatus(selector.channel, 'noteon');
+        setRoute(0, query, root, fn);
 
-		'noteon': function(selector, root, fn) {
-			var query = toNoteQuery(selector);
-			setRoute(0, query, root, fn);
-		},
+        query[0] = toStatus(selector.channel, 'noteoff');
+        setRoute(0, query, root, fn);
+    },
 
-		'noteoff': function(selector, root, fn) {
-			var query = toNoteQuery(selector);
-			setRoute(0, query, root, fn);
-		},
+    'noteon': function(selector, root, fn) {
+        var query = toNoteQuery(selector);
+        setRoute(0, query, root, fn);
+    },
 
-        'polytouch': function(selector, root, fn) {
-			var query = toNoteQuery(selector);
-			setRoute(0, query, root, fn);
-		},
+    'noteoff': function(selector, root, fn) {
+        var query = toNoteQuery(selector);
+        setRoute(0, query, root, fn);
+    },
 
-		'control': function(selector, root, fn) {
-			const query = toControlQuery(selector);
-			setRoute(0, query, root, fn);
-		},
+    'polytouch': function(selector, root, fn) {
+        var query = toNoteQuery(selector);
+        setRoute(0, query, root, fn);
+    },
 
-		'default': function(selector, root, fn) {
-			var query = toQuery(selector);
-			setRoute(0, query, root, fn);
-		}
-	}),
+    'control': function(selector, root, fn) {
+        const query = toControlQuery(selector);
+        setRoute(0, query, root, fn);
+    },
 
-	'default': function(query, root, fn) {
-		setRoute(0, query, root, fn);
-	}
+    'undefined': function(selector, root, fn) {
+        // Listen to everything on the given channel
+
+        selector.type = 'note';
+        setSelectorRoute(selector, root, fn);
+
+        selector.type = 'control';
+        setSelectorRoute(selector, root, fn);
+
+        selector.type = 'pitch';
+        setSelectorRoute(selector, root, fn);
+
+        selector.type = 'polytouch';
+        setSelectorRoute(selector, root, fn);
+
+        selector.type = 'channeltouch';
+        setSelectorRoute(selector, root, fn);
+
+        selector.type = 'program';
+        setSelectorRoute(selector, root, fn);
+    },
+
+    default: function(selector, root, fn) {
+        var query = toQuery(selector);
+        setRoute(0, query, root, fn);
+    }
 });
 
 function on(selector, fn) {
     const id = selector.port || 'undefined' ;
-    const root = roots[id] || (roots[id] = {});
+    const root = ports[id] || (ports[id] = {});
     setSelectorRoute(selector, root, fn);
 }
 
@@ -875,61 +979,86 @@ Removes an event listener 'fn' from MIDI events matching object 'selector'. Wher
     off(['note'], fn);
 */
 
-const removeSelectorRoute = overload(type1, {
-	'string': overload(get1, {
-		'note': function(selector, root, fn) {
-			var query = toNoteQuery(selector);
+const removeSelectorRoute = overload(toSelectorType, {
+    'array': function(selector, root, fn) {
+        removeRoute(selector, root, fn);
+    },
 
-			query[0] = toStatus(selector[0], 'noteon');
-			removeRoute(query, root, fn);
+    'note': function(selector, root, fn) {
+        var query = toNoteQuery(selector);
 
-			query[0] = toStatus(selector[0], 'noteoff');
-			removeRoute(query, root, fn);
-		},
+        query[0] = toStatus(selector.channel, 'noteon');
+        removeRoute(query, root, fn);
 
-		'noteon': function(selector, root, fn) {
-			var query = toNoteQuery(selector);
-			removeRoute(query, root, fn);
-		},
+        query[0] = toStatus(selector.channel, 'noteoff');
+        removeRoute(query, root, fn);
+    },
 
-		'noteoff': function(selector, root, fn) {
-			var query = toNoteQuery(selector);
-			removeRoute(query, root, fn);
-		},
+    'noteon': function(selector, root, fn) {
+        var query = toNoteQuery(selector);
+        removeRoute(query, root, fn);
+    },
 
-        'polytouch': function(selector, root, fn) {
-			var query = toNoteQuery(selector);
-			setRoute(query, root, fn);
-		},
+    'noteoff': function(selector, root, fn) {
+        var query = toNoteQuery(selector);
+        removeRoute(query, root, fn);
+    },
 
-		'default': function(selector, root, fn) {
-			var query = toQuery(selector);
-			removeRoute(query, root, fn);
-		}
-	}),
+    'polytouch': function(selector, root, fn) {
+        var query = toNoteQuery(selector);
+        removeRoute(query, root, fn);
+    },
 
-	'default': function(query, root, fn) {
-		removeRoute(query, root, fn);
-	}
+    'control': function(selector, root, fn) {
+        var query = toControlQuery(selector);
+        removeRoute(query, root, fn);
+    },
+
+    'undefined': function(selector, root, fn) {
+        // Otherwise, there being no message type, remove fn from
+        // all types for this channel
+        selector.type = 'note';
+        removeSelectorRoute(selector, root, fn);
+
+        selector.type = 'control';
+        removeSelectorRoute(selector, root, fn);
+
+        selector.type = 'pitch';
+        removeSelectorRoute(selector, root, fn);
+
+        selector.type = 'polytouch';
+        removeSelectorRoute(selector, root, fn);
+
+        selector.type = 'channeltouch';
+        removeSelectorRoute(selector, root, fn);
+
+        selector.type = 'program';
+        removeSelectorRoute(selector, root, fn);
+    },
+
+    default: function(selector, root, fn) {
+        var query = toQuery(selector);
+        removeRoute(query, root, fn);
+    }
 });
 
 function off(selector, fn) {
     const id = selector.port || 'undefined' ;
-    const root = roots[id] || (roots[id] = {});
+    const root = ports[id] || (ports[id] = {});
     removeSelectorRoute(selector, root, fn);
 }
 
 /*
 trigger(port, message)
 
-Simulates an incoming MIDI message and fires listeners with matching selectors.
+Simulates an incoming MIDI event and fires listeners with matching selectors.
 Useful for debugging.
 
     trigger(null, [128, 69, 88]);
 */
 
 /*
-trigger(port, chan, type, param, value)
+trigger(port, chan, type, name, value)
 
 As `trigger(port, message)`, where the last 4 parameters are passed to
 `createMessage()` to create the MIDI message before triggering.
@@ -938,7 +1067,7 @@ As `trigger(port, message)`, where the last 4 parameters are passed to
 */
 
 const internalPort = {
-    id: 'INTERNAL'
+    id: 'internal'
 };
 
 const trigger = overload(toArgsLength, {
@@ -949,8 +1078,8 @@ const trigger = overload(toArgsLength, {
 		fire(e);
 	},
 
-    default: function(port, chan, type, param, value) {
-		const message = createMessage(chan, type, param, value);
+    default: function(port, chan, type, name, value) {
+		const message = createMessage(chan, type, name, value);
 		const e       = createEvent(performance.now(), port ? port : internalPort, message);
 		fire(e);
 	}
@@ -1009,8 +1138,7 @@ request()
 Returns a promise that resolves to the midiAccess object where it is
 available. Where the underlying `navigator.requestMIDIAccess()` method is
 undefined, or where MIDI is unavailable for some reason, returns a rejected
-promise. Library functions are available to use without requesting the midiAccess
-object, but this request is useful for alerting the user.
+promise.
 
     request().catch(function(error) {
         // Alert the user they don't have MIDI
@@ -1150,7 +1278,7 @@ id of a MIDI output port.
 
 function sendMessage(time, port, message) {
     if (typeof port === 'string') {
-        port = midi.inputs.get(port) || findOutputPort(port);
+        port = midi.outputs.get(port) || findOutputPort(port);
 
         if (!port) {
             print('Output port not found', port);
@@ -1161,7 +1289,7 @@ function sendMessage(time, port, message) {
 }
 
 /*
-send(time, port, chan, type, param, value)
+send(time, port, chan, type, name, value)
 
 Like `send(time, port, message)`, but the last 4 parameters are passed to
 `createMessage()` to create the MIDI message before sending.
@@ -1169,8 +1297,8 @@ Like `send(time, port, message)`, but the last 4 parameters are passed to
     send(0, 'id', 1, 'noteon', 'A4', 0.75);
 */
 
-function sendParams(time, port, chan, type, param, value) {
-    const message = createMessage(chan, type, param, value);
+function sendParams(time, port, chan, type, name, value) {
+    const message = createMessage(chan, type, name, value);
     return sendMessage(time, port, message);
 }
 
@@ -1186,4 +1314,4 @@ print('       - http://github.com/stephband/midi');
 
 request();
 
-export { bytesToInt14, bytesToSignedFloat, controlToNumber, createMessage, floatToInt14, floatToInt7, frequencyToNumber, getInput, getOutput, inputs, int14ToFloat, int14ToLSB, int14ToMSB, int14ToSignedFloat, int7ToFloat, int7ToSignedFloat, isControl, isNote, isPitch, normalise, normaliseNote, noteToNumber, numberToControl, numberToFrequency, numberToNote, numberToOctave, off, on, outputs, request, send, sendEvent, signedFloatToInt14, signedFloatToInt7, statuses, toChannel, toStatus, toType, trigger };
+export { bytesToInt14, bytesToSignedFloat, createMessage, floatToFrequency, floatToInt14, floatToInt7, frequencyToFloat, getInput, getOutput, inputs, int14ToFloat, int14ToLSB, int14ToMSB, int14ToSignedFloat, int14ToWeightedFloat, int7ToFloat, int7ToSignedFloat, int7ToWeightedFloat, isControl, isNote, isPitch, normalise, normaliseNoteName, off, on, outputs, request, send, sendEvent, signedFloatToInt14, signedFloatToInt7, toChannel, toControlName, toControlNumber, toNoteName, toNoteNumber, toNoteOctave, toStatus, toType, trigger, weightedFloatToInt14, weightedFloatToInt7 };

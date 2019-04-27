@@ -59,7 +59,7 @@ export function floatToInt14(n) {
 /*
 int7ToFloat(n)
 
-Returns a float in the range `0`-`1` for values of `n` in the range `0`-`16383`.
+Returns a float in the range `0`-`1` for values of `n` in the range `0`-`127`.
 
     int7ToFloat(64);      // 0.503937
 */
@@ -75,8 +75,8 @@ Returns a float in the range `0`-`1` for values of `n` in the range `0`-`127`.
 The input integer is mapped so that the value `64` returns exactly `0.5`, the
 centre of the range, as per the MIDI spec for controller values and their ilk.
 
-    int7ToSignedFloat(0);    // -1
-    int7ToSignedFloat(64);   // 0
+    int7ToSignedFloat(0);    // 0
+    int7ToSignedFloat(64);   // 0.5
     int7ToSignedFloat(127);  // 1
 */
 
@@ -111,6 +111,23 @@ Returns a float in the range `0`-`1` for values of `n` in the range `0`-`16383`.
 export function int14ToFloat(n) {
 	return n / 16383;
 }
+
+/*
+int14ToWeightedFloat(n)
+
+Returns a float in the range `0`-`1` for values of `n` in the range `0`-`16383`.
+The input integer is mapped so that the value `8192` returns `0.5`, the centre of
+the range, as per the MIDI spec for pitch bend values and their ilk.
+
+    int14ToWeightedFloat(0);      // 0
+    int14ToWeightedFloat(8192);   // 0.5
+    int14ToWeightedFloat(16383);  // 1
+*/
+
+export function int14ToWeightedFloat(n) {
+	return n < 8192 ? n / 16384 : 0.5 + (n - 8192) / 16382 ;
+}
+
 
 /*
 int14ToSignedFloat(n)
@@ -196,4 +213,44 @@ export function signedFloatToInt14(n) {
 	return n < 0 ?
         n < -1 ? 0 : Math.round((1 + n) * 8192) :
         n > 1 ? 16383 : 8192 + Math.round(n * 8191) ;
+}
+
+/*
+weightedFloatToInt7(n)
+
+Returns an integer in the 7-bit range `0`-`127` for values of `n` between
+`0`-`1`. The input value `0.5` maps exactly to the value `64`, as per
+the MIDI spec for modulation control values and their ilk.
+
+    weightedFloatToInt7(0);   // 0
+    weightedFloatToInt7(0.5); // 64
+    weightedFloatToInt7(1);   // 127
+
+Values lower than `-1` return `0`, while values greater than `1` return `127`.
+*/
+
+export function weightedFloatToInt7(n) {
+	return n <= 0.5 ?
+        n <= 0 ? 0 : Math.round(n * 128) :
+        n >= 1 ? 127 : 64 + Math.round((n - 0.5) * 126) ;
+}
+
+/*
+weightedFloatToInt14(n)
+
+Returns an integer in the 14-bit range `0`-`16383` for values of `n` between
+`-1`-`1`. The input value `0` maps exactly to the value `8192`, as per
+the MIDI spec for pitch bend values and their ilk.
+
+    weightedFloatToInt14(0);   // 0
+    weightedFloatToInt14(0.5); // 8192
+    weightedFloatToInt14(1);   // 16383
+
+Values lower than `-1` return `0`, while values greater than `1` return `16383`.
+*/
+
+export function weightedFloatToInt14(n) {
+	return n <= 0.5 ?
+        n <= 0 ? 0 : Math.round(n * 16384) :
+        n >= 1 ? 16383 : 8192 + Math.round((n - 0.5) * 16382) ;
 }

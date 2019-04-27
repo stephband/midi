@@ -11,24 +11,28 @@ export {
     int7ToWeightedFloat,
     int7ToSignedFloat,
     int14ToFloat,
+    int14ToWeightedFloat,
     int14ToSignedFloat,
     int14ToLSB,
     int14ToMSB,
     signedFloatToInt7,
-    signedFloatToInt14
+    signedFloatToInt14,
+    weightedFloatToInt7,
+    weightedFloatToInt14
 } from './modules/maths.js';
 
 export {
-    controlToNumber,
-    frequencyToNumber,
-    normaliseNote,
-    noteToNumber,
-    numberToControl,
-    numberToFrequency,
-    numberToNote,
-    numberToOctave,
+    toControlNumber,
+    frequencyToFloat,
+    normaliseNoteName,
+    toNoteNumber,
+    toControlName,
+    floatToFrequency,
+    toNoteName,
+    toNoteOctave,
     toStatus,
-    statuses
+    toChannel,
+    toType
 } from './modules/data.js';
 
 export {
@@ -36,9 +40,7 @@ export {
     isControl,
     isNote,
     isPitch,
-    normalise,
-    toChannel,
-    toType
+    normalise
 } from './modules/messages.js';
 
 export {

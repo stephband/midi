@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
-<head template-fn="import:package.json">
+<html lang="en" is="sparky">
+<head build-fn="import:package.json">
     <meta charset="utf-8" />
     <meta name="author" content="@{[author.twitter]}" />
     <meta name="description" content="Documentation for {[title]}. {[description]}" />
@@ -26,19 +26,29 @@
     <link rel="stylesheet" href="../fn/css/tests.css" />
     <link rel="stylesheet" href="css/theme.css" />
 	<link rel="stylesheet" href="components/midi-graph/midi-graph.css" />
+
+    <template id="functions">
+        <article build-fn="each append:body" class="toggle-block block" toggleable id="{[id]}">
+            <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
+                <a href="#{[id]}">
+                    <code build-fn="append:title" class="language-js"></code>
+                </a>
+            </h3>
+        </article>
+    </template>
 </head>
 
 <body>
-    <header template-fn="import:'package.json'" class="1-grid grid" id="header">
+    <header build-fn="import:package.json" class="1-grid grid" id="header">
         <h1 class="grid-0 midi-icon">{[title]} <span class="text-6">{[version]}</span></h1>
 
         <div class="grid-1">
-            <p class="text-8">{[description]} <span id="support-hint" style="color: #bf004c;"></span> Currently, only Chrome and the dev channel of Brave support the <a href="https://caniuse.com/#feat=midi">WebMIDI API</a>.</p>
+            <p class="text-8">{[description]} <span id="support-hint" style="color: #bf004c;"></span> Currently <a href="https://brave.com/">Brave</a> and Chrome support the <a href="https://caniuse.com/#feat=midi">WebMIDI API</a>.</p>
 
             <ul class="link-index index">
-        		<li><strong>repo:</strong> <a href="{[repository.url]}">{[repository.url]}</a></li>
+                <li><strong>repo:</strong> <a href="{[repository.url]}">{[repository.url]}</a></li>
                 <li><strong>bugs:</strong> <a href="{[bugs.url]}">{[bugs.url]}</a></li>
-        	</ul>
+            </ul>
         </div>
     </header>
 
@@ -49,84 +59,64 @@
         </div>
     </div>
 
+    <section class="1-grid grid">
+        <header class="grid-0">
+            <h2 class="text-2" style="font-size: 1.875rem;">Quick start</h2>
+            <pre><code class="language-js">// Import MIDI functions as object
+import * as MIDI from 'http://stephen.band/midi/midi.js';
+
+// Listen to incoming 'noteon' and 'noteoff' messages on channel 1
+MIDI.on({channel: 1, type: 'note'}, (e) => {
+    // Time, port and message are properties of the DOM event
+    const time    = e.timeStamp;
+    const port    = e.target;
+    const message = e.data;
+
+    // Get the note name
+    const name = MIDI.toNoteName(message[1]);
+
+    // Normalise velocity to the range 0-1
+    const velocity = MIDI.int7ToFloat(message[2]);
+});
+</code></pre>
+
+            <p>On this page, functions have been imported to the object <code>window.MIDI</code> so that you may play with them in the console.</p>
+        </header>
+    </section>
+
     <section class="1-2-3-grid grid">
         <header class="grid-0">
             <h2 class="text-2" style="font-size: 1.875rem;">Functions</h2>
-            <p>Import functions:</p>
-            <pre><code class="language-js">// One at a time
-import { on, off } from 'http://stephen.band/midi/midi.js';
-
-// Or import them all to an object
-import * as MIDI from 'http://stephen.band/midi/midi.js';</code></pre>
-            <p>The modules that make up this library require no external dependencies.
-            On this page, all functions have been imported to the object <code>MIDI</code>
-            so that you may play with them in the console.</p>
         </header>
 
         <section class="grid-1">
             <h1 class="text-3">availability</h1>
-            <article template-fn="docs:'./modules/midi.js?request' each append:body" class="toggle-block block" toggleable id="{[id]}">
-                <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
-                    <a href="#{[id]}">
-                        <code template-fn="html:title" class="language-js"></code>
-                    </a>
-                </h3>
-            </article>
+            <template build-fn="docs:'./modules/midi.js?request'" build-include="#functions"></template>
         </section>
 
         <section class="grid-2">
             <h1 class="text-3">receive</h1>
-            <article template-fn="docs:'./modules/midi.js?inputs,getInput','./modules/events.js' each append:body" class="toggle-block block" toggleable id="{[id]}">
-                <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
-                    <a href="#{[id]}">
-                        <code template-fn="html:title" class="language-js"></code>
-                    </a>
-                </h3>
-            </article>
+            <template build-fn="docs:'./modules/midi.js?inputs,getInput','./modules/events.js'" build-include="#functions"></template>
         </section>
 
         <section class="grid-3">
             <h1 class="text-3">send</h1>
-            <article template-fn="docs:'./modules/midi.js?outputs,getOutput,send' each append:body" class="toggle-block block" toggleable id="{[id]}">
-                <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
-                    <a href="#{[id]}">
-                        <code template-fn="html:title" class="language-js"></code>
-                    </a>
-                </h3>
-            </article>
+            <template build-fn="docs:'./modules/midi.js?outputs,getOutput,send'" build-include="#functions"></template>
         </section>
 
         <section class="grid-4">
             <h1 class="text-3">messages</h1>
-            <article template-fn="docs:'./modules/messages.js' each append:body" class="toggle-block doc-block block" toggleable id="{[id]}">
-                <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
-                    <a href="#{[id]}">
-                        <code template-fn="html:title" class="language-js"></code>
-                    </a>
-                </h3>
-            </article>
+            <template build-fn="docs:'./modules/messages.js'" build-include="#functions"></template>
         </section>
 
         <section class="grid-5">
             <h1 class="text-3">data</h1>
-            <article template-fn="docs:'./modules/data.js' each append: body" class="toggle-block block" toggleable id="{[id]}">
-                <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
-                    <a href="#{[id]}">
-                        <code template-fn="html:title" class="language-js"></code>
-                    </a>
-                </h3>
-            </article>
+            <template build-fn="docs:'./modules/data.js'" build-include="#functions"></template>
         </section>
 
         <section class="grid-6">
             <h1 class="text-3">maths</h1>
-            <article template-fn="docs:'./modules/maths.js' each append:body" class="toggle-block block" toggleable id="{[id]}">
-                <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
-                    <a href="#{[id]}">
-                        <code template-fn="html:title" class="language-js"></code>
-                    </a>
-                </h3>
-            </article>
+            <template build-fn="docs:'./modules/maths.js'" build-include="#functions"></template>
         </section>
     </section>
 
@@ -135,24 +125,24 @@ import * as MIDI from 'http://stephen.band/midi/midi.js';</code></pre>
             <h2 class="text-2" style="font-size: 1.875rem;">Custom elements</h2>
         </header>
 
-        <article template-fn="docs:'./components/midi-graph/midi-graph.js' each append:body" class="grid-1" id="{[id]}">
+        <article build-fn="docs:'./components/midi-graph/midi-graph.js' each append:body" class="grid-1" id="{[id]}">
             <h3 class="text-3">
                 <a href="#{[id]}">
-                    <code template-fn="html:title" class="language-html"></code>
+                    <code build-fn="append:title" class="language-html"></code>
                 </a>
             </h3>
         </article>
 
-        <article template-fn="docs:'./components/midi-monitor/midi-monitor.js' each append:body" class="grid-2" id="{[id]}">
+        <article build-fn="docs:'./components/midi-monitor/midi-monitor.js' each append:body" class="grid-2" id="{[id]}">
             <h3 class="text-3">
                 <a href="#{[id]}">
-                    <code template-fn="html:title" class="language-html"></code>
+                    <code build-fn="append:title" class="language-html"></code>
                 </a>
             </h3>
         </article>
     </section>
 
-    <script remove-template type="module" src="../fn/docs-build.js"></script>
+    <script build-remove type="module" src="../fn/docs-build.js"></script>
 
     <!-- Document interactivity -->
     <script type="module" src="./components/midi-graph/midi-graph.js"></script>
@@ -160,7 +150,7 @@ import * as MIDI from 'http://stephen.band/midi/midi.js';</code></pre>
     <script type="module">
     import '../dom/js/dom.root.js';
     import '../dom/js/dom.toggleable.js';
-    import * as MIDI from './midi.js';
+    import * as MIDI from './module.js';
     window.MIDI = MIDI;
 
     import { classes, get } from '../dom/module.js';

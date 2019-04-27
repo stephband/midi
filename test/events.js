@@ -50,25 +50,6 @@ group('MIDI listeners', function(test, log) {
 		done();
 	}, 1);
 
-	test('MIDI.on([1, "note"], fn)', function(equals, done) {
-		var expects = [
-			[144,60,2]
-		];
-
-		function update(e) {
-			equals(e.data, expects.shift());
-		}
-
-		MIDI.on([144, 60], update);
-		MIDI.trigger(null, [144,62,127]);
-		MIDI.trigger(null, [146,60,0]);
-		MIDI.trigger(null, [144,60,2]);
-		MIDI.off([144, 60], update);
-		MIDI.trigger(null, [144,60,2]);
-
-		done();
-	}, 1);
-
 	test('MIDI.on({ port: "test-id", 0: 144, 1: 60 }, fn)', function(equals, done) {
 		var expects = [
 			[144,60,2]
@@ -100,143 +81,117 @@ group('MIDI listeners', function(test, log) {
 
 		done();
 	}, 1);
-});
 
-/*
-group('MIDI streams', function(test, log) {
-	test('MIDI([1,"note"])', function(equals, done) {
+	test('MIDI.on({ channel: 1, type: "note" }, fn)', function(equals, done) {
 		var expects = [
-			{ data: [144,60,1] },
-			{ data: [128,60,0] },
-			{ data: [144,90,1] },
-			{ data: [128,90,0] }
+			[144,62,127],
+			[144,60,2],
+			[128,62,0]
 		];
 
 		function update(e) {
-			equals(e.data, expects.shift().data);
+			equals(expects.shift(), e.data);
 		}
 
-		MIDI.on([1,"note"], update)
-		MIDI.trigger(null, [149,62,127]);
+		MIDI.on({ channel: 1, type: "note" }, update);
+		MIDI.trigger(null, [144,62,127]);
 		MIDI.trigger(null, [146,60,0]);
-		MIDI.trigger(null, [144,60,1]);
-		MIDI.trigger(null, [128,60,0]);
-		MIDI.trigger(null, [176,60,2]);
-		MIDI.trigger(null, [176,60,2]);
-		MIDI.trigger(null, [144,90,1]);
-		MIDI.trigger(null, [128,90,0]);
-		MIDI.trigger(null, [170,60,2]);
-		MIDI.off([1, "note"], update);
-		MIDI.trigger(null, [144,60,1]);
+		MIDI.trigger(null, [144,60,2]);
+		MIDI.trigger(null, [128,62,0]);
+		MIDI.off({ channel: 1, type: "note" }, update);
+		MIDI.trigger(null, [144,60,2]);
 
 		done();
-	}, 4);
+	}, 3);
 
-	test('MIDI([144, 60, 2], fn)', function(equals, done) {
+	test('MIDI.on({ channel: 2 }, fn)', function(equals, done) {
 		var expects = [
-			{ data: [144,60,2] }
+			[129,1,20],
+			[145,64,30],
+			[177,64,20]
 		];
 
 		function update(e) {
-			equals(e.data, expects.shift().data);
+			equals(expects.shift(), e.data);
 		}
 
-		MIDI.on([144,60,2], update);
-		MIDI.trigger(null, [144,62,127]);
-		MIDI.trigger(null, [146,60,0]);
-		MIDI.trigger(null, [144,60,2]);
-		MIDI.off([144,60,2], update);
-		MIDI.trigger(null, [144,60,2]);
+		MIDI.on({ channel: 2 }, update);
+		MIDI.trigger(null, [183,64,127]);
+		MIDI.trigger(null, [183,1,0]);
+		MIDI.trigger(null, [183,1,20]);
+		MIDI.trigger(null, [129,1,20]);
+		MIDI.trigger(null, [144,64,0]);
+		MIDI.trigger(null, [145,64,30]);
+		MIDI.trigger(null, [146,64,0]);
+		MIDI.trigger(null, [177,64,20]);
+		MIDI.off({ channel: 2 }, update);
+		MIDI.trigger(null, [177,60,2]);
+
+		done();
+	}, 3);
+
+	test('MIDI.on({ channel: 6, type: "control", name: 1 }, fn)', function(equals, done) {
+		var expects = [
+			[181,1,0],
+			[181,1,20]
+		];
+
+		function update(e) {
+			equals(expects.shift(), e.data);
+		}
+
+		MIDI.on({ channel: 6, type: "control", name: 1 }, update);
+		MIDI.trigger(null, [181,64,127]);
+		MIDI.trigger(null, [181,1,0]);
+		MIDI.trigger(null, [181,1,20]);
+		MIDI.trigger(null, [182,1,20]);
+		MIDI.trigger(null, [181,64,0]);
+		MIDI.off({ channel: 6, type: "control", name: 1 }, update);
+		MIDI.trigger(null, [181,60,2]);
+
+		done();
+	}, 2);
+
+	test('MIDI.on({ channel: 8, type: "control", name: "modulation" }, fn)', function(equals, done) {
+		var expects = [
+			[183,1,0],
+			[183,1,20]
+		];
+
+		function update(e) {
+			equals(expects.shift(), e.data);
+		}
+
+		MIDI.on({ channel: 8, type: "control", name: "modulation" }, update);
+		MIDI.trigger(null, [183,64,127]);
+		MIDI.trigger(null, [183,1,0]);
+		MIDI.trigger(null, [183,1,20]);
+		MIDI.trigger(null, [184,1,20]);
+		MIDI.trigger(null, [183,64,0]);
+		MIDI.off({ channel: 8, type: "control", name: "modulation" }, update);
+		MIDI.trigger(null, [183,60,2]);
+
+		done();
+	}, 2);
+
+	test('MIDI.on({ channel: 8, type: "control", name: "modulation", value: 0 }, fn)', function(equals, done) {
+		var expects = [
+			[183,1,0]
+		];
+
+		function update(e) {
+			equals(expects.shift(), e.data);
+		}
+
+		MIDI.on({ channel: 8, type: "control", name: "modulation", value: 0 }, update);
+		MIDI.trigger(null, [183,64,127]);
+		MIDI.trigger(null, [183,1,0]);
+		MIDI.trigger(null, [183,1,20]);
+		MIDI.trigger(null, [184,1,20]);
+		MIDI.trigger(null, [183,64,0]);
+		MIDI.off({ channel: 8, type: "control", name: "modulation", value: 0 }, update);
+		MIDI.trigger(null, [183,60,2]);
 
 		done();
 	}, 1);
-
-	test('MIDI([144])', function(equals, done) {
-		var stream = MIDI([144]);
-		var i = -1;
-		var expects = [
-			{ data: [144,64,127] },
-			{ data: [156,64,0] }
-		];
-
-
-		stream.each(function(message) {
-			equals(message.data, expects[++i].data);
-		});
-
-		MIDI.trigger(null, [144,64,127]);
-		MIDI.trigger(null, [156,64,0]);
-
-		stream.stop();
-		done();
-	}, 1);
-
-	test('MIDI([144, 60])', function(equals, done) {
-		var stream = MIDI([144, 60]);
-		var i = -1;
-		var expects = [
-			{ data: [144,60,2] }
-		];
-
-
-		stream.each(function(message) {
-			equals(message.data, expects[++i].data);
-		});
-
-		MIDI.trigger(null, [144,62,127]);
-		MIDI.trigger(null, [146,60,0]);
-		MIDI.trigger(null, [144,60,2]);
-
-		stream.stop();
-		done();
-	}, 1);
-
-	test('MIDI([144, 60, 2])', function(equals, done) {
-		var stream = MIDI([144,60,2]);
-		var i = -1;
-		var expects = [
-			{ data: [144,60,2] }
-		];
-
-
-		stream.each(function(message) {
-			equals(message.data, expects[++i].data);
-		});
-
-		MIDI.trigger(null, [144,62,127]);
-		MIDI.trigger(null, [146,60,0]);
-		MIDI.trigger(null, [144,60,2]);
-
-		stream.stop();
-		done();
-	}, 1);
-
-	test('MIDI([1,"note"])', function(equals, done) {
-		var stream = MIDI([1,"note"]);
-		var i = -1;
-		var expects = [
-			{ data: [144,60,1] },
-			{ data: [128,60,0] },
-			{ data: [144,60,1] },
-			{ data: [128,60,0] }
-		];
-
-		stream.each(function(message) {
-			equals(expects[++i].data, message.data);
-		});
-
-		MIDI.trigger(null, [149,62,127]);
-		MIDI.trigger(null, [146,60,0]);
-		MIDI.trigger(null, [144,60,1]);
-		MIDI.trigger(null, [128,60,0]);
-		MIDI.trigger(null, [176,60,2]);
-		MIDI.trigger(null, [176,60,2]);
-		MIDI.trigger(null, [144,60,1]);
-		MIDI.trigger(null, [128,60,0]);
-		MIDI.trigger(null, [176,60,2]);
-
-		stream.stop();
-		done();
-	}, 4);
 });
-*/

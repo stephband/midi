@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" class="js"><head>
+<html lang="en" is="sparky" class="js"><head>
     <meta charset="utf-8">
     <meta name="author" content="@stephband">
-    <meta name="description" content="Documentation for MIDI. Receive, manipulate and transmit browser MIDI messages.">
+    <meta name="description" content="Documentation for MIDI. Receive, monitor, manipulate and transmit browser MIDI messages.">
     <meta name="viewport" content="width=device-width">
 
     <title>MIDI</title>
@@ -25,88 +25,107 @@
     <link rel="stylesheet" href="../fn/css/tests.css">
     <link rel="stylesheet" href="css/theme.css">
 	<link rel="stylesheet" href="components/midi-graph/midi-graph.css">
+
+    <template id="functions">
+        <article build-fn="each append:body" class="toggle-block block" toggleable="" id="{[id]}">
+            <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
+                <a href="#{[id]}">
+                    <code build-fn="append:title" class="language-js"></code>
+                </a>
+            </h3>
+        </article>
+    </template>
 </head>
 
 <body>
     <header class="1-grid grid" id="header">
-        <h1 class="grid-0 midi-icon">MIDI <span class="text-6">0.9.4</span></h1>
+        <h1 class="grid-0 midi-icon">MIDI <span class="text-6">1.0.0</span></h1>
 
         <div class="grid-1">
-            <p class="text-8">Receive, manipulate and transmit browser MIDI messages. <span id="support-hint" style="color: #bf004c;"></span> Currently, only Chrome and the dev channel of Brave support the <a href="https://caniuse.com/#feat=midi">WebMIDI API</a>.</p>
+            <p class="text-8">Receive, monitor, manipulate and transmit browser MIDI messages. <span id="support-hint" style="color: #bf004c;"></span> Currently <a href="https://brave.com/">Brave</a> and Chrome support the <a href="https://caniuse.com/#feat=midi">WebMIDI API</a>.</p>
 
             <ul class="link-index index">
-        		<li><strong>repo:</strong> <a href="https://github.com/stephband/midi.git">https://github.com/stephband/midi.git</a></li>
+                <li><strong>repo:</strong> <a href="https://github.com/stephband/midi.git">https://github.com/stephband/midi.git</a></li>
                 <li><strong>bugs:</strong> <a href="https://github.com/stephband/midi/issues">https://github.com/stephband/midi/issues</a></li>
-        	</ul>
+            </ul>
         </div>
     </header>
 
     <div class="demo-block block site-grid grid">
         <div class="midi-graph grid-1" id="midi-graph">
-            <p class="text-8 hint" id="instrument-hint">Plug in a MIDI instrument to try out the <code>&lt;midi-graph&gt;</code> component…</p>
+            <p class="text-8 hint active" id="instrument-hint">Plug in a MIDI instrument to try out the <code>&lt;midi-graph&gt;</code> component…</p>
             <midi-graph>
         </midi-graph></div>
     </div>
 
     <section class="1-2-3-grid grid">
         <header class="grid-0">
-            <h2 class="text-2" style="font-size: 1.875rem;">Functions</h2>
-            <p>Import functions:</p>
-            <pre class=" language-js"><code class=" language-js"><span class="token comment">// One at a time</span>
-<span class="token keyword">import</span> <span class="token punctuation">{</span> on<span class="token punctuation">,</span> off <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'http://stephen.band/midi/midi.js'</span><span class="token punctuation">;</span>
+            <h2 class="text-2" style="font-size: 1.875rem;">Quick start</h2>
+            <pre class=" language-js"><code class=" language-js"><span class="token comment">// Import MIDI functions as object</span>
+<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> <span class="token constant">MIDI</span> <span class="token keyword">from</span> <span class="token string">'http://stephen.band/midi/midi.js'</span><span class="token punctuation">;</span>
 
-<span class="token comment">// Or import them all to an object</span>
-<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> <span class="token constant">MIDI</span> <span class="token keyword">from</span> <span class="token string">'http://stephen.band/midi/midi.js'</span><span class="token punctuation">;</span></code></pre>
-            <p>On this page, all functions have been imported to the object <code>MIDI</code> so that you may play with them in the console.</p>
+<span class="token comment">// Listen to incoming 'noteon' and 'noteoff' messages on channel 1</span>
+<span class="token constant">MIDI</span><span class="token punctuation">.</span><span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">{</span>channel<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string">'note'</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>e<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Time, port and message are properties of the DOM event</span>
+    <span class="token keyword">const</span> time    <span class="token operator">=</span> e<span class="token punctuation">.</span>timeStamp<span class="token punctuation">;</span>
+    <span class="token keyword">const</span> port    <span class="token operator">=</span> e<span class="token punctuation">.</span>target<span class="token punctuation">;</span>
+    <span class="token keyword">const</span> message <span class="token operator">=</span> e<span class="token punctuation">.</span>data<span class="token punctuation">;</span>
+
+    <span class="token comment">// Get the note name</span>
+    <span class="token keyword">const</span> name <span class="token operator">=</span> <span class="token constant">MIDI</span><span class="token punctuation">.</span><span class="token function">toNoteName</span><span class="token punctuation">(</span>message<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Normalise velocity to the range 0-1</span>
+    <span class="token keyword">const</span> velocity <span class="token operator">=</span> <span class="token constant">MIDI</span><span class="token punctuation">.</span><span class="token function">int7ToFloat</span><span class="token punctuation">(</span>message<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+
+            <p>On this page, functions have been imported to the object <code>window.MIDI</code> so that you may play with them in the console.</p>
         </header>
 
         <section class="grid-1">
             <h1 class="text-3">availability</h1>
-            <!--article template-fn="docs:'./modules/midi.js?request' each append:body"--><article class="toggle-block block" toggleable="" id="request">
-                <h3 class="text-5 ">
-                    <a href="#request">
-                        <code class="language-js"><span class="token function">request</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns a promise that resolves to the midiAccess object where it is
+
+        <!--article--><article class="toggle-block block" toggleable="" id="request">
+            <h3 class="text-5 ">
+                <a href="#request">
+                    <code class="language-js"><span class="token function">request</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns a promise that resolves to the midiAccess object where it is
 available. Where the underlying <code>navigator.requestMIDIAccess()</code> method is
 undefined, or where MIDI is unavailable for some reason, returns a rejected
-promise. Library functions are available to use without requesting the midiAccess
-object, but this request is useful for alerting the user.</p>
+promise.</p>
 <pre><code><span class="token function">request</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token keyword">catch</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token comment">// Alert the user they don't have MIDI</span>
 <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></article>
+
         </section>
 
         <section class="grid-2">
             <h1 class="text-3">receive</h1>
-            <!--article template-fn="docs:'./modules/midi.js?inputs,getInput','./modules/events.js' each append:body"--><article class="toggle-block block" toggleable="" id="inputs">
-                <h3 class="text-5 ">
-                    <a href="#inputs">
-                        <code class="language-js"><span class="token function">inputs</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns the map of MIDI input ports from the underlying MIDIAccess object.</p>
+
+        <!--article--><article class="toggle-block block" toggleable="" id="inputs">
+            <h3 class="text-5 ">
+                <a href="#inputs">
+                    <code class="language-js"><span class="token function">inputs</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns the map of MIDI input ports from the underlying MIDIAccess object.</p>
 </article><article class="toggle-block block" toggleable="" id="getinput-id">
-                <h3 class="text-5 ">
-                    <a href="#getinput-id">
-                        <code class="language-js"><span class="token function">getInput</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns an input port by id.</p>
+            <h3 class="text-5 ">
+                <a href="#getinput-id">
+                    <code class="language-js"><span class="token function">getInput</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns an input port by id.</p>
 </article><article class="toggle-block block" toggleable="" id="on-selector-fn">
-                <h3 class="text-5 ">
-                    <a href="#on-selector-fn">
-                        <code class="language-js"><span class="token function">on</span><span class="token punctuation">(</span>selector<span class="token punctuation">,</span> fn<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Registers a handler <code>fn</code> for incoming MIDI events that match object <code>selector</code>.</p>
-<pre><code><span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'note'</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token keyword">function</span><span class="token punctuation">(</span>e<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Do something with CH1 NOTEON and NOTEOFF event objects</span>
-    <span class="token keyword">const</span> time    <span class="token operator">=</span> e<span class="token punctuation">.</span>timeStamp<span class="token punctuation">;</span>
-    <span class="token keyword">const</span> port    <span class="token operator">=</span> e<span class="token punctuation">.</span>target<span class="token punctuation">;</span>
-    <span class="token keyword">const</span> message <span class="token operator">=</span> e<span class="token punctuation">.</span>data<span class="token punctuation">;</span>
-<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><p>A selector is either an array in the form of a MIDI message
+            <h3 class="text-5 ">
+                <a href="#on-selector-fn">
+                    <code class="language-js"><span class="token function">on</span><span class="token punctuation">(</span>selector<span class="token punctuation">,</span> fn<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Registers a handler <code>fn</code> for incoming MIDI events that match object <code>selector</code>.
+A selector is either an array (or array-like) in the form of a MIDI message
 <code>[status, data1, data2]</code>:</p>
 <pre><code><span class="token comment">// Call fn on CH1 NOTEON events</span>
 <span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">144</span><span class="token punctuation">]</span><span class="token punctuation">,</span> fn<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -115,72 +134,81 @@ object, but this request is useful for alerting the user.</p>
 <span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">144</span><span class="token punctuation">,</span> <span class="token number">60</span><span class="token punctuation">]</span><span class="token punctuation">,</span> fn<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token comment">// Call fn on CH1 NOTEON C4 127 events</span>
-<span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">144</span><span class="token punctuation">,</span> <span class="token number">60</span><span class="token punctuation">,</span> <span class="token number">127</span><span class="token punctuation">]</span><span class="token punctuation">,</span> fn<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><p>or more conveniently an array of interpretive data of the form
-<code>[chan, type, param, value]</code>:</p>
+<span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">144</span><span class="token punctuation">,</span> <span class="token number">60</span><span class="token punctuation">,</span> <span class="token number">127</span><span class="token punctuation">]</span><span class="token punctuation">,</span> fn<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><p>or a bit more conveniently an object of interpretive data of the form
+<code>{channel, type, name, value}</code>:</p>
 <pre><code><span class="token comment">// Call fn on CH2 NOTEON events</span>
-<span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token string">'noteon'</span><span class="token punctuation">]</span><span class="token punctuation">,</span> fn<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">{</span> channel<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string">'noteon'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> fn<span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token comment">// Call fn on CH2 NOTEOFF C4 events</span>
-<span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token string">'noteoff'</span><span class="token punctuation">,</span> <span class="token string">'C4'</span><span class="token punctuation">]</span><span class="token punctuation">,</span> fn<span class="token punctuation">)</span>
+<span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">{</span> channel<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string">'noteoff'</span><span class="token punctuation">,</span> name<span class="token punctuation">:</span> <span class="token string">'C4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> fn<span class="token punctuation">)</span>
 
 <span class="token comment">// Call fn on CH2 NOTEON and NOTEOFF C4 events</span>
-<span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token string">'note'</span><span class="token punctuation">,</span> <span class="token string">'C4'</span><span class="token punctuation">]</span><span class="token punctuation">,</span> fn<span class="token punctuation">)</span></code></pre><p>Finally, a selector may have a property <code>port</code>, the id of an input port.</p>
-<pre><code><span class="token comment">// Call fn on CH4 CC events from port '012345'</span>
-<span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">{</span> port<span class="token punctuation">:</span> <span class="token string">'012345'</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">:</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">:</span> <span class="token string">'control'</span> <span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token punctuation">,</span> fn<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">{</span> channel<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string">'note'</span><span class="token punctuation">,</span> name<span class="token punctuation">:</span> <span class="token string">'C4'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> fn<span class="token punctuation">)</span>
 
-<span class="token comment">// Call fn on CH4 CC 64 events from port '012345'</span>
-<span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">{</span> port<span class="token punctuation">:</span> <span class="token string">'012345'</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">:</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">:</span> <span class="token string">'control'</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">:</span> <span class="token number">64</span> <span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token punctuation">,</span> fn<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><p>Selectors pre-create paths in a filter tree through which incoming events flow,
-for performance.</p>
-</article><article class="toggle-block block" toggleable="" id="off-selector-fn">
-                <h3 class="text-5 ">
-                    <a href="#off-selector-fn">
-                        <code class="language-js"><span class="token function">off</span><span class="token punctuation">(</span>selector<span class="token punctuation">,</span> fn<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Removes an event listener ‘fn’ from MIDI events matching object ‘selector’. Where
+<span class="token comment">// Call fn on CH4 CONTROL 1 0 events</span>
+<span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">{</span> channel<span class="token punctuation">:</span> <span class="token number">4</span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string">'control'</span><span class="token punctuation">,</span> name<span class="token punctuation">:</span> <span class="token string">'modulation'</span><span class="token punctuation">,</span> value<span class="token punctuation">:</span> <span class="token number">0</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> fn<span class="token punctuation">)</span></code></pre><p>Note that these selector properties are progressive. A selector may not have
+a <code>type</code> if it has no <code>channel</code>, it may not have a <code>name</code> without a <code>type</code>,
+and may not have a <code>value</code> without a <code>name</code> property. Selectors pre-create
+paths in a distribution tree that is optimised for incoming events to flow
+through.</p>
+<p>Finally, a selector may optionally have a property <code>port</code>, the id of an
+input port.</p>
+<pre><code><span class="token comment">// Call fn on CH4 CC 64 events from port '0123'</span>
+<span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">{</span> port<span class="token punctuation">:</span> <span class="token string">'0123'</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">:</span> <span class="token number">179</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">:</span> <span class="token number">64</span> <span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token punctuation">,</span> fn<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Call fn on CH4 CC 64 events from port '0123'</span>
+<span class="token function">on</span><span class="token punctuation">(</span><span class="token punctuation">{</span> port<span class="token punctuation">:</span> <span class="token string">'0123'</span><span class="token punctuation">,</span> channel<span class="token punctuation">:</span> <span class="token number">4</span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string">'control'</span><span class="token punctuation">,</span> name<span class="token punctuation">:</span> <span class="token number">64</span> <span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token punctuation">,</span> fn<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></article><article class="toggle-block block" toggleable="" id="off-selector-fn">
+            <h3 class="text-5 ">
+                <a href="#off-selector-fn">
+                    <code class="language-js"><span class="token function">off</span><span class="token punctuation">(</span>selector<span class="token punctuation">,</span> fn<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Removes an event listener ‘fn’ from MIDI events matching object ‘selector’. Where
 ‘fn’ is not given, removes all handlers from events matching the selector.</p>
 <pre><code><span class="token function">off</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'note'</span><span class="token punctuation">]</span><span class="token punctuation">,</span> fn<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></article><article class="toggle-block block" toggleable="" id="trigger-port-message">
-                <h3 class="text-5 ">
-                    <a href="#trigger-port-message">
-                        <code class="language-js"><span class="token function">trigger</span><span class="token punctuation">(</span>port<span class="token punctuation">,</span> message<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Simulates an incoming MIDI message and fires listeners with matching selectors.
+            <h3 class="text-5 ">
+                <a href="#trigger-port-message">
+                    <code class="language-js"><span class="token function">trigger</span><span class="token punctuation">(</span>port<span class="token punctuation">,</span> message<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Simulates an incoming MIDI event and fires listeners with matching selectors.
 Useful for debugging.</p>
-<pre><code><span class="token function">trigger</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token number">128</span><span class="token punctuation">,</span> <span class="token number">69</span><span class="token punctuation">,</span> <span class="token number">88</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></article><article class="toggle-block block" toggleable="" id="trigger-port-chan-type-param-value">
-                <h3 class="text-5 ">
-                    <a href="#trigger-port-chan-type-param-value">
-                        <code class="language-js"><span class="token function">trigger</span><span class="token punctuation">(</span>port<span class="token punctuation">,</span> chan<span class="token punctuation">,</span> type<span class="token punctuation">,</span> param<span class="token punctuation">,</span> value<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>As <code>trigger(port, message)</code>, where the last 4 parameters are passed to
+<pre><code><span class="token function">trigger</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token number">128</span><span class="token punctuation">,</span> <span class="token number">69</span><span class="token punctuation">,</span> <span class="token number">88</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></article><article class="toggle-block block" toggleable="" id="trigger-port-chan-type-name-value">
+            <h3 class="text-5 ">
+                <a href="#trigger-port-chan-type-name-value">
+                    <code class="language-js"><span class="token function">trigger</span><span class="token punctuation">(</span>port<span class="token punctuation">,</span> chan<span class="token punctuation">,</span> type<span class="token punctuation">,</span> name<span class="token punctuation">,</span> value<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>As <code>trigger(port, message)</code>, where the last 4 parameters are passed to
 <code>createMessage()</code> to create the MIDI message before triggering.</p>
 <pre><code><span class="token function">trigger</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'noteon'</span><span class="token punctuation">,</span> <span class="token string">'A4'</span><span class="token punctuation">,</span> <span class="token number">0.75</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></article>
+
         </section>
 
         <section class="grid-3">
             <h1 class="text-3">send</h1>
-            <!--article template-fn="docs:'./modules/midi.js?outputs,getOutput,send' each append:body"--><article class="toggle-block block" toggleable="" id="outputs">
-                <h3 class="text-5 ">
-                    <a href="#outputs">
-                        <code class="language-js"><span class="token function">outputs</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns the map of MIDI output ports from the underlying MIDIAccess object.</p>
+
+        <!--article--><article class="toggle-block block" toggleable="" id="outputs">
+            <h3 class="text-5 ">
+                <a href="#outputs">
+                    <code class="language-js"><span class="token function">outputs</span><span class="token punctuation">(</span><span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns the map of MIDI output ports from the underlying MIDIAccess object.</p>
 </article><article class="toggle-block block" toggleable="" id="getoutput-id">
-                <h3 class="text-5 ">
-                    <a href="#getoutput-id">
-                        <code class="language-js"><span class="token function">getOutput</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns an output port by id.</p>
+            <h3 class="text-5 ">
+                <a href="#getoutput-id">
+                    <code class="language-js"><span class="token function">getOutput</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns an output port by id.</p>
 </article><article class="toggle-block block" toggleable="" id="send-event">
-                <h3 class="text-5 ">
-                    <a href="#send-event">
-                        <code class="language-js"><span class="token function">send</span><span class="token punctuation">(</span>event<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Cues a message to be sent to an output port. The object <code>event</code> must have the
+            <h3 class="text-5 ">
+                <a href="#send-event">
+                    <code class="language-js"><span class="token function">send</span><span class="token punctuation">(</span>event<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Cues a message to be sent to an output port. The object <code>event</code> must have the
 same structure as an incoming MIDI event object:</p>
 <pre><code><span class="token function">send</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
     target<span class="token punctuation">:</span>    <span class="token comment">// a MIDI output port</span>
@@ -188,318 +216,370 @@ same structure as an incoming MIDI event object:</p>
     data<span class="token punctuation">:</span>      <span class="token comment">// a MIDI message</span>
 <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><p>If <code>timeStamp</code> is in the past the message is sent immediately.</p>
 </article><article class="toggle-block block" toggleable="" id="send-time-port-message">
-                <h3 class="text-5 ">
-                    <a href="#send-time-port-message">
-                        <code class="language-js"><span class="token function">send</span><span class="token punctuation">(</span>time<span class="token punctuation">,</span> port<span class="token punctuation">,</span> message<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Cues a <code>message</code> to be sent to an output <code>port</code>. Where <code>time</code> is in the past
+            <h3 class="text-5 ">
+                <a href="#send-time-port-message">
+                    <code class="language-js"><span class="token function">send</span><span class="token punctuation">(</span>time<span class="token punctuation">,</span> port<span class="token punctuation">,</span> message<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Cues a <code>message</code> to be sent to an output <code>port</code>. Where <code>time</code> is in the past
 the message is sent immediately. <code>port</code> may be a MIDI output port or the
 id of a MIDI output port.</p>
-<pre><code><span class="token function">send</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">'id'</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token number">144</span><span class="token punctuation">,</span> <span class="token number">69</span><span class="token punctuation">,</span> <span class="token number">96</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></article><article class="toggle-block block" toggleable="" id="send-time-port-chan-type-param-value">
-                <h3 class="text-5 ">
-                    <a href="#send-time-port-chan-type-param-value">
-                        <code class="language-js"><span class="token function">send</span><span class="token punctuation">(</span>time<span class="token punctuation">,</span> port<span class="token punctuation">,</span> chan<span class="token punctuation">,</span> type<span class="token punctuation">,</span> param<span class="token punctuation">,</span> value<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Like <code>send(time, port, message)</code>, but the last 4 parameters are passed to
+<pre><code><span class="token function">send</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">'id'</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token number">144</span><span class="token punctuation">,</span> <span class="token number">69</span><span class="token punctuation">,</span> <span class="token number">96</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></article><article class="toggle-block block" toggleable="" id="send-time-port-chan-type-name-value">
+            <h3 class="text-5 ">
+                <a href="#send-time-port-chan-type-name-value">
+                    <code class="language-js"><span class="token function">send</span><span class="token punctuation">(</span>time<span class="token punctuation">,</span> port<span class="token punctuation">,</span> chan<span class="token punctuation">,</span> type<span class="token punctuation">,</span> name<span class="token punctuation">,</span> value<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Like <code>send(time, port, message)</code>, but the last 4 parameters are passed to
 <code>createMessage()</code> to create the MIDI message before sending.</p>
 <pre><code><span class="token function">send</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">'id'</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'noteon'</span><span class="token punctuation">,</span> <span class="token string">'A4'</span><span class="token punctuation">,</span> <span class="token number">0.75</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></article>
+
         </section>
 
         <section class="grid-4">
             <h1 class="text-3">messages</h1>
-            <!--article template-fn="docs:'./modules/messages.js' each append:body"--><article class="toggle-block doc-block block" toggleable="" id="createmessage-chan-type-param-value">
-                <h3 class="text-5 ">
-                    <a href="#createmessage-chan-type-param-value">
-                        <code class="language-js"><span class="token function">createMessage</span><span class="token punctuation">(</span>chan<span class="token punctuation">,</span> type<span class="token punctuation">,</span> param<span class="token punctuation">,</span> value<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Creates a MIDI message – a Uint8Array of three values – where channel <code>chan</code> is an
+
+        <!--article--><article class="toggle-block block" toggleable="" id="createmessage-channel-type-name-value">
+            <h3 class="text-5 ">
+                <a href="#createmessage-channel-type-name-value">
+                    <code class="language-js"><span class="token function">createMessage</span><span class="token punctuation">(</span>channel<span class="token punctuation">,</span> type<span class="token punctuation">,</span> name<span class="token punctuation">,</span> value<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Creates a MIDI message – a Uint8Array of three values – where <code>channel</code> is an
 integer in the range <code>1</code>-<code>16</code> and <code>type</code> is a string that determines the meaning
-of <code>param</code> and <code>value</code>…</p>
-<h4 id="create-type-noteon-or-noteoff-">Create type <code>'noteon'</code> or <code>'noteoff'</code>:</h4>
+of <code>name</code> and <code>value</code>…</p>
+<h4 id="for-type-noteon-or-noteoff-">for type <code>'noteon'</code> or <code>'noteoff'</code>:</h4>
 <ul>
-<li><code>param</code>: an integer in the range <code>0</code>-<code>127</code>, or a note name string eg. <code>'Eb4'</code>.</li>
+<li><code>name</code>: an integer in the range <code>0</code>-<code>127</code>, or a note name string eg. <code>'Eb4'</code>.</li>
 <li><code>value</code>: a float in the range <code>0</code>-<code>1</code> representing velocity.</li>
 </ul>
-<pre><code><span class="token function">createMessage</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'noteon'</span><span class="token punctuation">,</span> <span class="token string">'C3'</span><span class="token punctuation">,</span> <span class="token number">0.75</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><h4 id="create-type-control-">Create type <code>'control'</code>:</h4>
+<pre><code><span class="token function">createMessage</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'noteon'</span><span class="token punctuation">,</span> <span class="token string">'C3'</span><span class="token punctuation">,</span> <span class="token number">0.75</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><h4 id="for-type-control-">for type <code>'control'</code>:</h4>
 <ul>
-<li><code>param</code>: an integer in the range <code>0</code>-<code>127</code>, or a control name string eg. <code>'modulation'</code>.</li>
+<li><code>name</code>: an integer in the range <code>0</code>-<code>127</code>, or a control name string eg. <code>'modulation'</code>.</li>
 <li><code>value</code>: a float in the range <code>0</code>-<code>1</code> representing control value.</li>
 </ul>
-<pre><code><span class="token function">createMessage</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'control'</span><span class="token punctuation">,</span> <span class="token string">'modulation'</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><h4 id="create-type-pitch-">Create type <code>'pitch'</code>:</h4>
+<pre><code><span class="token function">createMessage</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'control'</span><span class="token punctuation">,</span> <span class="token string">'modulation'</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><h4 id="for-type-pitch-">for type <code>'pitch'</code>:</h4>
 <ul>
-<li><code>param</code>: a bend range in semitones.</li>
+<li><code>name</code>: a bend range in semitones.</li>
 <li><code>value</code>: a positive or negative float within that range representing a pitch
 bend in semitones.</li>
 </ul>
-<pre><code><span class="token function">createMessage</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'pitch'</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">0.25</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><h4 id="create-type-polytouch-">Create type <code>'polytouch'</code>:</h4>
+<pre><code><span class="token function">createMessage</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'pitch'</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">0.25</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><h4 id="for-type-polytouch-">for type <code>'polytouch'</code>:</h4>
 <ul>
-<li><code>param</code>: an integer in the range <code>0</code>-<code>127</code>, or a note name string eg. <code>'Eb4'</code>.</li>
+<li><code>name</code>: an integer in the range <code>0</code>-<code>127</code>, or a note name string eg. <code>'Eb4'</code>.</li>
 <li><code>value</code>: a float in the range <code>0</code>-<code>1</code> representing force.</li>
 </ul>
-<pre><code><span class="token function">createMessage</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'polytouch'</span><span class="token punctuation">,</span> <span class="token string">'C3'</span><span class="token punctuation">,</span> <span class="token number">0.25</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><h4 id="create-type-channeltouch-">Create type <code>'channeltouch'</code>:</h4>
+<pre><code><span class="token function">createMessage</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'polytouch'</span><span class="token punctuation">,</span> <span class="token string">'C3'</span><span class="token punctuation">,</span> <span class="token number">0.25</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><h4 id="for-type-channeltouch-">for type <code>'channeltouch'</code>:</h4>
 <ul>
-<li><code>param</code>: an integer in the range <code>0</code>-<code>1</code>.</li>
+<li><code>name</code>: an integer in the range <code>0</code>-<code>1</code>.</li>
 <li><code>value</code>: unused.</li>
 </ul>
-<pre><code><span class="token function">createMessage</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'channeltouch'</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><h4 id="create-type-program-">Create type <code>'program'</code>:</h4>
+<pre><code><span class="token function">createMessage</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'channeltouch'</span><span class="token punctuation">,</span> <span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><h4 id="for-type-program-">for type <code>'program'</code>:</h4>
 <ul>
-<li><code>param</code>: an integer in the range <code>0</code>-<code>127</code>.</li>
+<li><code>name</code>: an integer in the range <code>0</code>-<code>127</code>.</li>
 <li><code>value</code>: unused.</li>
 </ul>
-<pre><code><span class="token function">createMessage</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'program'</span><span class="token punctuation">,</span> <span class="token number">24</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></article><article class="toggle-block doc-block block" toggleable="" id="iscontrol-message">
-                <h3 class="text-5 ">
-                    <a href="#iscontrol-message">
-                        <code class="language-js"><span class="token function">isControl</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns <code>true</code> if message is a control change, otherwise <code>false</code>.</p>
-<pre><code><span class="token function">isControl</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">145</span><span class="token punctuation">,</span><span class="token number">80</span><span class="token punctuation">,</span><span class="token number">20</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>       <span class="token comment">// false</span></code></pre></article><article class="toggle-block doc-block block" toggleable="" id="isnote-message">
-                <h3 class="text-5 ">
-                    <a href="#isnote-message">
-                        <code class="language-js"><span class="token function">isNote</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns <code>true</code> where message is a noteon or noteoff, otherwise <code>false</code>.</p>
-<pre><code><span class="token function">isNote</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">145</span><span class="token punctuation">,</span><span class="token number">80</span><span class="token punctuation">,</span><span class="token number">20</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>           <span class="token comment">// true</span></code></pre></article><article class="toggle-block doc-block block" toggleable="" id="ispitch-message">
-                <h3 class="text-5 ">
-                    <a href="#ispitch-message">
-                        <code class="language-js"><span class="token function">isPitch</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns <code>true</code> message is a pitch bend, otherwise <code>false</code>.</p>
-<pre><code><span class="token function">isPitch</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">145</span><span class="token punctuation">,</span><span class="token number">80</span><span class="token punctuation">,</span><span class="token number">20</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>          <span class="token comment">// false</span></code></pre></article><article class="toggle-block doc-block block" toggleable="" id="normalise-message">
-                <h3 class="text-5 ">
-                    <a href="#normalise-message">
-                        <code class="language-js"><span class="token function">normalise</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Many keyboards transmit <code>'noteon'</code> with velocity <code>0</code> rather than <code>'noteoff'</code>
+<pre><code><span class="token function">createMessage</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'program'</span><span class="token punctuation">,</span> <span class="token number">24</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></article><article class="toggle-block block" toggleable="" id="iscontrol-message">
+            <h3 class="text-5 ">
+                <a href="#iscontrol-message">
+                    <code class="language-js"><span class="token function">isControl</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns <code>true</code> if message is a control change, otherwise <code>false</code>.</p>
+<pre><code><span class="token function">isControl</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">145</span><span class="token punctuation">,</span><span class="token number">80</span><span class="token punctuation">,</span><span class="token number">20</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>       <span class="token comment">// false</span></code></pre></article><article class="toggle-block block" toggleable="" id="isnote-message">
+            <h3 class="text-5 ">
+                <a href="#isnote-message">
+                    <code class="language-js"><span class="token function">isNote</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns <code>true</code> where message is a noteon or noteoff, otherwise <code>false</code>.</p>
+<pre><code><span class="token function">isNote</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">145</span><span class="token punctuation">,</span><span class="token number">80</span><span class="token punctuation">,</span><span class="token number">20</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>           <span class="token comment">// true</span></code></pre></article><article class="toggle-block block" toggleable="" id="ispitch-message">
+            <h3 class="text-5 ">
+                <a href="#ispitch-message">
+                    <code class="language-js"><span class="token function">isPitch</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns <code>true</code> message is a pitch bend, otherwise <code>false</code>.</p>
+<pre><code><span class="token function">isPitch</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">145</span><span class="token punctuation">,</span><span class="token number">80</span><span class="token punctuation">,</span><span class="token number">20</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>          <span class="token comment">// false</span></code></pre></article><article class="toggle-block block" toggleable="" id="normalise-message">
+            <h3 class="text-5 ">
+                <a href="#normalise-message">
+                    <code class="language-js"><span class="token function">normalise</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Many keyboards transmit <code>'noteon'</code> with velocity <code>0</code> rather than <code>'noteoff'</code>
 messages. This is because MIDI allows messages with the same type to be sent
 together, omitting the status byte and saving bandwidth. The MIDI spec requires
 that both forms are treated identically. <code>normalise()</code> <em>mutates</em>
 <code>'noteon'</code> messages with velocity <code>0</code> to <code>'noteoff'</code> messages.</p>
 <pre><code><span class="token function">normalise</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">145</span><span class="token punctuation">,</span><span class="token number">80</span><span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// [129,80,0]</span></code></pre><p>Note that the MIDI library automatically normalises incoming messages.</p>
-</article><article class="toggle-block doc-block block" toggleable="" id="tochannel-message">
-                <h3 class="text-5 ">
-                    <a href="#tochannel-message">
-                        <code class="language-js"><span class="token function">toChannel</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns the MIDI channel as a number between <code>1</code> and <code>16</code>.</p>
-<pre><code><span class="token function">toChannel</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">145</span><span class="token punctuation">,</span><span class="token number">80</span><span class="token punctuation">,</span><span class="token number">20</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>       <span class="token comment">// 2</span></code></pre></article><article class="toggle-block doc-block block" toggleable="" id="totype-message">
-                <h3 class="text-5 ">
-                    <a href="#totype-message">
-                        <code class="language-js"><span class="token function">toType</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns message type as one of the strings <code>'noteoff'</code>, <code>'noteon'</code>, <code>'polytouch'</code>,
-<code>'control'</code>, <code>'program'</code>, <code>'channeltouch'</code> or <code>'pitch'</code>.</p>
-<pre><code><span class="token function">toType</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">145</span><span class="token punctuation">,</span><span class="token number">80</span><span class="token punctuation">,</span><span class="token number">20</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>          <span class="token comment">// 'noteon'.</span></code></pre></article>
+</article>
+
         </section>
 
         <section class="grid-5">
             <h1 class="text-3">data</h1>
-            <!--article template-fn="docs:'./modules/data.js' each append: body"--><article class="toggle-block block" toggleable="" id="controltonumber-name">
-                <h3 class="text-5 ">
-                    <a href="#controltonumber-name">
-                        <code class="language-js"><span class="token function">controlToNumber</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns a value in the range <code>0</code>-<code>127</code> from a shorthand controller <code>name</code>.</p>
-<pre><code><span class="token function">controlToNumber</span><span class="token punctuation">(</span><span class="token string">'volume'</span><span class="token punctuation">)</span>   <span class="token comment">// 7</span>
-<span class="token function">controlToNumber</span><span class="token punctuation">(</span><span class="token string">'sustain'</span><span class="token punctuation">)</span>  <span class="token comment">// 64</span>
-<span class="token function">controlToNumber</span><span class="token punctuation">(</span><span class="token string">'98'</span><span class="token punctuation">)</span>       <span class="token comment">// 98</span></code></pre></article><article class="toggle-block block" toggleable="" id="frequencytonumber-reffreq-freq">
-                <h3 class="text-5 ">
-                    <a href="#frequencytonumber-reffreq-freq">
-                        <code class="language-js"><span class="token function">frequencyToNumber</span><span class="token punctuation">(</span>refFreq<span class="token punctuation">,</span> freq<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns <code>freq</code> as a float on the note number scale. <code>refFreq</code> is a reference
+
+        <!--article--><article class="toggle-block block" toggleable="" id="floattofrequency-ref-n">
+            <h3 class="text-5 ">
+                <a href="#floattofrequency-ref-n">
+                    <code class="language-js"><span class="token function">floatToFrequency</span><span class="token punctuation">(</span>ref<span class="token punctuation">,</span> n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Given a note number <code>n</code>, returns the frequency of the fundamental tone of that
+note. <code>ref</code> is a reference frequency for middle A4/69 (usually <code>440</code>).</p>
+<pre><code><span class="token function">floatToFrequency</span><span class="token punctuation">(</span><span class="token number">440</span><span class="token punctuation">,</span> <span class="token number">69</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 440</span>
+<span class="token function">floatToFrequency</span><span class="token punctuation">(</span><span class="token number">440</span><span class="token punctuation">,</span> <span class="token number">60</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 261.625565</span>
+<span class="token function">floatToFrequency</span><span class="token punctuation">(</span><span class="token number">442</span><span class="token punctuation">,</span> <span class="token number">69</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 442</span>
+<span class="token function">floatToFrequency</span><span class="token punctuation">(</span><span class="token number">442</span><span class="token punctuation">,</span> <span class="token number">60</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 262.814772</span></code></pre></article><article class="toggle-block block" toggleable="" id="frequencytofloat-ref-frequency">
+            <h3 class="text-5 ">
+                <a href="#frequencytofloat-ref-frequency">
+                    <code class="language-js"><span class="token function">frequencyToFloat</span><span class="token punctuation">(</span>ref<span class="token punctuation">,</span> frequency<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns <code>frequency</code> as a float on the note number scale. <code>ref</code> is a reference
 frequency for middle A4/69 (usually <code>440</code>).</p>
-<pre><code><span class="token function">frequencyToNumber</span><span class="token punctuation">(</span><span class="token number">440</span><span class="token punctuation">,</span> <span class="token number">220</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 57 (A3)</span>
-<span class="token function">frequencyToNumber</span><span class="token punctuation">(</span><span class="token number">440</span><span class="token punctuation">,</span> <span class="token number">110</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 45 (A2)</span></code></pre><p>Accuracy is limited to a 0.000001 semitones to prevent floating point
-rounding errors screwing up round-trip calculations.</p>
-</article><article class="toggle-block block" toggleable="" id="normalisenote-name">
-                <h3 class="text-5 ">
-                    <a href="#normalisenote-name">
-                        <code class="language-js"><span class="token function">normaliseNote</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Replaces the characters <code>'b'</code> and <code>'#'</code> with the unicode musical characters <code>'♭'</code>
+<pre><code><span class="token function">frequencyToFloat</span><span class="token punctuation">(</span><span class="token number">440</span><span class="token punctuation">,</span> <span class="token number">220</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 57 (A3)</span>
+<span class="token function">frequencyToFloat</span><span class="token punctuation">(</span><span class="token number">440</span><span class="token punctuation">,</span> <span class="token number">110</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 45 (A2)</span></code></pre><p>Output is rounded to 32 bits to mitigate floating point rounding errors.</p>
+</article><article class="toggle-block block" toggleable="" id="normalisenotename-name">
+            <h3 class="text-5 ">
+                <a href="#normalisenotename-name">
+                    <code class="language-js"><span class="token function">normaliseNoteName</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Replaces the characters <code>'b'</code> and <code>'#'</code> with the unicode musical characters <code>'♭'</code>
 and <code>'♯'</code> respectively.</p>
-<pre><code><span class="token function">normaliseNote</span><span class="token punctuation">(</span><span class="token string">'Eb6'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// 'E♭6'</span></code></pre></article><article class="toggle-block block" toggleable="" id="notetonumber-name">
-                <h3 class="text-5 ">
-                    <a href="#notetonumber-name">
-                        <code class="language-js"><span class="token function">noteToNumber</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Given a note name, returns a value in the range 0-127.</p>
-<pre><code><span class="token function">noteToNumber</span><span class="token punctuation">(</span><span class="token string">'D6'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>     <span class="token comment">// 86</span></code></pre></article><article class="toggle-block block" toggleable="" id="numbertocontrol-n">
-                <h3 class="text-5 ">
-                    <a href="#numbertocontrol-n">
-                        <code class="language-js"><span class="token function">numberToControl</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns a shorthand controller name from a value in the range <code>0</code>-<code>127</code>. Not all
+<pre><code><span class="token function">normaliseNoteName</span><span class="token punctuation">(</span><span class="token string">'Eb6'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// 'E♭6'</span></code></pre></article><article class="toggle-block block" toggleable="" id="tocontrolname-n">
+            <h3 class="text-5 ">
+                <a href="#tocontrolname-n">
+                    <code class="language-js"><span class="token function">toControlName</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns a shorthand controller name from a value in the range <code>0</code>-<code>127</code>. Not all
 contollers have a standardised name, and this library implements only the
 more common ones. Where a name is not found, returns the controller number as a
 string.</p>
-<pre><code><span class="token function">numberToControl</span><span class="token punctuation">(</span><span class="token number">7</span><span class="token punctuation">)</span><span class="token punctuation">;</span>       <span class="token comment">// 'volume'</span>
-<span class="token function">numberToControl</span><span class="token punctuation">(</span><span class="token number">64</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// 'sustain'</span>
-<span class="token function">numberToControl</span><span class="token punctuation">(</span><span class="token number">98</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// '98'</span></code></pre><p>Standardised controller names are defined at
+<pre><code><span class="token function">toControlName</span><span class="token punctuation">(</span><span class="token number">7</span><span class="token punctuation">)</span><span class="token punctuation">;</span>       <span class="token comment">// 'volume'</span>
+<span class="token function">toControlName</span><span class="token punctuation">(</span><span class="token number">64</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// 'sustain'</span>
+<span class="token function">toControlName</span><span class="token punctuation">(</span><span class="token number">98</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// '98'</span></code></pre><p>Standardised controller names are defined at
 <a href="https://www.midi.org/specifications-old/item/table-3-control-change-messages-data-bytes-2">midi.org/specifications-old/</a>.</p>
-</article><article class="toggle-block block" toggleable="" id="numbertofrequency-reffreq-n">
-                <h3 class="text-5 ">
-                    <a href="#numbertofrequency-reffreq-n">
-                        <code class="language-js"><span class="token function">numberToFrequency</span><span class="token punctuation">(</span>refFreq<span class="token punctuation">,</span> n<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Given a note number <code>n</code>, returns the frequency of the fundamental tone of that
-note. <code>refFreq</code> is a reference frequency for middle A4/69 (usually <code>440</code>).</p>
-<pre><code><span class="token function">numberToFrequency</span><span class="token punctuation">(</span><span class="token number">440</span><span class="token punctuation">,</span> <span class="token number">69</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 440</span>
-<span class="token function">numberToFrequency</span><span class="token punctuation">(</span><span class="token number">440</span><span class="token punctuation">,</span> <span class="token number">60</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 261.625565</span>
-<span class="token function">numberToFrequency</span><span class="token punctuation">(</span><span class="token number">442</span><span class="token punctuation">,</span> <span class="token number">69</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 442</span>
-<span class="token function">numberToFrequency</span><span class="token punctuation">(</span><span class="token number">442</span><span class="token punctuation">,</span> <span class="token number">60</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 262.814772</span></code></pre></article><article class="toggle-block block" toggleable="" id="numbertonote-n">
-                <h3 class="text-5 ">
-                    <a href="#numbertonote-n">
-                        <code class="language-js"><span class="token function">numberToNote</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns note name from a value in the range 0-127.</p>
-<pre><code><span class="token function">numberToNote</span><span class="token punctuation">(</span><span class="token number">69</span><span class="token punctuation">)</span><span class="token punctuation">;</span>       <span class="token comment">// 'A4'</span></code></pre></article><article class="toggle-block block" toggleable="" id="numbertooctave-n">
-                <h3 class="text-5 ">
-                    <a href="#numbertooctave-n">
-                        <code class="language-js"><span class="token function">numberToOctave</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Where <code>n</code> is a note number, returns the numerical octave.</p>
-<pre><code><span class="token function">numberToOctave</span><span class="token punctuation">(</span><span class="token number">69</span><span class="token punctuation">)</span><span class="token punctuation">;</span>     <span class="token comment">// 4</span></code></pre></article><article class="toggle-block block" toggleable="" id="tostatus-channel-type">
-                <h3 class="text-5 ">
-                    <a href="#tostatus-channel-type">
-                        <code class="language-js"><span class="token function">toStatus</span><span class="token punctuation">(</span>channel<span class="token punctuation">,</span> type<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Given a <code>channel</code> in the range <code>1</code>-<code>16</code> and type, returns the MIDI message
+</article><article class="toggle-block block" toggleable="" id="tocontrolnumber-name">
+            <h3 class="text-5 ">
+                <a href="#tocontrolnumber-name">
+                    <code class="language-js"><span class="token function">toControlNumber</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns a value in the range <code>0</code>-<code>127</code> from a shorthand controller <code>name</code>.</p>
+<pre><code><span class="token function">toControlNumber</span><span class="token punctuation">(</span><span class="token string">'volume'</span><span class="token punctuation">)</span>   <span class="token comment">// 7</span>
+<span class="token function">toControlNumber</span><span class="token punctuation">(</span><span class="token string">'sustain'</span><span class="token punctuation">)</span>  <span class="token comment">// 64</span>
+<span class="token function">toControlNumber</span><span class="token punctuation">(</span><span class="token string">'98'</span><span class="token punctuation">)</span>       <span class="token comment">// 98</span></code></pre></article><article class="toggle-block block" toggleable="" id="tonotename-n">
+            <h3 class="text-5 ">
+                <a href="#tonotename-n">
+                    <code class="language-js"><span class="token function">toNoteName</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns note name from a value in the range 0-127.</p>
+<pre><code><span class="token function">toNoteName</span><span class="token punctuation">(</span><span class="token number">69</span><span class="token punctuation">)</span><span class="token punctuation">;</span>       <span class="token comment">// 'A4'</span></code></pre></article><article class="toggle-block block" toggleable="" id="tonotenumber-name">
+            <h3 class="text-5 ">
+                <a href="#tonotenumber-name">
+                    <code class="language-js"><span class="token function">toNoteNumber</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Given a note name, returns a value in the range 0-127.</p>
+<pre><code><span class="token function">toNoteNumber</span><span class="token punctuation">(</span><span class="token string">'D6'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>     <span class="token comment">// 86</span></code></pre></article><article class="toggle-block block" toggleable="" id="tonoteoctave-n">
+            <h3 class="text-5 ">
+                <a href="#tonoteoctave-n">
+                    <code class="language-js"><span class="token function">toNoteOctave</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Where <code>n</code> is a note number, returns the numerical octave.</p>
+<pre><code><span class="token function">toNoteOctave</span><span class="token punctuation">(</span><span class="token number">69</span><span class="token punctuation">)</span><span class="token punctuation">;</span>     <span class="token comment">// 4</span></code></pre></article><article class="toggle-block block" toggleable="" id="tostatus-channel-type">
+            <h3 class="text-5 ">
+                <a href="#tostatus-channel-type">
+                    <code class="language-js"><span class="token function">toStatus</span><span class="token punctuation">(</span>channel<span class="token punctuation">,</span> type<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Given a <code>channel</code> in the range <code>1</code>-<code>16</code> and type, returns the MIDI message
 status byte.</p>
 <pre><code><span class="token function">toStatus</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'noteon'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// 144</span>
-<span class="token function">toStatus</span><span class="token punctuation">(</span><span class="token number">7</span><span class="token punctuation">,</span> <span class="token string">'control'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>     <span class="token comment">// 183</span></code></pre></article>
+<span class="token function">toStatus</span><span class="token punctuation">(</span><span class="token number">7</span><span class="token punctuation">,</span> <span class="token string">'control'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>     <span class="token comment">// 183</span></code></pre></article><article class="toggle-block block" toggleable="" id="tochannel-status">
+            <h3 class="text-5 ">
+                <a href="#tochannel-status">
+                    <code class="language-js"><span class="token function">toChannel</span><span class="token punctuation">(</span>status<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns the MIDI channel as a number between <code>1</code> and <code>16</code>.</p>
+<pre><code><span class="token function">toChannel</span><span class="token punctuation">(</span><span class="token number">145</span><span class="token punctuation">)</span><span class="token punctuation">;</span>       <span class="token comment">// 2</span></code></pre></article><article class="toggle-block block" toggleable="" id="totype-status">
+            <h3 class="text-5 ">
+                <a href="#totype-status">
+                    <code class="language-js"><span class="token function">toType</span><span class="token punctuation">(</span>status<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns message type as one of the strings <code>'noteoff'</code>, <code>'noteon'</code>, <code>'polytouch'</code>,
+<code>'control'</code>, <code>'program'</code>, <code>'channeltouch'</code> or <code>'pitch'</code>.</p>
+<pre><code><span class="token function">toType</span><span class="token punctuation">(</span><span class="token number">145</span><span class="token punctuation">)</span><span class="token punctuation">;</span>          <span class="token comment">// 'noteon'.</span></code></pre></article>
+
         </section>
 
         <section class="grid-6">
             <h1 class="text-3">maths</h1>
-            <!--article template-fn="docs:'./modules/maths.js' each append:body"--><article class="toggle-block block" toggleable="" id="bytestoint14-lsb-msb">
-                <h3 class="text-5 ">
-                    <a href="#bytestoint14-lsb-msb">
-                        <code class="language-js"><span class="token function">bytesToInt14</span><span class="token punctuation">(</span>lsb<span class="token punctuation">,</span> msb<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Given two 7-bit values for <code>lsb</code> (least significant byte) and <code>msb</code> (most
+
+        <!--article--><article class="toggle-block block" toggleable="" id="bytestoint14-lsb-msb">
+            <h3 class="text-5 ">
+                <a href="#bytestoint14-lsb-msb">
+                    <code class="language-js"><span class="token function">bytesToInt14</span><span class="token punctuation">(</span>lsb<span class="token punctuation">,</span> msb<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Given two 7-bit values for <code>lsb</code> (least significant byte) and <code>msb</code> (most
 significant byte), returns a 14-bit integer in the range <code>0</code>-<code>16383</code>.</p>
 <pre><code><span class="token function">bytesToInt14</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">64</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// 8192</span></code></pre></article><article class="toggle-block block" toggleable="" id="bytestosignedfloat-lsb-msb">
-                <h3 class="text-5 ">
-                    <a href="#bytestosignedfloat-lsb-msb">
-                        <code class="language-js"><span class="token function">bytesToSignedFloat</span><span class="token punctuation">(</span>lsb<span class="token punctuation">,</span> msb<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Given two 7-bit values for <code>lsb</code> (least significant byte) and <code>msb</code> (most
+            <h3 class="text-5 ">
+                <a href="#bytestosignedfloat-lsb-msb">
+                    <code class="language-js"><span class="token function">bytesToSignedFloat</span><span class="token punctuation">(</span>lsb<span class="token punctuation">,</span> msb<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Given two 7-bit values for <code>lsb</code> (least significant byte) and <code>msb</code> (most
 significant byte), returns a float in the range <code>-1</code>-<code>1</code>.</p>
 <pre><code><span class="token function">bytesToSignedFloat</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">64</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// 0</span></code></pre></article><article class="toggle-block block" toggleable="" id="floattoint7-n">
-                <h3 class="text-5 ">
-                    <a href="#floattoint7-n">
-                        <code class="language-js"><span class="token function">floatToInt7</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns an integer in the 7-bit range <code>0</code>-<code>127</code> for values of <code>n</code> between <code>0</code>-<code>1</code>.
+            <h3 class="text-5 ">
+                <a href="#floattoint7-n">
+                    <code class="language-js"><span class="token function">floatToInt7</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns an integer in the 7-bit range <code>0</code>-<code>127</code> for values of <code>n</code> between <code>0</code>-<code>1</code>.
 Values lower than <code>0</code> return <code>0</code>, while values greater than <code>1</code> return <code>127</code>.</p>
 <pre><code><span class="token function">floatToInt7</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// 64</span></code></pre></article><article class="toggle-block block" toggleable="" id="floattoint14-n">
-                <h3 class="text-5 ">
-                    <a href="#floattoint14-n">
-                        <code class="language-js"><span class="token function">floatToInt14</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns an integer in the 14-bit range <code>0</code>-<code>16383</code> for values of <code>n</code> between <code>0</code>-<code>1</code>.
+            <h3 class="text-5 ">
+                <a href="#floattoint14-n">
+                    <code class="language-js"><span class="token function">floatToInt14</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns an integer in the 14-bit range <code>0</code>-<code>16383</code> for values of <code>n</code> between <code>0</code>-<code>1</code>.
 Values lower than <code>0</code> return <code>0</code>, while values greater than <code>1</code> return <code>16383</code>.</p>
 <pre><code><span class="token function">floatToInt14</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// 8192</span></code></pre></article><article class="toggle-block block" toggleable="" id="int7tofloat-n">
-                <h3 class="text-5 ">
-                    <a href="#int7tofloat-n">
-                        <code class="language-js"><span class="token function">int7ToFloat</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns a float in the range <code>0</code>-<code>1</code> for values of <code>n</code> in the range <code>0</code>-<code>16383</code>.</p>
-<pre><code><span class="token function">int7ToFloat</span><span class="token punctuation">(</span><span class="token number">64</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// 0.503937</span></code></pre></article><article class="toggle-block block" toggleable="" id="int7tosignedfloat-n">
-                <h3 class="text-5 ">
-                    <a href="#int7tosignedfloat-n">
-                        <code class="language-js"><span class="token function">int7ToSignedFloat</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns a float in the range <code>-1</code>-<code>1</code> for values of <code>n</code> in the range <code>0</code>-<code>127</code>.
+            <h3 class="text-5 ">
+                <a href="#int7tofloat-n">
+                    <code class="language-js"><span class="token function">int7ToFloat</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns a float in the range <code>0</code>-<code>1</code> for values of <code>n</code> in the range <code>0</code>-<code>127</code>.</p>
+<pre><code><span class="token function">int7ToFloat</span><span class="token punctuation">(</span><span class="token number">64</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// 0.503937</span></code></pre></article><article class="toggle-block block" toggleable="" id="int7toweightedfloat-n">
+            <h3 class="text-5 ">
+                <a href="#int7toweightedfloat-n">
+                    <code class="language-js"><span class="token function">int7ToWeightedFloat</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns a float in the range <code>0</code>-<code>1</code> for values of <code>n</code> in the range <code>0</code>-<code>127</code>.
+The input integer is mapped so that the value <code>64</code> returns exactly <code>0.5</code>, the
+centre of the range, as per the MIDI spec for controller values and their ilk.</p>
+<pre><code><span class="token function">int7ToSignedFloat</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment">// 0</span>
+<span class="token function">int7ToSignedFloat</span><span class="token punctuation">(</span><span class="token number">64</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// 0.5</span>
+<span class="token function">int7ToSignedFloat</span><span class="token punctuation">(</span><span class="token number">127</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 1</span></code></pre></article><article class="toggle-block block" toggleable="" id="int7tosignedfloat-n">
+            <h3 class="text-5 ">
+                <a href="#int7tosignedfloat-n">
+                    <code class="language-js"><span class="token function">int7ToSignedFloat</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns a float in the range <code>-1</code>-<code>1</code> for values of <code>n</code> in the range <code>0</code>-<code>127</code>.
 The input integer is mapped so that the value <code>64</code> returns <code>0</code>, the centre of
-the range, as per the MIDI spec for modulation controller values and their ilk.</p>
+the range, as per the MIDI spec for controller values and their ilk.</p>
 <pre><code><span class="token function">int7ToSignedFloat</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment">// -1</span>
 <span class="token function">int7ToSignedFloat</span><span class="token punctuation">(</span><span class="token number">64</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// 0</span>
 <span class="token function">int7ToSignedFloat</span><span class="token punctuation">(</span><span class="token number">127</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 1</span></code></pre></article><article class="toggle-block block" toggleable="" id="int14tofloat-n">
-                <h3 class="text-5 ">
-                    <a href="#int14tofloat-n">
-                        <code class="language-js"><span class="token function">int14ToFloat</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns a float in the range <code>0</code>-<code>1</code> for values of <code>n</code> in the range <code>0</code>-<code>16383</code>.</p>
-<pre><code><span class="token function">int14ToFloat</span><span class="token punctuation">(</span><span class="token number">8192</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// 0.500031</span></code></pre></article><article class="toggle-block block" toggleable="" id="int14tosignedfloat-n">
-                <h3 class="text-5 ">
-                    <a href="#int14tosignedfloat-n">
-                        <code class="language-js"><span class="token function">int14ToSignedFloat</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns a float in the range <code>-1</code>-<code>1</code> for values of <code>n</code> in the range <code>0</code>-<code>16383</code>.
+            <h3 class="text-5 ">
+                <a href="#int14tofloat-n">
+                    <code class="language-js"><span class="token function">int14ToFloat</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns a float in the range <code>0</code>-<code>1</code> for values of <code>n</code> in the range <code>0</code>-<code>16383</code>.</p>
+<pre><code><span class="token function">int14ToFloat</span><span class="token punctuation">(</span><span class="token number">8192</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// 0.500031</span></code></pre></article><article class="toggle-block block" toggleable="" id="int14toweightedfloat-n">
+            <h3 class="text-5 ">
+                <a href="#int14toweightedfloat-n">
+                    <code class="language-js"><span class="token function">int14ToWeightedFloat</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns a float in the range <code>0</code>-<code>1</code> for values of <code>n</code> in the range <code>0</code>-<code>16383</code>.
+The input integer is mapped so that the value <code>8192</code> returns <code>0.5</code>, the centre of
+the range, as per the MIDI spec for pitch bend values and their ilk.</p>
+<pre><code><span class="token function">int14ToWeightedFloat</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// 0</span>
+<span class="token function">int14ToWeightedFloat</span><span class="token punctuation">(</span><span class="token number">8192</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// 0.5</span>
+<span class="token function">int14ToWeightedFloat</span><span class="token punctuation">(</span><span class="token number">16383</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 1</span></code></pre></article><article class="toggle-block block" toggleable="" id="int14tosignedfloat-n">
+            <h3 class="text-5 ">
+                <a href="#int14tosignedfloat-n">
+                    <code class="language-js"><span class="token function">int14ToSignedFloat</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns a float in the range <code>-1</code>-<code>1</code> for values of <code>n</code> in the range <code>0</code>-<code>16383</code>.
 The input integer is mapped so that the value <code>8192</code> returns <code>0</code>, the centre of
 the range, as per the MIDI spec for pitch bend values and their ilk.</p>
 <pre><code><span class="token function">int14ToSignedFloat</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// -1</span>
 <span class="token function">int14ToSignedFloat</span><span class="token punctuation">(</span><span class="token number">8192</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// 0</span>
 <span class="token function">int14ToSignedFloat</span><span class="token punctuation">(</span><span class="token number">16383</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 1</span></code></pre></article><article class="toggle-block block" toggleable="" id="int14tolsb-n">
-                <h3 class="text-5 ">
-                    <a href="#int14tolsb-n">
-                        <code class="language-js"><span class="token function">int14ToLSB</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns the least significant 7-bit data byte of an unsigned 14-bit integer.</p>
+            <h3 class="text-5 ">
+                <a href="#int14tolsb-n">
+                    <code class="language-js"><span class="token function">int14ToLSB</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns the least significant 7-bit data byte of an unsigned 14-bit integer.</p>
 <pre><code><span class="token function">int14ToLSB</span><span class="token punctuation">(</span><span class="token number">8192</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// 0</span></code></pre><p>Out-of-range input values will return spurious results.</p>
 </article><article class="toggle-block block" toggleable="" id="int14tomsb-n">
-                <h3 class="text-5 ">
-                    <a href="#int14tomsb-n">
-                        <code class="language-js"><span class="token function">int14ToMSB</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns the most significant 7-bit data byte of an unsigned 14-bit integer in
+            <h3 class="text-5 ">
+                <a href="#int14tomsb-n">
+                    <code class="language-js"><span class="token function">int14ToMSB</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns the most significant 7-bit data byte of an unsigned 14-bit integer in
 the range <code>0</code>-<code>16383</code></p>
 <pre><code><span class="token function">int14ToMSB</span><span class="token punctuation">(</span><span class="token number">8192</span><span class="token punctuation">)</span><span class="token punctuation">;</span>      <span class="token comment">// 64</span></code></pre><p>Out-of-range input values will return spurious results.</p>
 </article><article class="toggle-block block" toggleable="" id="signedfloattoint7-n">
-                <h3 class="text-5 ">
-                    <a href="#signedfloattoint7-n">
-                        <code class="language-js"><span class="token function">signedFloatToInt7</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns an integer in the 7-bit range <code>0</code>-<code>127</code> for values of <code>n</code> between
+            <h3 class="text-5 ">
+                <a href="#signedfloattoint7-n">
+                    <code class="language-js"><span class="token function">signedFloatToInt7</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns an integer in the 7-bit range <code>0</code>-<code>127</code> for values of <code>n</code> between
 <code>-1</code>-<code>1</code>. The input value <code>0</code> maps exactly to the value <code>64</code>, as per
 the MIDI spec for modulation control values and their ilk.</p>
 <pre><code><span class="token function">signedFloatToInt7</span><span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 0</span>
 <span class="token function">signedFloatToInt7</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 64</span>
 <span class="token function">signedFloatToInt7</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 127</span></code></pre><p>Values lower than <code>-1</code> return <code>0</code>, while values greater than <code>1</code> return <code>127</code>.</p>
 </article><article class="toggle-block block" toggleable="" id="signedfloattoint14-n">
-                <h3 class="text-5 ">
-                    <a href="#signedfloattoint14-n">
-                        <code class="language-js"><span class="token function">signedFloatToInt14</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
-                    </a>
-                </h3>
-            <p>Returns an integer in the 14-bit range <code>0</code>-<code>16383</code> for values of <code>n</code> between
+            <h3 class="text-5 ">
+                <a href="#signedfloattoint14-n">
+                    <code class="language-js"><span class="token function">signedFloatToInt14</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns an integer in the 14-bit range <code>0</code>-<code>16383</code> for values of <code>n</code> between
 <code>-1</code>-<code>1</code>. The input value <code>0</code> maps exactly to the value <code>8192</code>, as per
 the MIDI spec for pitch bend values and their ilk.</p>
 <pre><code><span class="token function">signedFloatToInt14</span><span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 0</span>
 <span class="token function">signedFloatToInt14</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 8192</span>
 <span class="token function">signedFloatToInt14</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 16383</span></code></pre><p>Values lower than <code>-1</code> return <code>0</code>, while values greater than <code>1</code> return <code>16383</code>.</p>
+</article><article class="toggle-block block" toggleable="" id="weightedfloattoint7-n">
+            <h3 class="text-5 ">
+                <a href="#weightedfloattoint7-n">
+                    <code class="language-js"><span class="token function">weightedFloatToInt7</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns an integer in the 7-bit range <code>0</code>-<code>127</code> for values of <code>n</code> between
+<code>0</code>-<code>1</code>. The input value <code>0.5</code> maps exactly to the value <code>64</code>, as per
+the MIDI spec for modulation control values and their ilk.</p>
+<pre><code><span class="token function">weightedFloatToInt7</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// 0</span>
+<span class="token function">weightedFloatToInt7</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 64</span>
+<span class="token function">weightedFloatToInt7</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// 127</span></code></pre><p>Values lower than <code>-1</code> return <code>0</code>, while values greater than <code>1</code> return <code>127</code>.</p>
+</article><article class="toggle-block block" toggleable="" id="weightedfloattoint14-n">
+            <h3 class="text-5 ">
+                <a href="#weightedfloattoint14-n">
+                    <code class="language-js"><span class="token function">weightedFloatToInt14</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span></code>
+                </a>
+            </h3>
+        <p>Returns an integer in the 14-bit range <code>0</code>-<code>16383</code> for values of <code>n</code> between
+<code>-1</code>-<code>1</code>. The input value <code>0</code> maps exactly to the value <code>8192</code>, as per
+the MIDI spec for pitch bend values and their ilk.</p>
+<pre><code><span class="token function">weightedFloatToInt14</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// 0</span>
+<span class="token function">weightedFloatToInt14</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 8192</span>
+<span class="token function">weightedFloatToInt14</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// 16383</span></code></pre><p>Values lower than <code>-1</code> return <code>0</code>, while values greater than <code>1</code> return <code>16383</code>.</p>
 </article>
+
         </section>
     </section>
 
@@ -508,31 +588,32 @@ the MIDI spec for pitch bend values and their ilk.</p>
             <h2 class="text-2" style="font-size: 1.875rem;">Custom elements</h2>
         </header>
 
-        <!--article template-fn="docs:'./components/midi-graph/midi-graph.js' each append:body"--><article class="grid-1" id="midi-graph">
+        <!--article--><article class="grid-1" id="midi-graph">
             <h3 class="text-3">
                 <a href="#midi-graph">
-                    <code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>midi-graph</span><span class="token punctuation">&gt;</span></span></code>
+                    <code class=" language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>midi-graph</span><span class="token punctuation">&gt;</span></span></code>
                 </a>
             </h3>
-        <p>The <code>&lt;midi-graph&gt;</code> element plots incoming messages on a graph. The current
-version displays notes, control change and pitch bend messages.</p>
+        <p>The <code>&lt;midi-graph&gt;</code> element plots incoming note, control change and pitch bend
+messages on a graph.</p>
 <pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>module<span class="token punctuation">"</span></span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>//stephen.band/midi/components/midi-graph/midi-graph.js<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span><span class="token script language-javascript"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>midi-graph</span><span class="token punctuation">&gt;</span></span></code></pre>
-<midi-graph>
+<p><midi-graph></midi-graph></p>
+<p>This module has external dependencies.</p>
+</article>
 
-</midi-graph></article>
-
-        <!--article template-fn="docs:'./components/midi-monitor/midi-monitor.js' each append:body"--><article class="grid-2" id="midi-monitor">
+        <!--article--><article class="grid-2" id="midi-monitor">
             <h3 class="text-3">
                 <a href="#midi-monitor">
-                    <code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>midi-monitor</span><span class="token punctuation">&gt;</span></span></code>
+                    <code class=" language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>midi-monitor</span><span class="token punctuation">&gt;</span></span></code>
                 </a>
             </h3>
         <p>The <code>&lt;midi-monitor&gt;</code> element displays all incoming messages in a rolling list.</p>
 <pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>module<span class="token punctuation">"</span></span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>//stephen.band/midi/components/midi-monitor/midi-monitor.js<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span><span class="token script language-javascript"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>midi-monitor</span><span class="token punctuation">&gt;</span></span></code></pre>
 <p><midi-monitor></midi-monitor></p>
-<p>There is a full-page MIDI monitor at <a href="http://stephen.band/midi/monitor/">stephen.band/midi/monitor/</a>.</p>
+<p>This module has external depencies.
+There is a full-page MIDI monitor at <a href="http://stephen.band/midi/monitor/">stephen.band/midi/monitor/</a>.</p>
 </article>
     </section>
 
@@ -544,7 +625,7 @@ version displays notes, control change and pitch bend messages.</p>
     <script type="module">
     import '../dom/js/dom.root.js';
     import '../dom/js/dom.toggleable.js';
-    import * as MIDI from './midi.js';
+    import * as MIDI from './module.js';
     window.MIDI = MIDI;
 
     import { classes, get } from '../dom/module.js';
