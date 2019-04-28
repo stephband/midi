@@ -4,7 +4,9 @@ print('       - http://github.com/stephband/midi');
 
 export {
     bytesToInt14,
+    bytesToFloat,
     bytesToSignedFloat,
+    bytesToWeightedFloat,
     floatToInt7,
     floatToInt14,
     int7ToFloat,

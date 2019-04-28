@@ -18,16 +18,50 @@ export function bytesToInt14(lsb, msb) {
 }
 
 /*
+bytesToFloat(lsb, msb)
+
+Given two 7-bit values for `lsb` (least significant byte) and `msb` (most
+significant byte), returns a float in the range `0`-`1`.
+
+    bytesToFloat(0, 0);     // 0
+    bytesToFloat(0, 64);    // 0.50003051944
+    bytesToFloat(127, 127); // 1
+*/
+
+export function bytesToFloat(lsb, msb) {
+	return int14ToFloat(bytesToInt14(lsb, msb));
+}
+
+/*
 bytesToSignedFloat(lsb, msb)
 
 Given two 7-bit values for `lsb` (least significant byte) and `msb` (most
-significant byte), returns a float in the range `-1`-`1`.
+significant byte), returns a float in the range `-1`-`1`, weighted so that
+an input of (`0`, `64`) maps to `0`.
 
-    bytesToSignedFloat(0, 64);   // 0
+    bytesToSignedFloat(0, 0);     // -1
+    bytesToSignedFloat(0, 64);    // 0
+    bytesToSignedFloat(127, 127); // 1
 */
 
 export function bytesToSignedFloat(lsb, msb) {
 	return int14ToSignedFloat(bytesToInt14(lsb, msb));
+}
+
+/*
+bytesToWeightedFloat(lsb, msb)
+
+Given two 7-bit values for `lsb` (least significant byte) and `msb` (most
+significant byte), returns a float in the range `0`-`1`, weighted so that
+an input of (`0`, `64`) maps to `0.5`.
+
+    bytesToWeightedFloat(0, 0);     // 0
+    bytesToWeightedFloat(0, 64);    // 0.5
+    bytesToWeightedFloat(127, 127); // 1
+*/
+
+export function bytesToWeightedFloat(lsb, msb) {
+	return int14ToWeightedFloat(bytesToInt14(lsb, msb));
 }
 
 /*
