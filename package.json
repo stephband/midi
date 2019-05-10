@@ -33,7 +33,8 @@
     "docs": "http://stephen.band/midi/index.html",
     "devDependencies": {
         "eslint": "^5.16.0",
-        "rollup": "^1.8.0"
+        "rollup": "^1.8.0",
+        "puppeteer": "^1.15.0"
     },
     "module": "module.js",
     "main": "index.js",
@@ -41,6 +42,7 @@
         "lint": "eslint modules/*.js",
         "build": "npm run build-cjs && npm run build-esm",
         "build-cjs": "rollup module.js --o index.js --f cjs",
-        "build-esm": "rollup module.js --o midi.js --f esm"
+        "build-esm": "rollup module.js --o midi.js --f esm",
+        "build-docs": "node ../fn/render-html.js http://localhost/midi/template.html ./index.html 10"
     }
 }
