@@ -156,45 +156,46 @@ function renderEntry(trTemplate, tdNodes, tbody, nodes, maxEntries, time, port, 
 // Define custom element
 // element(name, template, attributes, properties, options)
 
-element('midi-monitor',
-`<!-- We have to use absolute paths for CSS inside the shadow DOM because we do
-not know where the root document is. -->
-<link rel="stylesheet" href="//stephen.band/midi/components/midi-monitor/midi-monitor.css"/>
+element('midi-monitor', {
+	shadow: `<!-- We have to use absolute paths for CSS inside the shadow DOM because we do
+		not know where the root document is. -->
+		<link rel="stylesheet" href="//stephen.band/midi/components/midi-monitor/midi-monitor.css"/>
 
-<div class="head-block block">
-	<table class="console-table">
-		<thead>
+		<div class="head-block block">
+			<table class="console-table">
+				<thead>
+					<tr>
+						<th class="time-th">Time</th>
+						<th class="port-th">Port</th>
+						<th class="type-th">Message</th>
+						<th class="chan-th">Ch</th>
+						<th class="num-th">No</th>
+						<th class="note-th">Note</th>
+						<th class="val-th">Value</th>
+					</tr>
+				</thead>
+			</table>
+		</div>
+
+		<div class="body-block block">
+			<table class="console-table">
+				<tbody id="tbody"></tbody>
+			</table>
+		</div>
+
+		<template>
 			<tr>
-				<th class="time-th">Time</th>
-				<th class="port-th">Port</th>
-				<th class="type-th">Message</th>
-				<th class="chan-th">Ch</th>
-				<th class="num-th">No</th>
-				<th class="note-th">Note</th>
-				<th class="val-th">Value</th>
+				<td class="time-td"></td>
+				<td class="port-td"></td>
+				<td class="type-td"></td>
+				<td class="chan-td"></td>
+				<td class="num-td"></td>
+				<td class="note-td"></td>
+				<td class="val-td"></td>
 			</tr>
-		</thead>
-	</table>
-</div>
+		</template>`,
 
-<div class="body-block block">
-	<table class="console-table">
-		<tbody id="tbody"></tbody>
-	</table>
-</div>
-
-<template>
-	<tr>
-		<td class="time-td"></td>
-		<td class="port-td"></td>
-		<td class="type-td"></td>
-		<td class="chan-td"></td>
-		<td class="num-td"></td>
-		<td class="note-td"></td>
-		<td class="val-td"></td>
-	</tr>
-</template>`, {}, {}, {
-	setup: function setup(root) {
+	construct: function setup(root) {
 		const template   = root.querySelector('template').content;
 		const trTemplate = template.querySelector('tr');
 		const tdNodes    = trTemplate.querySelectorAll('td');

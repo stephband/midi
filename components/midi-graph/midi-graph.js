@@ -316,18 +316,15 @@ const lis = Array
 	.join('');
 
 // define(name, setup, attributes, shadow)
-element('midi-graph',
-`<!-- We have to use absolute paths for CSS inside the shadow DOM because we do
-not know where the root document is. -->
-<link rel="stylesheet" href="//stephen.band/midi/components/midi-graph/midi-graph.css"/>
-<canvas class="midi-graph-canvas" width="1920" height="320"></canvas>
-<ul class="midi-graph-ul">${lis}</ul>
-`, {
-	// Attributes
-}, {
-	// Properties
-}, {
-	setup: function setup(root) {
+element('midi-graph', {
+	shadow: `<!-- We have to use absolute paths for CSS inside the shadow DOM because we do
+		not know where the root document is. -->
+		<link rel="stylesheet" href="//stephen.band/midi/components/midi-graph/midi-graph.css"/>
+		<canvas class="midi-graph-canvas" width="1920" height="320"></canvas>
+		<ul class="midi-graph-ul">${lis}</ul>
+		`,
+
+	construct: function setup(root) {
 		// Todo: get options from attributes?
 		var options = {};
 
