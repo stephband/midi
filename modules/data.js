@@ -3,7 +3,7 @@ const entries = Object.entries;
 const A4      = 69;
 
 
-/*
+/**
 floatToFrequency(ref, n)
 
 Given a note number `n`, returns the frequency of the fundamental tone of that
@@ -13,14 +13,14 @@ note. `ref` is a reference frequency for middle A4/69 (usually `440`).
     floatToFrequency(440, 60);  // 261.625565
     floatToFrequency(442, 69);  // 442
     floatToFrequency(442, 60);  // 262.814772
-*/
+**/
 
 export function floatToFrequency(ref, n) {
 	return ref * Math.pow(2, (n - A4) / 12);
 }
 
 
-/*
+/**
 frequencyToFloat(ref, frequency)
 
 Returns `frequency` as a float on the note number scale. `ref` is a reference
@@ -41,7 +41,7 @@ export function frequencyToFloat(ref, freq) {
 }
 
 
-/*
+/**
 normaliseNoteName(name)
 
 Replaces the characters `'b'` and `'#'` with the unicode musical characters `'♭'`
@@ -66,7 +66,7 @@ export function normaliseNoteName(name) {
 }
 
 
-/*
+/**
 toControlName(n)
 
 Returns a shorthand controller name from a value in the range `0`-`127`. Not all
@@ -119,7 +119,7 @@ export function toControlName(n) {
 }
 
 
-/*
+/**
 toControlNumber(name)
 
 Returns a value in the range `0`-`127` from a shorthand controller `name`.
@@ -138,7 +138,7 @@ export function toControlNumber(name) {
 }
 
 
-/*
+/**
 toNoteName(n)
 
 Returns note name from a value in the range 0-127.
@@ -155,7 +155,7 @@ export function toNoteName(n) {
 }
 
 
-/*
+/**
 toNoteNumber(name)
 
 Given a note name, returns a value in the range 0-127.
@@ -177,7 +177,7 @@ export function toNoteNumber(str) {
 }
 
 
-/*
+/**
 toNoteOctave(n)
 
 Where `n` is a note number, returns the numerical octave.
@@ -190,7 +190,7 @@ export function toNoteOctave(n) {
 }
 
 
-/*
+/**
 toStatus(channel, type)
 
 Given a `channel` in the range `1`-`16` and type, returns the MIDI message
@@ -227,7 +227,7 @@ export function toStatus(channel, type) {
 }
 
 
-/*
+/**
 toChannel(status)
 
 Returns the MIDI channel as a number between `1` and `16`.
@@ -240,7 +240,8 @@ export function toChannel(status) {
 }
 
 
-/* toType(status)
+/**
+toType(status)
 
 Returns message type as one of the strings `'noteoff'`, `'noteon'`, `'polytouch'`,
 `'control'`, `'program'`, `'channeltouch'` or `'pitch'`.

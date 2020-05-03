@@ -1,5 +1,5 @@
 
-/*
+/**
 <midi-graph>
 
 The `<midi-graph>` element plots incoming note, control change and pitch bend
@@ -15,7 +15,7 @@ messages on a graph.
 This module has external dependencies.
 */
 
-import { noop, overload, toInt } from '../../../fn/module.js';
+import { noop, overload, parseInt } from '../../../fn/module.js';
 import { element, now } from '../../../dom/module.js';
 import { print } from '../../modules/print.js';
 import { bytesToSignedFloat, toChannel, toNoteName, on, toType } from '../../module.js';
@@ -218,7 +218,7 @@ function renderNames(nodes, set, state) {
 }
 
 function hslToArray(hsl) {
-	return rhsl.exec(hsl).splice(1, 3).map(toInt);
+	return rhsl.exec(hsl).splice(1, 3).map(parseInt);
 }
 
 function createSettings(options, node) {
@@ -227,10 +227,11 @@ function createSettings(options, node) {
 	var paddingTop   = (options.paddingTop || defaults.paddingTop) * node.height;
 	var innerWidth   = node.width - paddingLeft - paddingRight;
 	var innerHeight  = node.height - paddingTop;
+	var col, l;
 
 	if (options.colors) {
-		var col = options.colors.map(hslToArray);
-		var l = col.length;
+		col = options.colors.map(hslToArray);
+		l   = col.length;
 
 		// Populate missing fields with colors from default colors array.
 		while (l--) {

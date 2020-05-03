@@ -150,7 +150,7 @@ export function createEvent(time, port, message) {
 	return e;
 }
 
-/*
+/**
 on(selector, fn)
 
 Registers a handler `fn` for incoming MIDI events that match object `selector`.
@@ -268,7 +268,7 @@ export function on(selector, fn) {
     setSelectorRoute(selector, root, fn);
 }
 
-/*
+/**
 off(selector, fn)
 
 Removes an event listener 'fn' from MIDI events matching object 'selector'. Where
@@ -346,7 +346,7 @@ export function off(selector, fn) {
     removeSelectorRoute(selector, root, fn);
 }
 
-/*
+/**
 trigger(port, message)
 
 Simulates an incoming MIDI event and fires listeners with matching selectors.
@@ -355,7 +355,7 @@ Useful for debugging.
     trigger(null, [128, 69, 88]);
 */
 
-/*
+/**
 trigger(port, chan, type, name, value)
 
 As `trigger(port, message)`, where the last 4 parameters are passed to

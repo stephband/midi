@@ -1,7 +1,7 @@
 import { signedFloatToInt14, limit  } from './maths.js';
 import { toStatus, toNoteNumber, toControlNumber } from './data.js';
 
-/*
+/**
 createMessage(channel, type, name, value)
 
 Creates a MIDI message – a Uint8Array of three values – where `channel` is an
@@ -104,7 +104,7 @@ export function createMessage(channel, type, name, value) {
     return message;
 }
 
-/*
+/**
 isControl(message)
 
 Returns `true` if message is a control change, otherwise `false`.
@@ -116,7 +116,7 @@ export function isControl(message) {
 	return message[0] > 175 && message[0] < 192 ;
 }
 
-/*
+/**
 isNote(message)
 
 Returns `true` where message is a noteon or noteoff, otherwise `false`.
@@ -128,7 +128,7 @@ export function isNote(message) {
 	return message[0] > 127 && message[0] < 160 ;
 }
 
-/*
+/**
 isPitch(message)
 
 Returns `true` message is a pitch bend, otherwise `false`.
@@ -140,7 +140,7 @@ export function isPitch(message) {
 	return message[0] > 223 && message[0] < 240 ;
 }
 
-/*
+/**
 normalise(message)
 
 Many keyboards transmit `'noteon'` with velocity `0` rather than `'noteoff'`

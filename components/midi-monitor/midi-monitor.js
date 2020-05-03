@@ -1,5 +1,5 @@
 
-/*
+/**
 <midi-monitor>
 
 The `<midi-monitor>` element displays all incoming messages in a rolling list.

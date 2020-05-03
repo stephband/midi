@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" is="sparky">
-<head build-fn="import:package.json">
+<html lang="en">
+<head build-fn="fetch:package.json">
     <meta charset="utf-8" />
     <meta name="author" content="@{[author.twitter]}" />
     <meta name="description" content="Documentation for {[title]}. {[description]}" />
@@ -8,8 +8,13 @@
 
     <title>{[title]}</title>
 
-    <script>
-    document.documentElement.className = 'js';
+    <script title="load">
+    document.documentElement.className += ' js content-loading loading';
+    window.addEventListener('DOMContentLoaded', () => document.documentElement.classList.remove('content-loading'));
+    window.addEventListener('load', () => document.documentElement.classList.remove('loading'));
+    </script>
+
+    <script build-remove>
     window.DEBUG = true;
     </script>
 
@@ -19,16 +24,17 @@
     <link rel="icon" type="image/png" href="images/logo-128x128.png" sizes="128x128">
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:100,300,400,500,700" />
-    <link rel="stylesheet" href="../bolt/dist/bolt.css" />
+    <link rel="stylesheet" href="../bolt/fonts/fira-mono.css" />
+    <link rel="stylesheet" href="../bolt/dist/bolt.min.css" />
     <link rel="stylesheet" href="../dom/css/dom.css" />
-    <link rel="stylesheet" href="../fn/css/prism.cruncher.css" />
+    <link rel="stylesheet" href="../fn/css/prism-cruncher.css" />
     <link rel="stylesheet" href="../fn/css/docs.css" />
     <link rel="stylesheet" href="../fn/css/tests.css" />
     <link rel="stylesheet" href="css/theme.css" />
 	<link rel="stylesheet" href="components/midi-graph/midi-graph.css" />
 
     <template id="functions">
-        <article build-fn="each append:body" class="toggle-block block" toggleable id="{[id]}">
+        <article build-fn="each append:body" class="doc-toggle-block toggle-block block" toggleable id="{[id]}">
             <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
                 <a href="#{[id]}">
                     <code build-fn="append:title" class="language-js"></code>
@@ -39,7 +45,7 @@
 </head>
 
 <body>
-    <header build-fn="import:package.json" class="1-grid grid" id="header">
+    <header build-fn="fetch:package.json" class="1-grid grid" id="header">
         <h1 class="grid-0 midi-icon">{[title]} <span class="text-6">{[version]}</span></h1>
 
         <div class="grid-1">
@@ -96,32 +102,32 @@ MIDI.on({channel: 1, type: 'note'}, (e) => {
 
         <section class="grid-1">
             <h1 class="text-3">availability</h1>
-            <template build-fn="docs:'./modules/midi.js?request'" build-include="#functions"></template>
+            <template build-fn="docs:'./modules/midi.js?request'" build-src="#functions"></template>
         </section>
 
         <section class="grid-2">
             <h1 class="text-3">receive</h1>
-            <template build-fn="docs:'./modules/midi.js?inputs,getInput','./modules/events.js'" build-include="#functions"></template>
+            <template build-fn="docs:'./modules/midi.js?inputs,getInput','./modules/events.js'" build-src="#functions"></template>
         </section>
 
         <section class="grid-3">
             <h1 class="text-3">send</h1>
-            <template build-fn="docs:'./modules/midi.js?outputs,getOutput,send'" build-include="#functions"></template>
+            <template build-fn="docs:'./modules/midi.js?outputs,getOutput,send'" build-src="#functions"></template>
         </section>
 
         <section class="grid-4">
             <h1 class="text-3">messages</h1>
-            <template build-fn="docs:'./modules/messages.js'" build-include="#functions"></template>
+            <template build-fn="docs:'./modules/messages.js'" build-src="#functions"></template>
         </section>
 
         <section class="grid-5">
             <h1 class="text-3">data</h1>
-            <template build-fn="docs:'./modules/data.js'" build-include="#functions"></template>
+            <template build-fn="docs:'./modules/data.js'" build-src="#functions"></template>
         </section>
 
         <section class="grid-6">
             <h1 class="text-3">maths</h1>
-            <template build-fn="docs:'./modules/maths.js'" build-include="#functions"></template>
+            <template build-fn="docs:'./modules/maths.js'" build-src="#functions"></template>
         </section>
     </section>
 
@@ -153,8 +159,8 @@ MIDI.on({channel: 1, type: 'note'}, (e) => {
     <script type="module" src="./components/midi-graph/midi-graph.js"></script>
     <script type="module" src="./components/midi-monitor/midi-monitor.js"></script>
     <script type="module">
-    import '../dom/js/dom.root.js';
-    import '../dom/js/dom.toggleable.js';
+    import '../dom/js/device.js';
+    import '../dom/js/toggleable.js';
     import * as MIDI from './module.js';
     window.MIDI = MIDI;
 

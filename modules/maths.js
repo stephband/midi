@@ -3,7 +3,7 @@ export function limit(min, max, n) {
     return n > max ? max : n < min ? min : n ;
 }
 
-/*
+/**
 bytesToInt14(lsb, msb)
 
 Given two 7-bit values for `lsb` (least significant byte) and `msb` (most
@@ -17,7 +17,7 @@ export function bytesToInt14(lsb, msb) {
 	return msb << 7 | lsb;
 }
 
-/*
+/**
 bytesToFloat(lsb, msb)
 
 Given two 7-bit values for `lsb` (least significant byte) and `msb` (most
@@ -32,7 +32,7 @@ export function bytesToFloat(lsb, msb) {
 	return int14ToFloat(bytesToInt14(lsb, msb));
 }
 
-/*
+/**
 bytesToSignedFloat(lsb, msb)
 
 Given two 7-bit values for `lsb` (least significant byte) and `msb` (most
@@ -48,7 +48,7 @@ export function bytesToSignedFloat(lsb, msb) {
 	return int14ToSignedFloat(bytesToInt14(lsb, msb));
 }
 
-/*
+/**
 bytesToWeightedFloat(lsb, msb)
 
 Given two 7-bit values for `lsb` (least significant byte) and `msb` (most
@@ -64,7 +64,7 @@ export function bytesToWeightedFloat(lsb, msb) {
 	return int14ToWeightedFloat(bytesToInt14(lsb, msb));
 }
 
-/*
+/**
 floatToInt7(n)
 
 Returns an integer in the 7-bit range `0`-`127` for values of `n` between `0`-`1`.
@@ -77,7 +77,7 @@ export function floatToInt7(n) {
 	return Math.round(limit(0, 1, n) * 127);
 }
 
-/*
+/**
 floatToInt14(n)
 
 Returns an integer in the 14-bit range `0`-`16383` for values of `n` between `0`-`1`.
@@ -90,7 +90,7 @@ export function floatToInt14(n) {
 	return Math.round(limit(0, 1, n) * 16383);
 }
 
-/*
+/**
 int7ToFloat(n)
 
 Returns a float in the range `0`-`1` for values of `n` in the range `0`-`127`.
@@ -102,7 +102,7 @@ export function int7ToFloat(n) {
 	return n / 127;
 }
 
-/*
+/**
 int7ToWeightedFloat(n)
 
 Returns a float in the range `0`-`1` for values of `n` in the range `0`-`127`.
@@ -118,7 +118,7 @@ export function int7ToWeightedFloat(n) {
 	return n < 64 ? n / 128 : 0.5 + (n - 64) / 126 ;
 }
 
-/*
+/**
 int7ToSignedFloat(n)
 
 Returns a float in the range `-1`-`1` for values of `n` in the range `0`-`127`.
@@ -134,7 +134,7 @@ export function int7ToSignedFloat(n) {
 	return n < 64 ? n / 64 - 1 : (n - 64) / 63 ;
 }
 
-/*
+/**
 int14ToFloat(n)
 
 Returns a float in the range `0`-`1` for values of `n` in the range `0`-`16383`.
@@ -146,7 +146,7 @@ export function int14ToFloat(n) {
 	return n / 16383;
 }
 
-/*
+/**
 int14ToWeightedFloat(n)
 
 Returns a float in the range `0`-`1` for values of `n` in the range `0`-`16383`.
@@ -163,7 +163,7 @@ export function int14ToWeightedFloat(n) {
 }
 
 
-/*
+/**
 int14ToSignedFloat(n)
 
 Returns a float in the range `-1`-`1` for values of `n` in the range `0`-`16383`.
@@ -179,7 +179,7 @@ export function int14ToSignedFloat(n) {
 	return n < 8192 ? n / 8192 - 1 : (n - 8192) / 8191 ;
 }
 
-/*
+/**
 int14ToLSB(n)
 
 Returns the least significant 7-bit data byte of an unsigned 14-bit integer.
@@ -193,7 +193,7 @@ export function int14ToLSB(n) {
 	return n & 127;
 }
 
-/*
+/**
 int14ToMSB(n)
 
 Returns the most significant 7-bit data byte of an unsigned 14-bit integer in
@@ -208,7 +208,7 @@ export function int14ToMSB(n) {
 	return n >> 7;
 }
 
-/*
+/**
 signedFloatToInt7(n)
 
 Returns an integer in the 7-bit range `0`-`127` for values of `n` between
@@ -228,7 +228,7 @@ export function signedFloatToInt7(n) {
         n > 1 ? 127 : 64 + Math.round(n * 63) ;
 }
 
-/*
+/**
 signedFloatToInt14(n)
 
 Returns an integer in the 14-bit range `0`-`16383` for values of `n` between
@@ -249,7 +249,7 @@ export function signedFloatToInt14(n) {
         n > 1 ? 16383 : 8192 + Math.round(n * 8191) ;
 }
 
-/*
+/**
 weightedFloatToInt7(n)
 
 Returns an integer in the 7-bit range `0`-`127` for values of `n` between
@@ -269,7 +269,7 @@ export function weightedFloatToInt7(n) {
         n >= 1 ? 127 : 64 + Math.round((n - 0.5) * 126) ;
 }
 
-/*
+/**
 weightedFloatToInt14(n)
 
 Returns an integer in the 14-bit range `0`-`16383` for values of `n` between

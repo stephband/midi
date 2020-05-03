@@ -1,6 +1,6 @@
 
 import { print } from './modules/print.js';
-print('       - http://github.com/stephband/midi');
+print('       - http://stephen.band/midi/');
 
 export {
     bytesToInt14,

@@ -12,7 +12,7 @@ let midi = {
     outputs: empty
 };
 
-/*
+/**
 inputs()
 
 Returns the map of MIDI input ports from the underlying MIDIAccess object.
@@ -22,7 +22,7 @@ export function inputs() {
     return midi.inputs;
 }
 
-/*
+/**
 getInput(id)
 
 Returns an input port by id.
@@ -32,7 +32,7 @@ export function getInput(id) {
     return midi.inputs.get(id);
 }
 
-/*
+/**
 outputs()
 
 Returns the map of MIDI output ports from the underlying MIDIAccess object.
@@ -42,7 +42,7 @@ export function outputs() {
     return midi.outputs;
 }
 
-/*
+/**
 getOutput(id)
 
 Returns an output port by id.
@@ -52,7 +52,7 @@ export function getOutput(id) {
     return midi.outputs.get(id);
 }
 
-/*
+/**
 request()
 
 Returns a promise that resolves to the midiAccess object where it is
@@ -165,7 +165,7 @@ function findOutputPort(string) {
     }
 }
 
-/*
+/**
 send(event)
 
 Cues a message to be sent to an output port. The object `event` must have the
@@ -186,7 +186,7 @@ export function sendEvent(e) {
     e.target.send(e.data, e.timeStamp);
 }
 
-/*
+/**
 send(time, port, message)
 
 Cues a `message` to be sent to an output `port`. Where `time` is in the past
@@ -208,7 +208,7 @@ function sendMessage(time, port, message) {
     port.send(message, time);
 }
 
-/*
+/**
 send(time, port, chan, type, name, value)
 
 Like `send(time, port, message)`, but the last 4 parameters are passed to

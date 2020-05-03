@@ -34,15 +34,19 @@
     "devDependencies": {
         "eslint": "^5.16.0",
         "rollup": "^1.8.0",
-        "puppeteer": "^1.15.0"
+        "puppeteer": "^1.20.0",
+        "http-server": "^0.12.1",
+        "node-sass": "^4.13.1"
     },
     "module": "module.js",
     "main": "index.js",
     "scripts": {
         "lint": "eslint modules/*.js",
-        "build": "npm run build-cjs && npm run build-esm",
-        "build-cjs": "rollup module.js --o index.js --f cjs",
-        "build-esm": "rollup module.js --o midi.js --f esm",
-        "build-docs": "node ../fn/render-html.js http://localhost/midi/template.html ./index.html 10"
+        "serve": "npx http-server ../ -p 8080 &",
+        "serve-kill": "kill $(lsof -t -i:8080)",
+        "build-sass": "node-sass --output-style compact --indent-width 4 ./sass/grid.scss ./css/grid.css && node-sass --output-style compact --indent-width 4 ./sass/respond.scss ./css/respond.css",
+        "build-css": "npm run build-sass && node build-css.js dist/bolt.min.css",
+        "build-module": "rollup ./module.js --o dist/bolt.js --f esm",
+        "build-docs": "npm run serve && node ../fn/render-html.js http://127.0.0.1:8080/midi/index.template.html ./index.html 4 && npm run serve-kill"
     }
 }
