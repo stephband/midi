@@ -35,7 +35,7 @@
 
     <template id="functions">
         <article build-fn="each append:body" class="doc-toggle-block toggle-block block" toggleable id="{[id]}">
-            <h3 class="text-5 {[prefix|is:'.'|yesno:'dot-indent','']}">
+            <h3 class="doctext-05 {[prefix|is:'.'|yesno:'dot-indent','']}">
                 <a href="#{[id]}">
                     <code build-fn="append:title" class="language-js"></code>
                 </a>
@@ -46,10 +46,10 @@
 
 <body class="grid @3-9x-grid">
     <header build-fn="fetch:package.json" class="grid x-1 @3-x-2 @3-xspan-4" id="header">
-        <h1 class="x-1 x-start midi-icon">{[title]} <span class="text-6">{[version]}</span></h1>
+        <h1 class="x-1 x-start midi-icon">{[title]} <span class="doctext-06">{[version]}</span></h1>
 
         <div class="x-1">
-            <p class="text-8">
+            <p class="doctext-08">
                 {[description]}
                 <span id="support-hint" style="color: #bf004c;"></span>
                 Currently <a href="https://brave.com/">Brave</a> and Chrome support the <a href="https://caniuse.com/#feat=midi">WebMIDI API</a>.
@@ -65,14 +65,14 @@
 
     <div class="demo-block block site-grid grid x-bleed @3-xspan-9">
         <div class="midi-graph grid-1" id="midi-graph">
-            <p class="text-8 hint" id="instrument-hint">Plug in a MIDI instrument to try out the <code>&lt;midi-graph&gt;</code> component&hellip;</p>
+            <p class="doctext-08 hint" id="instrument-hint">Plug in a MIDI instrument to try out the <code>&lt;midi-graph&gt;</code> component&hellip;</p>
             <midi-graph/>
         </div>
     </div>
 
     <section class="grid @3-x-2 @3-xspan-4">
         <header class="x-1 @2-x-1 @2-xspan-3">
-            <h2 class="text-2" style="font-size: 1.875rem;">Quick start</h2>
+            <h2 class="doctext-02" style="font-size: 1.875rem;">Quick start</h2>
             <pre><code class="language-js">// Import MIDI functions as object
 import * as MIDI from 'http://stephen.band/midi/midi.js';
 
@@ -97,47 +97,47 @@ MIDI.on({channel: 1, type: 'note'}, (e) => {
 
     <section class="grid @3-x-2 @3-xspan-6">
         <header class="x-1">
-            <h2 class="text-2" style="font-size: 1.875rem;">Functions</h2>
+            <h2 class="doctext-02" style="font-size: 1.875rem;">Functions</h2>
         </header>
 
         <section class="x-1 @1-x-1 @2-x-1">
-            <h1 class="text-3">availability</h1>
+            <h1 class="doctext-03">availability</h1>
             <template build-fn="docs:'./modules/midi.js?request'" build-src="#functions"></template>
         </section>
 
         <section class="x-1 @1-x-2 @2-x-2">
-            <h1 class="text-3">receive</h1>
+            <h1 class="doctext-03">receive</h1>
             <template build-fn="docs:'./modules/midi.js?inputs,getInput','./modules/events.js'" build-src="#functions"></template>
         </section>
 
         <section class="x-1 @1-x-1 @2-x-3">
-            <h1 class="text-3">send</h1>
+            <h1 class="doctext-03">send</h1>
             <template build-fn="docs:'./modules/midi.js?outputs,getOutput,send'" build-src="#functions"></template>
         </section>
 
         <section class="x-1 @1-x-2 @2-x-1">
-            <h1 class="text-3">messages</h1>
+            <h1 class="doctext-03">messages</h1>
             <template build-fn="docs:'./modules/messages.js'" build-src="#functions"></template>
         </section>
 
         <section class="x-1 @1-x-1 @2-x-2">
-            <h1 class="text-3">data</h1>
+            <h1 class="doctext-03">data</h1>
             <template build-fn="docs:'./modules/data.js'" build-src="#functions"></template>
         </section>
 
         <section class="x-1 @1-x-2 @2-x-3">
-            <h1 class="text-3">maths</h1>
+            <h1 class="doctext-03">maths</h1>
             <template build-fn="docs:'./modules/maths.js'" build-src="#functions"></template>
         </section>
     </section>
 
     <section class="grid @3-x-2 @3-xspan-6">
         <header class="x-1">
-            <h2 class="text-2" style="font-size: 1.875rem;">Custom elements</h2>
+            <h2 class="doctext-02" style="font-size: 1.875rem;">Custom elements</h2>
         </header>
 
         <article class="x-1 @1-x-1" build-fn="docs:'./components/midi-graph/midi-graph.js' each append:body" id="{[id]}">
-            <h3 class="text-3">
+            <h3 class="doctext-03">
                 <a href="#{[id]}">
                     <code build-fn="append:title" class="language-html"></code>
                 </a>
@@ -145,7 +145,7 @@ MIDI.on({channel: 1, type: 'note'}, (e) => {
         </article>
 
         <article class="x-1 @1-x-2" build-fn="docs:'./components/midi-monitor/midi-monitor.js' each append:body" id="{[id]}">
-            <h3 class="text-3">
+            <h3 class="doctext-03">
                 <a href="#{[id]}">
                     <code build-fn="append:title" class="language-html"></code>
                 </a>
