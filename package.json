@@ -3,7 +3,6 @@
     "title": "MIDI",
     "description": "Receive, monitor, manipulate and transmit MIDI messages in the browser.",
     "version": "1.0.0",
-    "homepage": "http://stephen.band/midi/index.html",
     "author": {
         "name": "Stephen Band",
         "twitter": "stephband"
@@ -31,7 +30,8 @@
         "music",
         "MIDI"
     ],
-    "docs": "http://stephen.band/midi/index.html",
+    "homepage": "http://stephen.band/midi/",
+    "docs": "http://stephen.band/midi/",
     "devDependencies": {
         "eslint": "^6.5.0",
         "rollup": "^1.32.1",
