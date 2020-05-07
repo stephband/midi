@@ -47,7 +47,6 @@
         "build-docs": "npm run serve && node ../fn/render-html.js http://127.0.0.1:8080/midi/index.template.html ./index.html 4 && npm run serve-kill"
     },
     "style": [
-        "../bolt/fonts/source-sans-pro.css",
         "../bolt/fonts/fira-mono.css",
         "../bolt/css/html.css",
         "../bolt/css/svg.css",
