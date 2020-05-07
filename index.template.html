@@ -31,7 +31,7 @@
     <link rel="stylesheet" href="../fn/css/docs.css" />
     <link rel="stylesheet" href="../fn/css/tests.css" />
     <link rel="stylesheet" href="css/theme.css" />
-	<link rel="stylesheet" href="components/midi-graph/midi-graph.css" />
+	<link rel="stylesheet" href="elements/midi-graph/midi-graph.css" />
 
     <template id="functions">
         <article build-fn="each append:body" class="doc-toggle-block toggle-block block" toggleable id="{[id]}">
@@ -136,7 +136,7 @@ on({ channel: 1, type: 'note' }, (e) => {
             <h2 class="doctext-02" style="font-size: 1.875rem;">Custom elements</h2>
         </header>
 
-        <article class="x-1 @1-x-1" build-fn="docs:'./components/midi-graph/midi-graph.js' each append:body" id="{[id]}">
+        <article class="x-1 @1-x-1" build-fn="docs:'./elements/midi-graph/midi-graph.js' each append:body" id="{[id]}">
             <h3 class="doctext-03">
                 <a href="#{[id]}">
                     <code build-fn="append:title" class="language-html"></code>
@@ -144,7 +144,7 @@ on({ channel: 1, type: 'note' }, (e) => {
             </h3>
         </article>
 
-        <article class="x-1 @1-x-2" build-fn="docs:'./components/midi-monitor/midi-monitor.js' each append:body" id="{[id]}">
+        <article class="x-1 @1-x-2" build-fn="docs:'./elements/midi-monitor/midi-monitor.js' each append:body" id="{[id]}">
             <h3 class="doctext-03">
                 <a href="#{[id]}">
                     <code build-fn="append:title" class="language-html"></code>
@@ -156,10 +156,12 @@ on({ channel: 1, type: 'note' }, (e) => {
     <script build-remove type="module" src="../fn/docs-build.js"></script>
 
     <!-- Document interactivity -->
-    <script type="module" src="./components/midi-graph/midi-graph.js"></script>
-    <script type="module" src="./components/midi-monitor/midi-monitor.js"></script>
     <script type="module">
+    import '../bolt/module.js';
+    import './elements/midi-graph/midi-graph.js';
+    import './elements/midi-monitor/midi-monitor.js';
     import * as MIDI from './module.js';
+
     window.MIDI = MIDI;
 
     import { classes, get } from '../dom/module.js';

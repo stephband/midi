@@ -16,7 +16,7 @@ function limit(min, max, n) {
     return n > max ? max : n < min ? min : n ;
 }
 
-/*
+/**
 bytesToInt14(lsb, msb)
 
 Given two 7-bit values for `lsb` (least significant byte) and `msb` (most
@@ -30,7 +30,7 @@ function bytesToInt14(lsb, msb) {
 	return msb << 7 | lsb;
 }
 
-/*
+/**
 bytesToFloat(lsb, msb)
 
 Given two 7-bit values for `lsb` (least significant byte) and `msb` (most
@@ -45,7 +45,7 @@ function bytesToFloat(lsb, msb) {
 	return int14ToFloat(bytesToInt14(lsb, msb));
 }
 
-/*
+/**
 bytesToSignedFloat(lsb, msb)
 
 Given two 7-bit values for `lsb` (least significant byte) and `msb` (most
@@ -61,7 +61,7 @@ function bytesToSignedFloat(lsb, msb) {
 	return int14ToSignedFloat(bytesToInt14(lsb, msb));
 }
 
-/*
+/**
 bytesToWeightedFloat(lsb, msb)
 
 Given two 7-bit values for `lsb` (least significant byte) and `msb` (most
@@ -77,7 +77,7 @@ function bytesToWeightedFloat(lsb, msb) {
 	return int14ToWeightedFloat(bytesToInt14(lsb, msb));
 }
 
-/*
+/**
 floatToInt7(n)
 
 Returns an integer in the 7-bit range `0`-`127` for values of `n` between `0`-`1`.
@@ -90,7 +90,7 @@ function floatToInt7(n) {
 	return Math.round(limit(0, 1, n) * 127);
 }
 
-/*
+/**
 floatToInt14(n)
 
 Returns an integer in the 14-bit range `0`-`16383` for values of `n` between `0`-`1`.
@@ -103,7 +103,7 @@ function floatToInt14(n) {
 	return Math.round(limit(0, 1, n) * 16383);
 }
 
-/*
+/**
 int7ToFloat(n)
 
 Returns a float in the range `0`-`1` for values of `n` in the range `0`-`127`.
@@ -115,7 +115,7 @@ function int7ToFloat(n) {
 	return n / 127;
 }
 
-/*
+/**
 int7ToWeightedFloat(n)
 
 Returns a float in the range `0`-`1` for values of `n` in the range `0`-`127`.
@@ -131,7 +131,7 @@ function int7ToWeightedFloat(n) {
 	return n < 64 ? n / 128 : 0.5 + (n - 64) / 126 ;
 }
 
-/*
+/**
 int7ToSignedFloat(n)
 
 Returns a float in the range `-1`-`1` for values of `n` in the range `0`-`127`.
@@ -147,7 +147,7 @@ function int7ToSignedFloat(n) {
 	return n < 64 ? n / 64 - 1 : (n - 64) / 63 ;
 }
 
-/*
+/**
 int14ToFloat(n)
 
 Returns a float in the range `0`-`1` for values of `n` in the range `0`-`16383`.
@@ -159,7 +159,7 @@ function int14ToFloat(n) {
 	return n / 16383;
 }
 
-/*
+/**
 int14ToWeightedFloat(n)
 
 Returns a float in the range `0`-`1` for values of `n` in the range `0`-`16383`.
@@ -176,7 +176,7 @@ function int14ToWeightedFloat(n) {
 }
 
 
-/*
+/**
 int14ToSignedFloat(n)
 
 Returns a float in the range `-1`-`1` for values of `n` in the range `0`-`16383`.
@@ -192,7 +192,7 @@ function int14ToSignedFloat(n) {
 	return n < 8192 ? n / 8192 - 1 : (n - 8192) / 8191 ;
 }
 
-/*
+/**
 int14ToLSB(n)
 
 Returns the least significant 7-bit data byte of an unsigned 14-bit integer.
@@ -206,7 +206,7 @@ function int14ToLSB(n) {
 	return n & 127;
 }
 
-/*
+/**
 int14ToMSB(n)
 
 Returns the most significant 7-bit data byte of an unsigned 14-bit integer in
@@ -221,7 +221,7 @@ function int14ToMSB(n) {
 	return n >> 7;
 }
 
-/*
+/**
 signedFloatToInt7(n)
 
 Returns an integer in the 7-bit range `0`-`127` for values of `n` between
@@ -241,7 +241,7 @@ function signedFloatToInt7(n) {
         n > 1 ? 127 : 64 + Math.round(n * 63) ;
 }
 
-/*
+/**
 signedFloatToInt14(n)
 
 Returns an integer in the 14-bit range `0`-`16383` for values of `n` between
@@ -262,7 +262,7 @@ function signedFloatToInt14(n) {
         n > 1 ? 16383 : 8192 + Math.round(n * 8191) ;
 }
 
-/*
+/**
 weightedFloatToInt7(n)
 
 Returns an integer in the 7-bit range `0`-`127` for values of `n` between
@@ -282,7 +282,7 @@ function weightedFloatToInt7(n) {
         n >= 1 ? 127 : 64 + Math.round((n - 0.5) * 126) ;
 }
 
-/*
+/**
 weightedFloatToInt14(n)
 
 Returns an integer in the 14-bit range `0`-`16383` for values of `n` between
@@ -306,7 +306,7 @@ const entries = Object.entries;
 const A4      = 69;
 
 
-/*
+/**
 floatToFrequency(ref, n)
 
 Given a note number `n`, returns the frequency of the fundamental tone of that
@@ -316,14 +316,14 @@ note. `ref` is a reference frequency for middle A4/69 (usually `440`).
     floatToFrequency(440, 60);  // 261.625565
     floatToFrequency(442, 69);  // 442
     floatToFrequency(442, 60);  // 262.814772
-*/
+**/
 
 function floatToFrequency(ref, n) {
 	return ref * Math.pow(2, (n - A4) / 12);
 }
 
 
-/*
+/**
 frequencyToFloat(ref, frequency)
 
 Returns `frequency` as a float on the note number scale. `ref` is a reference
@@ -344,7 +344,7 @@ function frequencyToFloat(ref, freq) {
 }
 
 
-/*
+/**
 normaliseNoteName(name)
 
 Replaces the characters `'b'` and `'#'` with the unicode musical characters `'♭'`
@@ -369,7 +369,7 @@ function normaliseNoteName(name) {
 }
 
 
-/*
+/**
 toControlName(n)
 
 Returns a shorthand controller name from a value in the range `0`-`127`. Not all
@@ -422,7 +422,7 @@ function toControlName(n) {
 }
 
 
-/*
+/**
 toControlNumber(name)
 
 Returns a value in the range `0`-`127` from a shorthand controller `name`.
@@ -441,7 +441,7 @@ function toControlNumber(name) {
 }
 
 
-/*
+/**
 toNoteName(n)
 
 Returns note name from a value in the range 0-127.
@@ -458,7 +458,7 @@ function toNoteName(n) {
 }
 
 
-/*
+/**
 toNoteNumber(name)
 
 Given a note name, returns a value in the range 0-127.
@@ -480,7 +480,7 @@ function toNoteNumber(str) {
 }
 
 
-/*
+/**
 toNoteOctave(n)
 
 Where `n` is a note number, returns the numerical octave.
@@ -493,7 +493,7 @@ function toNoteOctave(n) {
 }
 
 
-/*
+/**
 toStatus(channel, type)
 
 Given a `channel` in the range `1`-`16` and type, returns the MIDI message
@@ -530,7 +530,7 @@ function toStatus(channel, type) {
 }
 
 
-/*
+/**
 toChannel(status)
 
 Returns the MIDI channel as a number between `1` and `16`.
@@ -543,7 +543,8 @@ function toChannel(status) {
 }
 
 
-/* toType(status)
+/**
+toType(status)
 
 Returns message type as one of the strings `'noteoff'`, `'noteon'`, `'polytouch'`,
 `'control'`, `'program'`, `'channeltouch'` or `'pitch'`.
@@ -557,7 +558,7 @@ function toType(status) {
 	return types[Math.floor(status / 16) - 8];
 }
 
-/*
+/**
 createMessage(channel, type, name, value)
 
 Creates a MIDI message – a Uint8Array of three values – where `channel` is an
@@ -660,7 +661,7 @@ function createMessage(channel, type, name, value) {
     return message;
 }
 
-/*
+/**
 isControl(message)
 
 Returns `true` if message is a control change, otherwise `false`.
@@ -672,7 +673,7 @@ function isControl(message) {
 	return message[0] > 175 && message[0] < 192 ;
 }
 
-/*
+/**
 isNote(message)
 
 Returns `true` where message is a noteon or noteoff, otherwise `false`.
@@ -684,7 +685,7 @@ function isNote(message) {
 	return message[0] > 127 && message[0] < 160 ;
 }
 
-/*
+/**
 isPitch(message)
 
 Returns `true` message is a pitch bend, otherwise `false`.
@@ -696,7 +697,7 @@ function isPitch(message) {
 	return message[0] > 223 && message[0] < 240 ;
 }
 
-/*
+/**
 normalise(message)
 
 Many keyboards transmit `'noteon'` with velocity `0` rather than `'noteoff'`
@@ -886,7 +887,7 @@ function createEvent(time, port, message) {
 	return e;
 }
 
-/*
+/**
 on(selector, fn)
 
 Registers a handler `fn` for incoming MIDI events that match object `selector`.
@@ -1004,13 +1005,13 @@ function on(selector, fn) {
     setSelectorRoute(selector, root, fn);
 }
 
-/*
+/**
 off(selector, fn)
 
 Removes an event listener 'fn' from MIDI events matching object 'selector'. Where
 'fn' is not given, removes all handlers from events matching the selector.
 
-    off(['note'], fn);
+    off({ channel: 1, type: 'note' }, fn);
 */
 
 const removeSelectorRoute = overload(toSelectorType, {
@@ -1082,7 +1083,7 @@ function off(selector, fn) {
     removeSelectorRoute(selector, root, fn);
 }
 
-/*
+/**
 trigger(port, message)
 
 Simulates an incoming MIDI event and fires listeners with matching selectors.
@@ -1091,7 +1092,7 @@ Useful for debugging.
     trigger(null, [128, 69, 88]);
 */
 
-/*
+/**
 trigger(port, chan, type, name, value)
 
 As `trigger(port, message)`, where the last 4 parameters are passed to
@@ -1126,7 +1127,7 @@ let midi = {
     outputs: empty
 };
 
-/*
+/**
 inputs()
 
 Returns the map of MIDI input ports from the underlying MIDIAccess object.
@@ -1136,7 +1137,7 @@ function inputs() {
     return midi.inputs;
 }
 
-/*
+/**
 getInput(id)
 
 Returns an input port by id.
@@ -1146,7 +1147,7 @@ function getInput(id) {
     return midi.inputs.get(id);
 }
 
-/*
+/**
 outputs()
 
 Returns the map of MIDI output ports from the underlying MIDIAccess object.
@@ -1156,7 +1157,7 @@ function outputs() {
     return midi.outputs;
 }
 
-/*
+/**
 getOutput(id)
 
 Returns an output port by id.
@@ -1166,7 +1167,7 @@ function getOutput(id) {
     return midi.outputs.get(id);
 }
 
-/*
+/**
 request()
 
 Returns a promise that resolves to the midiAccess object where it is
@@ -1279,7 +1280,7 @@ function findOutputPort(string) {
     }
 }
 
-/*
+/**
 send(event)
 
 Cues a message to be sent to an output port. The object `event` must have the
@@ -1292,7 +1293,7 @@ same structure as an incoming MIDI event object:
     });
 
 If `timeStamp` is in the past the message is sent immediately.
-*/
+**/
 
 function sendEvent(e) {
     // Spec example:
@@ -1300,7 +1301,7 @@ function sendEvent(e) {
     e.target.send(e.data, e.timeStamp);
 }
 
-/*
+/**
 send(time, port, message)
 
 Cues a `message` to be sent to an output `port`. Where `time` is in the past
@@ -1322,7 +1323,7 @@ function sendMessage(time, port, message) {
     port.send(message, time);
 }
 
-/*
+/**
 send(time, port, chan, type, name, value)
 
 Like `send(time, port, message)`, but the last 4 parameters are passed to
@@ -1342,7 +1343,7 @@ const send = overload(toArgsLength, {
     default: sendParams
 });
 
-print('       - http://github.com/stephband/midi');
+print('       - http://stephen.band/midi/');
 
 // Setup
 

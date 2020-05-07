@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en" class="js"><head>
     <meta charset="utf-8">
     <meta name="author" content="@stephband">
-    <meta name="description" content="Documentation for MIDI. Receive, monitor, manipulate and transmit browser MIDI messages.">
+    <meta name="description" content="Documentation for MIDI. Receive, monitor, manipulate and transmit MIDI messages in the browser.">
     <meta name="viewport" content="width=device-width">
 
     <title>MIDI</title>
@@ -27,7 +27,7 @@
     <link rel="stylesheet" href="../fn/css/docs.css">
     <link rel="stylesheet" href="../fn/css/tests.css">
     <link rel="stylesheet" href="css/theme.css">
-	<link rel="stylesheet" href="components/midi-graph/midi-graph.css">
+	<link rel="stylesheet" href="elements/midi-graph/midi-graph.css">
 
     <template id="functions">
         <article build-fn="each append:body" class="doc-toggle-block toggle-block block" toggleable="" id="{[id]}">
@@ -46,7 +46,7 @@
 
         <div class="x-1">
             <p class="doctext-08">
-                Receive, monitor, manipulate and transmit browser MIDI messages.
+                Receive, monitor, manipulate and transmit MIDI messages in the browser.
                 <span id="support-hint" style="color: #bf004c;"></span>
                 Currently <a href="https://brave.com/">Brave</a> and Chrome support the <a href="https://caniuse.com/#feat=midi">WebMIDI API</a>.
                 Firefox have had it <a href="https://github.com/mozilla/standards-positions/issues/58">under consideration</a> for some time.
@@ -617,7 +617,7 @@ the MIDI spec for pitch bend values and their ilk.</p>
             </h3>
         <p>The <code>&lt;midi-graph&gt;</code> element plots incoming note, control change and pitch bend
 messages on a graph.</p>
-<pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>module<span class="token punctuation">"</span></span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>//stephen.band/midi/components/midi-graph/midi-graph.js<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span><span class="token script language-javascript"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span>
+<pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>module<span class="token punctuation">"</span></span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>./elements/midi-graph/midi-graph.js<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span><span class="token script language-javascript"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>midi-graph</span><span class="token punctuation">&gt;</span></span></code></pre>
 <p><midi-graph></midi-graph></p>
 <p>This module has external dependencies.</p>
@@ -630,7 +630,7 @@ messages on a graph.</p>
                 </a>
             </h3>
         <p>The <code>&lt;midi-monitor&gt;</code> element displays all incoming messages in a rolling list.</p>
-<pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>module<span class="token punctuation">"</span></span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>//stephen.band/midi/components/midi-monitor/midi-monitor.js<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span><span class="token script language-javascript"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span>
+<pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>module<span class="token punctuation">"</span></span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>//stephen.band/midi/elements/midi-monitor/midi-monitor.js<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span><span class="token script language-javascript"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>midi-monitor</span><span class="token punctuation">&gt;</span></span></code></pre>
 <p><midi-monitor></midi-monitor></p>
 <p>This module has external depencies.
@@ -641,13 +641,12 @@ There is a full-page MIDI monitor at <a href="http://stephen.band/midi/monitor/"
     
 
     <!-- Document interactivity -->
-    <script type="module" src="./components/midi-graph/midi-graph.js"></script>
-    <script type="module" src="./components/midi-monitor/midi-monitor.js"></script>
     <script type="module">
-    import '../dom/js/device.js';
-    import '../dom/js/toggleable.js';
-    import '../bolt/components/toggle-block.js';
+    import '../bolt/module.js';
+    import './elements/midi-graph/midi-graph.js';
+    import './elements/midi-monitor/midi-monitor.js';
     import * as MIDI from './module.js';
+
     window.MIDI = MIDI;
 
     import { classes, get } from '../dom/module.js';

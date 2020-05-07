@@ -5,7 +5,7 @@
 The `<midi-monitor>` element displays all incoming messages in a rolling list.
 
 ```html
-<script type="module" src="//stephen.band/midi/components/midi-monitor/midi-monitor.js"></script>
+<script type="module" src="//stephen.band/midi/elements/midi-monitor/midi-monitor.js"></script>
 <midi-monitor>
 ```
 
@@ -159,7 +159,7 @@ function renderEntry(trTemplate, tdNodes, tbody, nodes, maxEntries, time, port, 
 element('midi-monitor', {
 	shadow: `<!-- We have to use absolute paths for CSS inside the shadow DOM because we do
 		not know where the root document is. -->
-		<link rel="stylesheet" href="//stephen.band/midi/components/midi-monitor/midi-monitor.css"/>
+		<link rel="stylesheet" href="//stephen.band/midi/elements/midi-monitor/midi-monitor.css"/>
 
 		<div class="head-block block">
 			<table class="console-table">
