@@ -30,6 +30,18 @@ pre + midi-monitor {
     margin-top: 1.875rem;
 }
 
+.hint {
+    visibility: hidden;
+    opacity: 0;
+    transition:
+        visibility 800ms linear,
+        opacity 800ms linear;
+}
+
+.hint.active {
+    visibility: visible;
+    opacity: 1;
+}
 
 .midi-icon {
     position: relative;
@@ -48,11 +60,12 @@ pre + midi-monitor {
     margin-right: 0.75rem;
 }
 
-@media (min-width: 100em) {
+@media (min-width: 90em) {
     .midi-icon::before {
         position: absolute;
         right: 0;
-        left: -3.75rem;
+        left: -2.8125rem;
         right: auto;
+        top: 0.25rem;
     }
 }

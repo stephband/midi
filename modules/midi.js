@@ -178,7 +178,7 @@ same structure as an incoming MIDI event object:
     });
 
 If `timeStamp` is in the past the message is sent immediately.
-*/
+**/
 
 export function sendEvent(e) {
     // Spec example:

@@ -274,7 +274,7 @@ off(selector, fn)
 Removes an event listener 'fn' from MIDI events matching object 'selector'. Where
 'fn' is not given, removes all handlers from events matching the selector.
 
-    off(['note'], fn);
+    off({ channel: 1, type: 'note' }, fn);
 */
 
 const removeSelectorRoute = overload(toSelectorType, {
