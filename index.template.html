@@ -23,18 +23,14 @@
     <link rel="icon" type="image/png" href="images/logo-64x64.png" sizes="64x64">
     <link rel="icon" type="image/png" href="images/logo-128x128.png" sizes="128x128">
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:100,300,400,500,700" />
-    <link rel="stylesheet" href="../bolt/fonts/fira-mono.css" />
-    <link rel="stylesheet" href="../bolt/dist/bolt.min.css" />
-    <link rel="stylesheet" href="../dom/css/dom.css" />
-    <link rel="stylesheet" href="../fn/css/prism-cruncher.css" />
-    <link rel="stylesheet" href="../fn/css/docs.css" />
-    <link rel="stylesheet" href="../fn/css/tests.css" />
-    <link rel="stylesheet" href="css/theme.css" />
-	<link rel="stylesheet" href="elements/midi-graph/midi-graph.css" />
+    <link rel="stylesheet" href="style.min.css" />
+
+    <!--template build-fn="get:style each">
+        <link rel="stylesheet" href="{[.]}" />
+    </template-->
 
     <template id="functions">
-        <article build-fn="each append:body" class="doc-toggle-block toggle-block block" toggleable id="{[id]}">
+        <article build-fn="each append:body" class="doc-toggle-block toggle-block block doctext-08" toggleable id="{[id]}">
             <h3 class="doctext-05 {[prefix|is:'.'|yesno:'dot-indent','']}">
                 <a href="#{[id]}">
                     <code build-fn="append:title" class="language-js"></code>
@@ -56,25 +52,24 @@
                 Firefox have had it <a href="https://github.com/mozilla/standards-positions/issues/58">under consideration</a> for some time.
             </p>
 
-            <ul class="link-index index">
+            <ul class="link-index index doctext-08">
                 <li><strong>repo:</strong> <a href="{[repository.url]}">{[repository.url]}</a></li>
                 <li><strong>bugs:</strong> <a href="{[bugs.url]}">{[bugs.url]}</a></li>
             </ul>
         </div>
     </header>
 
-    <div class="docdemo-block block grid bleed-x @1-6x @3-9x">
+    <!--div class="docdemo-block block grid bleed-x @1-6x @3-9x">
         <div class="midi-graph grid-1" id="midi-graph">
             <p class="doctext-08 hint" id="instrument-hint">Plug in a MIDI instrument to try out the <code>&lt;midi-graph&gt;</code> component&hellip;</p>
             <midi-graph/>
         </div>
-    </div>
+    </div-->
 
     <section class="grid @1-5x @2-4x @3-x-2 @3-4x">
         <header class="x-1 @2-x-1 @2-3x">
             <h2 class="doctext-02" style="font-size: 1.875rem;">Quick start</h2>
-            <pre><code class="language-js">// Import MIDI functions as object
-import { on, toNoteName, int7ToFloat } from './midi/module.js';
+            <pre><code class="language-js">import { on, toNoteName, int7ToFloat } from './midi/module.js';
 
 // Listen to incoming 'noteon' and 'noteoff' messages on channel 1
 on({ channel: 1, type: 'note' }, (e) => {
@@ -91,7 +86,7 @@ on({ channel: 1, type: 'note' }, (e) => {
 });
 </code></pre>
 
-            <p>Note that on this page functions have been imported to the object <code>MIDI</code> so that you may try them in the&nbsp;console.</p>
+            <p class="doctext-08">Note that on this page functions have been imported to the object <code>MIDI</code> so that you may try them in the&nbsp;console.</p>
         </header>
     </section>
 
@@ -171,7 +166,7 @@ on({ channel: 1, type: 'note' }, (e) => {
     .catch(function() {
         get('support-hint').innerHTML = 'This browser does not support MIDI.';
     });
-
+    /*
     setTimeout(function() {
         var cls = classes(get('instrument-hint'));
         cls.add('active');
@@ -184,6 +179,7 @@ on({ channel: 1, type: 'note' }, (e) => {
             cls.remove('active');
         });
     }, 2000);
+    */
     </script>
 
     <!-- Tests -->

@@ -33,8 +33,8 @@
     ],
     "docs": "http://stephen.band/midi/index.html",
     "devDependencies": {
-        "eslint": "^5.16.0",
-        "rollup": "^1.8.0",
+        "eslint": "^6.5.0",
+        "rollup": "^1.32.1",
         "http-server": "^0.12.1"
     },
     "module": "module.js",
@@ -42,7 +42,39 @@
         "lint": "eslint modules/*.js",
         "serve": "npx http-server ../ -p 8080 &",
         "serve-kill": "kill $(lsof -t -i:8080)",
+        "build-css": "node ../bolt/build-css.js ./style.min.css ../midi/package.json",
         "build-module": "rollup ./module.js --o ./module.rolled.js --f esm",
         "build-docs": "npm run serve && node ../fn/render-html.js http://127.0.0.1:8080/midi/index.template.html ./index.html 4 && npm run serve-kill"
-    }
+    },
+    "style": [
+        "../bolt/fonts/source-sans-pro.css",
+        "../bolt/fonts/fira-mono.css",
+        "../bolt/css/html.css",
+        "../bolt/css/svg.css",
+        "../bolt/css/root.css",
+        "../bolt/css/body.css",
+        "../bolt/css/type.css",
+        "../bolt/css/code.css",
+        "../bolt/css/content.css",
+        "../bolt/css/input.css",
+        "../bolt/css/label.css",
+        "../bolt/css/button.css",
+        "../bolt/css/thumb.css",
+        "../bolt/css/index.css",
+        "../bolt/css/block.css",
+        "../bolt/css/color.css",
+        "../bolt/css/text.css",
+        "../bolt/css/modifiers.css",
+        "../bolt/css/respond.css",
+        "../bolt/css/grid.css",
+        "../bolt/components/toggle-block.css",
+        "../bolt/components/toggle-button.css",
+        "../bolt/css/device.css",
+        "../bolt/css/var.css",
+        "../dom/css/dom.css",
+        "../fn/css/prism-cruncher.css",
+        "../fn/css/docs.css",
+        "../fn/css/tests.css",
+        "./css/theme.css"
+    ]
 }
