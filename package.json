@@ -34,6 +34,7 @@
     ],
     "homepage": "http://stephen.band/midi/",
     "docs": "http://stephen.band/midi/",
+    "image": "images/logo-bg-128x128.png",
     "devDependencies": {
         "eslint": "^6.5.0",
         "rollup": "^1.32.1",
