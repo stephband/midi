@@ -37,17 +37,14 @@
     "image": "https://stephen.band/midi/images/logo-bg-128x128.png",
     "devDependencies": {
         "eslint": "^6.5.0",
-        "rollup": "^1.32.1",
-        "http-server": "^0.12.1"
+        "rollup": "^1.32.1"
     },
     "module": "module.js",
     "scripts": {
         "lint": "eslint modules/*.js",
-        "serve": "npx http-server ../ -p 8080 &",
-        "serve-kill": "kill $(lsof -t -i:8080)",
-        "build-css": "node ../bolt/build-css.js ./style.min.css ../midi/package.json",
+        "build-css": "node ../fn/build-css.js package.json style.min.css",
         "build-module": "rollup ./module.js --o ./module.rolled.js --f esm",
-        "build-docs": "npm run serve && node ../fn/render-html.js http://127.0.0.1:8080/midi/index.template.html ./index.html 4 && npm run serve-kill"
+        "build-docs": "node ../fn/build-html.js index.template.html index.html"
     },
     "style": [
         "../bolt/fonts/fira-mono.css",
