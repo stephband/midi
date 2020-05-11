@@ -1,17 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head build-fn="fetch:package.json">
-    <template build-src="/fn/templates.html#head-template"></template>
+    <template build-src="../fn/templates.html#head-template"></template>
 
     <script build-remove>
     window.DEBUG = true;
     </script>
 
     <link rel="stylesheet" href="style.min.css" />
-
-    <!--template build-fn="get:style each">
-        <link rel="stylesheet" href="{[.]}" />
-    </template-->
+    <!--link rel="stylesheet" href="style.css" /-->
 
     <template build-remove id="functions">
         <article build-fn="each append:body" class="doc-toggle-block toggle-block block doctext-08" toggleable id="{[id]}">
