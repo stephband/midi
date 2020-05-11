@@ -42,38 +42,8 @@
     "module": "module.js",
     "scripts": {
         "lint": "eslint modules/*.js",
-        "build-css": "node ../fn/build-css.js package.json style.min.css",
+        "build-css": "node ../fn/build-css.js style.css style.min.css",
         "build-module": "rollup ./module.js --o ./module.rolled.js --f esm",
         "build-docs": "node ../fn/build-html.js index.template.html index.html"
-    },
-    "style": [
-        "../bolt/fonts/fira-mono.css",
-        "../bolt/css/html.css",
-        "../bolt/css/svg.css",
-        "../bolt/css/root.css",
-        "../bolt/css/body.css",
-        "../bolt/css/type.css",
-        "../bolt/css/code.css",
-        "../bolt/css/content.css",
-        "../bolt/css/input.css",
-        "../bolt/css/label.css",
-        "../bolt/css/button.css",
-        "../bolt/css/thumb.css",
-        "../bolt/css/index.css",
-        "../bolt/css/block.css",
-        "../bolt/css/color.css",
-        "../bolt/css/text.css",
-        "../bolt/css/modifiers.css",
-        "../bolt/css/respond.css",
-        "../bolt/css/grid.css",
-        "../bolt/components/toggle-block.css",
-        "../bolt/components/toggle-button.css",
-        "../bolt/css/device.css",
-        "../bolt/css/var.css",
-        "../dom/css/dom.css",
-        "../fn/css/prism-cruncher.css",
-        "../fn/css/docs.css",
-        "../fn/css/tests.css",
-        "./css/theme.css"
-    ]
+    }
 }
