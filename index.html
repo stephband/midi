@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en" class=" js content-loading loading"><head>
-
+    
     <meta charset="utf-8">
     <meta name="author" content="stephband">
     <meta name="description" content="Documentation for MIDI. Receive, monitor, manipulate and transmit MIDI messages in the browser.">
@@ -17,7 +17,10 @@
     <script title="load">
     document.documentElement.className += ' js content-loading loading';
     window.addEventListener('DOMContentLoaded', () => document.documentElement.classList.remove('content-loading'));
-    window.addEventListener('load', () => document.documentElement.classList.remove('loading'));
+    // Wait for other load handlers to run first - Bolt does a few things on
+    // load (eg. locateable scrolls) and we want them to run before the loading
+    // class is removed
+    window.addEventListener('load', () => window.requestAnimationFrame(() => document.documentElement.classList.remove('loading')));
     </script>
 
     <link rel="shortcut icon" href="images/logo-64x64.ico">
@@ -26,15 +29,12 @@
     <link rel="icon" type="image/png" href="images/logo-128x128.png" sizes="128x128">
 
 
-
+    
 
     <link rel="stylesheet" href="style.min.css">
+    <!--link rel="stylesheet" href="style.css" /-->
 
-    <!--template build-fn="get:style each">
-        <link rel="stylesheet" href="{[.]}" />
-    </template-->
-
-
+    
 </head>
 
 <body class="grid @1-6x-grid @3-9x-grid">
@@ -94,7 +94,7 @@
 
         <section class="x-1 @1-x-1 @2-x-1">
             <h3 class="doctext-03">availability</h3>
-
+            
         <!--article--><article class="doc-toggle-block toggle-block block doctext-08" toggleable="" id="request">
             <h3 class="doctext-05 ">
                 <a href="#request">
@@ -108,12 +108,12 @@ promise.</p>
 <pre><code><span class="token function">request</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token keyword">catch</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token comment">// Alert the user they don't have MIDI</span>
 <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></article>
-
+    
         </section>
 
         <section class="x-1 @1-x-2 @2-x-2">
             <h3 class="doctext-03">receive</h3>
-
+            
         <!--article--><article class="doc-toggle-block toggle-block block doctext-08" toggleable="" id="inputs">
             <h3 class="doctext-05 ">
                 <a href="#inputs">
@@ -192,12 +192,12 @@ Useful for debugging.</p>
         <p>As <code>trigger(port, message)</code>, where the last 4 parameters are passed to
 <code>createMessage()</code> to create the MIDI message before triggering.</p>
 <pre><code><span class="token function">trigger</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">'noteon'</span><span class="token punctuation">,</span> <span class="token string">'A4'</span><span class="token punctuation">,</span> <span class="token number">0.75</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre></article>
-
+    
         </section>
 
         <section class="x-1 @1-x-1 @2-x-3">
             <h3 class="doctext-03">send</h3>
-
+            
         <!--article--><article class="doc-toggle-block toggle-block block doctext-08" toggleable="" id="outputs">
             <h3 class="doctext-05 ">
                 <a href="#outputs">
@@ -226,12 +226,12 @@ same structure as an incoming MIDI event object:</p>
     data<span class="token punctuation">:</span>      <span class="token comment">// a MIDI message</span>
 <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre><p>If <code>timeStamp</code> is in the past the message is sent immediately.</p>
 </article>
-
+    
         </section>
 
         <section class="x-1 @1-x-2 @2-x-1">
             <h3 class="doctext-03">messages</h3>
-
+            
         <!--article--><article class="doc-toggle-block toggle-block block doctext-08" toggleable="" id="createmessage-channel-type-name-value">
             <h3 class="doctext-05 ">
                 <a href="#createmessage-channel-type-name-value">
@@ -306,12 +306,12 @@ that both forms are treated identically. <code>normalise()</code> <em>mutates</e
 <code>'noteon'</code> messages with velocity <code>0</code> to <code>'noteoff'</code> messages.</p>
 <pre><code><span class="token function">normalise</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">145</span><span class="token punctuation">,</span><span class="token number">80</span><span class="token punctuation">,</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// [129,80,0]</span></code></pre><p>Note that the MIDI library automatically normalises incoming messages.</p>
 </article>
-
+    
         </section>
 
         <section class="x-1 @1-x-1 @2-x-2">
             <h3 class="doctext-03">data</h3>
-
+            
         <!--article--><article class="doc-toggle-block toggle-block block doctext-08" toggleable="" id="floattofrequency-ref-n">
             <h3 class="doctext-05 ">
                 <a href="#floattofrequency-ref-n">
@@ -410,12 +410,12 @@ status byte.</p>
         <p>Returns message type as one of the strings <code>'noteoff'</code>, <code>'noteon'</code>, <code>'polytouch'</code>,
 <code>'control'</code>, <code>'program'</code>, <code>'channeltouch'</code> or <code>'pitch'</code>.</p>
 <pre><code><span class="token function">toType</span><span class="token punctuation">(</span><span class="token number">145</span><span class="token punctuation">)</span><span class="token punctuation">;</span>          <span class="token comment">// 'noteon'.</span></code></pre></article>
-
+    
         </section>
 
         <section class="x-1 @1-x-2 @2-x-3">
             <h3 class="doctext-03">maths</h3>
-
+            
         <!--article--><article class="doc-toggle-block toggle-block block doctext-08" toggleable="" id="bytestoint14-lsb-msb">
             <h3 class="doctext-05 ">
                 <a href="#bytestoint14-lsb-msb">
@@ -596,7 +596,7 @@ the MIDI spec for pitch bend values and their ilk.</p>
 <span class="token function">weightedFloatToInt14</span><span class="token punctuation">(</span><span class="token number">0.5</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 8192</span>
 <span class="token function">weightedFloatToInt14</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// 16383</span></code></pre><p>Values lower than <code>-1</code> return <code>0</code>, while values greater than <code>1</code> return <code>16383</code>.</p>
 </article>
-
+    
         </section>
     </section>
 
@@ -634,7 +634,7 @@ There is a full-page MIDI monitor at <a href="http://stephen.band/midi/monitor/"
 </article>
     </section>
 
-
+    
 
     <!-- Document interactivity -->
     <script type="module">
