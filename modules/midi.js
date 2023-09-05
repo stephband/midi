@@ -2,7 +2,7 @@
 import { print, printGroup, printGroupEnd } from './print.js';
 import { overload, toArgsLength } from './utils.js';
 import { fire } from './events.js';
-import { createMessage } from './messages.js';
+import { createMessage } from './message.js';
 
 const DEBUG = true;
 const empty = new Map();

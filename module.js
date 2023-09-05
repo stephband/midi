@@ -43,7 +43,7 @@ export {
     isNote,
     isPitch,
     normalise
-} from './modules/messages.js';
+} from './modules/message.js';
 
 export {
     on,

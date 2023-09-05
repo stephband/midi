@@ -1,7 +1,7 @@
 
 import { overload, remove, toArgsLength } from './utils.js';
 import { toStatus, toControlNumber, toNoteNumber } from './data.js';
-import { createMessage, normalise } from './messages.js';
+import { createMessage, normalise } from './message.js';
 
 const performance = window.performance;
 

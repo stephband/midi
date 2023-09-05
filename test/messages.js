@@ -5,7 +5,7 @@ import {
     isNote,
     isPitch,
     normalise
-} from '../modules/messages.js';
+} from '../modules/message.js';
 
 test('MIDI message functions', function(run, log, fixture) {
 	run('createMessage()', function(equals, done) {

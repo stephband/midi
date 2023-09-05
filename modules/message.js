@@ -149,9 +149,11 @@ together, omitting the status byte and saving bandwidth. The MIDI spec requires
 that both forms are treated identically. `normalise()` <em>mutates</em>
 `'noteon'` messages with velocity `0` to `'noteoff'` messages.
 
-    normalise([145,80,0]);  // [129,80,0]
+```js
+normalise([145,80,0]);  // [129,80,0]
+```
 
-Note that the MIDI library automatically normalises incoming messages.
+Note that `MIDI.on(selector, fn)` normalises messages coming from the browser.
 */
 
 export function normalise(message) {
