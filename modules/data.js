@@ -19,6 +19,28 @@ export function floatToFrequency(ref, n) {
 	return ref * Math.pow(2, (n - A4) / 12);
 }
 
+/**
+noteToFrequency(ref, n)
+
+Given a note number or note name `n`, returns the frequency of the fundamental
+tone of that note. `tuning` is a reference frequency for middle A4/69, which
+defaults to `440`.
+
+```js
+noteToFrequency(69);      // 440
+noteToFrequency(60, 440); // 261.625565
+noteToFrequency('C4');    // 261.625565
+```
+**/
+
+export function noteToFrequency(n, tuning) {
+	return typeof n === 'number' ?
+			floatToFrequency(tuning, n) :
+		/^\d/.test(n) ?
+			floatToFrequency(tuning, parseFloat(n)) :
+			floatToFrequency(tuning, toNoteNumber(n)) ;
+}
+
 
 /**
 frequencyToFloat(ref, frequency)
