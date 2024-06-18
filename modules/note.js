@@ -113,21 +113,25 @@ const drumNames = {
     87: 'Open Surdo'
 };
 
-for (n in drumNames) {
-    notesNumbers[drumNames[n]] = parseInt(n, 10);
+function slugify(string) {
+    return string.toLowerCase().replace(/\s+/g, '-');
+}
+
+for (let n in drumNames) {
+    noteNumbers[slugify(drumNames[n])] = parseInt(n, 10);
 }
 
 export function toNoteNumber(name) {
-    if (typeof name === 'number') {
-        return name;
-    }
+    // Name is a number
+    if (typeof name === 'number') return name;
 
-    if (noteNumbers[name]) {
-        return noteNumbers[name];
-    }
+    const r = rnotename.exec(name);
 
-    var r = rnotename.exec(name);
-    return (parseInt(r[2], 10) + 1) * 12 + noteNumbers[r[1]];
+    return r ?
+        // Name is a pitch string
+        (parseInt(r[2], 10) + 1) * 12 + noteNumbers[r[1]] :
+        // Name is a GM drum string
+        noteNumbers[slugify(name)] ;
 }
 
 export function toRootNumber(name) {
