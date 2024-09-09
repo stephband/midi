@@ -70,7 +70,6 @@ function listen(port) {
 	// hanging around to avoid garbage collection:
 	// https://code.google.com/p/chromium/issues/detail?id=163795#c123
 	//store.push(port);
-
 	port.onmidimessage = fire;
 }
 
@@ -104,7 +103,7 @@ function setup(midi) {
 function statechange(e) {
 	var port = e.port;
 
-    if (DEBUG) { print(port.type + ' ' + port.state, port); }
+    if (DEBUG) { print(port.type + ' ' + port.state, port.name); }
 
     if (port.type === 'input') {
         if (port.state === 'connected') {

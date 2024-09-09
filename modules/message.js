@@ -1,5 +1,5 @@
-import { signedFloatToInt14, limit  } from './maths.js';
-import { toStatus, toNoteNumber, toControlNumber } from './data.js';
+import { signedFloatToInt14, bytesToSignedFloat, bytesToWeightedFloat, limit  } from './maths.js';
+import { toStatus as statusToChannel, toType as statusToType, toNoteNumber, toControlNumber } from './data.js';
 
 /**
 createMessage(channel, type, name, value)
@@ -106,10 +106,10 @@ export function createMessage(channel, type, name, value) {
 
 /**
 isControl(message)
-
 Returns `true` if message is a control change, otherwise `false`.
-
-    isControl([145,80,20]);       // false
+```js
+isControl([145,80,20]);       // false
+```
 */
 
 export function isControl(message) {
@@ -118,23 +118,50 @@ export function isControl(message) {
 
 /**
 isNote(message)
-
 Returns `true` where message is a noteon or noteoff, otherwise `false`.
-
-    isNote([145,80,20]);           // true
-*/
+```js
+isNote([145,80,20]);           // true
+```
+**/
 
 export function isNote(message) {
 	return message[0] > 127 && message[0] < 160 ;
 }
 
 /**
+isNoteOn(message)
+Returns `true` where message is a noteon with velocity greater than `0`.
+```js
+isNoteOn([145,80,20]);         // true
+```
+**/
+
+export function isNoteOn(message) {
+    return message[0] > 143 && message[0] < 160 && message[2] > 0;
+}
+
+/**
+isNoteOff(message)
+Returns `true` where message is a noteoff, or a noteon with 0 velocity.
+```js
+isNoteOff([145,80,20]);        // false
+```
+**/
+
+export function isNoteOff(message) {
+        // Note off
+    return (message[0] > 127 && message[0] < 144)
+        // Note on with 0 velocity
+        || (message[0] > 143 && message[0] < 160 && message[2] === 0) ;
+}
+
+/**
 isPitch(message)
-
 Returns `true` message is a pitch bend, otherwise `false`.
-
-    isPitch([145,80,20]);          // false
-*/
+```js
+isPitch([145,80,20]);          // false
+```
+**/
 
 export function isPitch(message) {
 	return message[0] > 223 && message[0] < 240 ;
@@ -143,18 +170,19 @@ export function isPitch(message) {
 /**
 normalise(message)
 
-Many keyboards transmit `'noteon'` with velocity `0` rather than `'noteoff'`
+Many instruments transmit `'noteon'` with velocity `0` rather than `'noteoff'`
 messages. This is because MIDI allows messages with the same type to be sent
 together, omitting the status byte and saving bandwidth. The MIDI spec requires
 that both forms are treated identically. `normalise()` <em>mutates</em>
-`'noteon'` messages with velocity `0` to `'noteoff'` messages.
+`'noteon'` messages with velocity `0` to `'noteoff'` messages, and passes all
+other messages through unchanged.
 
 ```js
 normalise([145,80,0]);  // [129,80,0]
 ```
 
 Note that `MIDI.on(selector, fn)` normalises messages coming from the browser.
-*/
+**/
 
 export function normalise(message) {
 	// If it's a noteon with 0 velocity, normalise it to a noteoff
@@ -163,4 +191,56 @@ export function normalise(message) {
 	}
 
 	return message;
+}
+
+
+/**
+toChannel(message)
+Returns the MIDI channel as a number between `1` and `16`.
+```js
+toChannel([145,80,20]);       // 2
+```
+**/
+
+export function toChannel(message) {
+    return statusToChannel(message[0]);
+}
+
+
+/**
+toType(message)
+Returns message type as one of the strings `'noteoff'`, `'noteon'`, `'polytouch'`,
+`'control'`, `'program'`, `'channeltouch'` or `'pitch'`.
+```js
+toType([145,80,20]);          // 'noteon'
+```
+**/
+
+export function toType(message) {
+    const type = statusToType(message[0]);
+    // Check for noteon with velocity 0
+    return type === 'noteon' && message[2] === 0 ?
+        'noteoff' :
+        type ;
+}
+
+
+/**
+toSignedFloat(message)
+Returns a 14-bit message of the form `[status, msb, lsb]` as a signed float in
+the range `-1` to `1`.
+**/
+
+export function toSignedFloat(message) {
+    return bytesToSignedFloat(message[1], message[2]);
+}
+
+/**
+toWeightedFloat(message)
+Returns a 14-bit message of the form `[status, msb, lsb]` as a weighted float in
+the range `0` to `1`.
+**/
+
+export function toWeightedFloat(message) {
+    return bytesToWeightedFloat(message[1], message[2]);
 }

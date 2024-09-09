@@ -9,8 +9,10 @@ bytesToInt14(lsb, msb)
 Given two 7-bit values for `lsb` (least significant byte) and `msb` (most
 significant byte), returns a 14-bit integer in the range `0`-`16383`.
 
-    bytesToInt14(0, 64);   // 8192
-*/
+```js
+bytesToInt14(0, 64);   // 8192
+```
+**/
 
 export function bytesToInt14(lsb, msb) {
 	// Pitch bend messages order data as [STATUS, LSB, MSB]
@@ -23,9 +25,11 @@ bytesToFloat(lsb, msb)
 Given two 7-bit values for `lsb` (least significant byte) and `msb` (most
 significant byte), returns a float in the range `0`-`1`.
 
-    bytesToFloat(0, 0);     // 0
-    bytesToFloat(0, 64);    // 0.50003051944
-    bytesToFloat(127, 127); // 1
+```js
+bytesToFloat(0, 0);     // 0
+bytesToFloat(0, 64);    // 0.50003051944
+bytesToFloat(127, 127); // 1
+```
 */
 
 export function bytesToFloat(lsb, msb) {
@@ -39,9 +43,11 @@ Given two 7-bit values for `lsb` (least significant byte) and `msb` (most
 significant byte), returns a float in the range `-1`-`1`, weighted so that
 an input of (`0`, `64`) maps to `0`.
 
-    bytesToSignedFloat(0, 0);     // -1
-    bytesToSignedFloat(0, 64);    // 0
-    bytesToSignedFloat(127, 127); // 1
+```js
+bytesToSignedFloat(0, 0);     // -1
+bytesToSignedFloat(0, 64);    // 0
+bytesToSignedFloat(127, 127); // 1
+```
 */
 
 export function bytesToSignedFloat(lsb, msb) {
@@ -55,9 +61,11 @@ Given two 7-bit values for `lsb` (least significant byte) and `msb` (most
 significant byte), returns a float in the range `0`-`1`, weighted so that
 an input of (`0`, `64`) maps to `0.5`.
 
-    bytesToWeightedFloat(0, 0);     // 0
-    bytesToWeightedFloat(0, 64);    // 0.5
-    bytesToWeightedFloat(127, 127); // 1
+```js
+bytesToWeightedFloat(0, 0);     // 0
+bytesToWeightedFloat(0, 64);    // 0.5
+bytesToWeightedFloat(127, 127); // 1
+```
 */
 
 export function bytesToWeightedFloat(lsb, msb) {
@@ -109,10 +117,12 @@ Returns a float in the range `0`-`1` for values of `n` in the range `0`-`127`.
 The input integer is mapped so that the value `64` returns exactly `0.5`, the
 centre of the range, as per the MIDI spec for controller values and their ilk.
 
-    int7ToSignedFloat(0);    // 0
-    int7ToSignedFloat(64);   // 0.5
-    int7ToSignedFloat(127);  // 1
-*/
+```js
+int7ToWeightedFloat(0);    // 0
+int7ToWeightedFloat(64);   // 0.5
+int7ToWeightedFloat(127);  // 1
+```
+**/
 
 export function int7ToWeightedFloat(n) {
 	return n < 64 ? n / 128 : 0.5 + (n - 64) / 126 ;
@@ -125,10 +135,12 @@ Returns a float in the range `-1`-`1` for values of `n` in the range `0`-`127`.
 The input integer is mapped so that the value `64` returns `0`, the centre of
 the range, as per the MIDI spec for controller values and their ilk.
 
-    int7ToSignedFloat(0);    // -1
-    int7ToSignedFloat(64);   // 0
-    int7ToSignedFloat(127);  // 1
-*/
+```
+int7ToSignedFloat(0);    // -1
+int7ToSignedFloat(64);   // 0
+int7ToSignedFloat(127);  // 1
+```
+**/
 
 export function int7ToSignedFloat(n) {
 	return n < 64 ? n / 64 - 1 : (n - 64) / 63 ;
@@ -170,9 +182,11 @@ Returns a float in the range `-1`-`1` for values of `n` in the range `0`-`16383`
 The input integer is mapped so that the value `8192` returns `0`, the centre of
 the range, as per the MIDI spec for pitch bend values and their ilk.
 
-    int14ToSignedFloat(0);      // -1
-    int14ToSignedFloat(8192);   // 0
-    int14ToSignedFloat(16383);  // 1
+```js
+int14ToSignedFloat(0);      // -1
+int14ToSignedFloat(8192);   // 0
+int14ToSignedFloat(16383);  // 1
+```
 */
 
 export function int14ToSignedFloat(n) {

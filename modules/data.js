@@ -4,7 +4,7 @@ import { toNoteNumber, toNoteOctave, toNoteName } from './note.js';
 const entries = Object.entries;
 const A4      = 69;
 
-export { toNoteNumber, toNoteOctave, toNoteName, normaliseNoteName };
+export { toNoteNumber, toNoteOctave, toNoteName };
 
 /**
 floatToFrequency(ref, n)
@@ -181,11 +181,11 @@ export function toStatus(channel, type) {
 
 /**
 toChannel(status)
-
 Returns the MIDI channel as a number between `1` and `16`.
-
-    toChannel(145);       // 2
-*/
+```js
+toChannel(145);       // 2
+```
+**/
 
 export function toChannel(status) {
 	return status % 16 + 1;
@@ -198,7 +198,9 @@ toType(status)
 Returns message type as one of the strings `'noteoff'`, `'noteon'`, `'polytouch'`,
 `'control'`, `'program'`, `'channeltouch'` or `'pitch'`.
 
-    toType(145);          // 'noteon'.
+```js
+toType(145);          // 'noteon'.
+```
 */
 
 const types = Object.keys(statuses);
