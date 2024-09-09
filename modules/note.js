@@ -37,6 +37,10 @@ toNoteNumber('D6');     // 86
 ```
 */
 
+const rnotename   = /^([A-G][♭♯#b]?)(-?\d)$/;
+const rnoteroot   = /^[A-G][♭♯#b]?/;
+const rnoteoctave = /-?\d$/;
+
 /* noteNumbers exported because used by Scribe, TODO maybe we should have a
 toRootNumber function that accepts names without octaves. */
 export const noteNumbers = {
@@ -45,17 +49,89 @@ export const noteNumbers = {
     'A♯': 10, 'A#': 10, 'B♭': 10, 'Bb': 10, 'B': 11
 };
 
-const rnotename   = /^([A-G][♭♯#b]?)(-?\d)$/;
-const rnoteroot   = /^[A-G][♭♯#b]?/;
-const rnoteoctave = /-?\d$/;
+const drumNames = {
+    27: 'High Q',
+    28: 'Slap',
+    29: 'Scratch Push',
+    30: 'Scratch Pull',
+    31: 'Sticks',
+    32: 'Square Click',
+    33: 'Metronome Click',
+    34: 'Metronome Bell',
+    35: 'Bass Drum 2',
+    36: 'Bass Drum 1',
+    37: 'Side Stick',
+    38: 'Snare Drum 1',
+    39: 'Hand Clap',
+    40: 'Snare Drum 2',
+    41: 'Low Tom 2',
+    42: 'Closed Hi-hat',
+    43: 'Low Tom 1',
+    44: 'Pedal Hi-hat',
+    45: 'Mid Tom 2',
+    46: 'Open Hi-hat',
+    47: 'Mid Tom 1',
+    48: 'High Tom 2',
+    49: 'Crash Cymbal 1',
+    50: 'High Tom 1',
+    51: 'Ride Cymbal 1',
+    52: 'Chinese Cymbal',
+    53: 'Ride Bell',
+    54: 'Tambourine',
+    55: 'Splash Cymbal',
+    56: 'Cowbell',
+    57: 'Crash Cymbal 2',
+    58: 'Vibra Slap',
+    59: 'Ride Cymbal 2',
+    60: 'High Bongo',
+    61: 'Low Bongo',
+    62: 'Mute High Conga',
+    63: 'Open High Conga',
+    64: 'Low Conga',
+    65: 'High Timbale',
+    66: 'Low Timbale',
+    67: 'High Agogo',
+    68: 'Low Agogo',
+    69: 'Cabasa',
+    70: 'Maracas',
+    71: 'Short Whistle',
+    72: 'Long Whistle',
+    73: 'Short Guiro',
+    74: 'Long Guiro',
+    75: 'Claves',
+    76: 'High Wood Block',
+    77: 'Low Wood Block',
+    78: 'Mute Cuica',
+    79: 'Open Cuica',
+    80: 'Mute Triangle',
+    81: 'Open Triangle',
+    82: 'Shaker',
+    83: 'Jingle Bell',
+    84: 'Belltree',
+    85: 'Castanets',
+    86: 'Mute Surdo',
+    87: 'Open Surdo'
+};
+
+function slugify(string) {
+    return string.toLowerCase().replace(/\s+/g, '-');
+}
+
+for (let n in drumNames) {
+    noteNumbers[slugify(drumNames[n])] = parseInt(n, 10);
+}
 
 export function toNoteNumber(name) {
-    if (typeof name === 'number') {
-        return name;
-    }
+    // Name is a number
+    if (typeof name === 'number') return name;
 
-    var r = rnotename.exec(name);
-    return (parseInt(r[2], 10) + 1) * 12 + noteNumbers[r[1]];
+    const r = rnotename.exec(name);
+
+    return r ?
+        // Name is a pitch string
+        (parseInt(r[2], 10) + 1) * 12 + noteNumbers[r[1]] :
+        // Name is a GM drum string
+        noteNumbers[slugify(name)] ;
 }
 
 export function toRootNumber(name) {
@@ -108,4 +184,14 @@ export function toNoteOctave(n) {
     return typeof n === 'number' ?
         Math.floor(n / 12) - 1 :
         Number(noteNumbers[(rnoteoctave.exec(name) || nothing)[0]]) ;
+}
+
+/**
+toDrumName(n)
+Returns a standard General MIDI drum name for note number or note name `n`.
+**/
+
+export function toDrumName(n) {
+    const number = toNoteNumber(n);
+    return drumNames[number] || '';
 }
