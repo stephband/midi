@@ -1,5 +1,5 @@
-import { signedFloatToInt14, bytesToSignedFloat, bytesToWeightedFloat, limit  } from './maths.js';
-import { toStatus as statusToChannel, toType as statusToType, toNoteNumber, toControlNumber } from './data.js';
+import { signedFloatToInt14, bytesToSignedFloat, bytesToWeightedFloat, clamp  } from './maths.js';
+import { toStatus as toStatusByteByte, toChannel as byteToChannel, toType as byteToType, toNoteNumber, toControlNumber } from './data.js';
 
 /**
 createMessage(channel, type, name, value)
@@ -28,12 +28,11 @@ createMessage(1, 'control', 'modulation', 1);
 
 #### for type `'pitch'`:
 
-- `name`: a bend range in semitones.
-- `value`: a positive or negative float within that range representing a pitch
-  bend in semitones.
+- `name`: a positive or negative float representing a pitch bend in semitones.
+- `value`: a bend range in semitones (optional, defaults to `2`).
 
 ```
-createMessage(1, 'pitch', 2, 0.25);
+createMessage(1, 'pitch', 0.25);
 ```
 
 #### for type `'polytouch'`:
@@ -65,43 +64,77 @@ createMessage(1, 'program', 24);
 
 */
 
-function createNote(name, value, message) {
-    message[1] = typeof name === 'string' ? toNoteNumber(name) : name ;
-    message[2] = limit(0, 127, value * 127);
-}
+const create = {
+    'noteon': (channel, name, value) => Uint8Array.of(
+        // Status
+        143 + channel,
+        // Number
+        typeof name === 'string' ? toNoteNumber(name) : name,
+        // Velocity
+        clamp(0, 127, value * 127)
+    ),
 
-const createData = {
-    'noteon': createNote,
-    'noteoff': createNote,
-    'polytouch': createNote,
+    'noteoff': (channel, name, value) => Uint8Array.of(
+        // Status
+        127 + channel,
+        // Number
+        typeof name === 'string' ? toNoteNumber(name) : name,
+        // Velocity
+        clamp(0, 127, value * 127)
+    ),
 
-    'channeltouch': function(name, value, message) {
-        message[1] = limit(0, 127, value * 127);
-        message[2] = 0;
+    'polytouch': (channel, name, value) => Uint8Array.of(
+        // Status
+        159 + channel,
+        // Number
+        typeof name === 'string' ? toNoteNumber(name) : name,
+        // Velocity
+        clamp(0, 127, value * 127)
+    ),
+
+    'channeltouch': (channel, value) => Uint8Array.of(
+        // Status
+        207 + channel,
+        // Force
+        clamp(0, 127, value * 127),
+        // Nothing
+        0
+    ),
+
+    'control': (channel, name, value) => Uint8Array.of(
+        // Status
+        175 + channel,
+        // Number
+        typeof name === 'string' ? toControlNumber(name) : name ,
+        // Value
+        clamp(0, 127, value * 127)
+    ),
+
+    'pitch': (channel, value, range = 2) => {
+        const int14 = signedFloatToInt14(value / range);
+
+        return Uint8Array.of(
+            // Status
+            223 + channel,
+            // LSB
+            int14 & 127,
+            // MSB
+            int14 >> 7
+        );
     },
 
-    'control': function(name, value, message) {
-        message[1] = typeof name === 'string' ? toControlNumber(name) : name ;
-        message[2] = limit(0, 127, value * 127);
-    },
-
-    'pitch': function(range, value, message) {
-        const int14 = signedFloatToInt14(value/range);
-		message[1] = int14 & 127; // LSB
-		message[2] = int14 >> 7;  // MSB
-    },
-
-    'program': function(name, value, message) {
-        message[1] = name;
-        message[2] = 0;
-    }
+    'program': (channel, type, number) => Uint8Array.of(
+        // Status
+        191 + channel,
+        // Number
+        number,
+        // Nothing
+        0
+    ),
 };
 
 export function createMessage(channel, type, name, value) {
-	var message = new Uint8Array(3);
-	message[0] = toStatus(channel, type);
-    createData[type](name, value, message);
-    return message;
+    return create[type](channel, type, name, value);
 }
 
 /**
@@ -203,7 +236,7 @@ toChannel([145,80,20]);       // 2
 **/
 
 export function toChannel(message) {
-    return statusToChannel(message[0]);
+    return byteToChannel(message[0]);
 }
 
 
@@ -217,7 +250,7 @@ toType([145,80,20]);          // 'noteon'
 **/
 
 export function toType(message) {
-    const type = statusToType(message[0]);
+    const type = byteToType(message[0]);
     // Check for noteon with velocity 0
     return type === 'noteon' && message[2] === 0 ?
         'noteoff' :

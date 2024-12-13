@@ -41,8 +41,7 @@ const rnotename   = /^([A-G][♭♯#b]?)(-?\d)$/;
 const rnoteroot   = /^[A-G][♭♯#b]?/;
 const rnoteoctave = /-?\d$/;
 
-/* noteNumbers exported because used by Scribe, TODO maybe we should have a
-toRootNumber function that accepts names without octaves. */
+/* noteNumbers exported because used by Scribe */
 export const noteNumbers = {
     'C':  0, 'C♯': 1, 'C#': 1, 'D♭': 1, 'Db': 1, 'D': 2, 'D♯': 3, 'D#': 3, 'E♭': 3, 'Eb': 3, 'E': 4,
     'F':  5, 'F♯': 6, 'F#': 6, 'G♭': 6, 'Gb': 6, 'G': 7, 'G♯': 8, 'G#': 8, 'A♭': 8, 'Ab': 8, 'A': 9,

@@ -1,5 +1,5 @@
 
-export function limit(min, max, n) {
+export function clamp(min, max, n) {
     return n > max ? max : n < min ? min : n ;
 }
 
@@ -82,7 +82,7 @@ Values lower than `0` return `0`, while values greater than `1` return `127`.
 */
 
 export function floatToInt7(n) {
-	return Math.round(limit(0, 1, n) * 127);
+	return Math.round(clamp(0, 1, n) * 127);
 }
 
 /**
@@ -95,7 +95,7 @@ Values lower than `0` return `0`, while values greater than `1` return `16383`.
 */
 
 export function floatToInt14(n) {
-	return Math.round(limit(0, 1, n) * 16383);
+	return Math.round(clamp(0, 1, n) * 16383);
 }
 
 /**
@@ -196,9 +196,12 @@ export function int14ToSignedFloat(n) {
 /**
 int14ToLSB(n)
 
-Returns the least significant 7-bit data byte of an unsigned 14-bit integer.
+Returns the least significant 7-bit data byte of an unsigned 14-bit integer (in
+the range `0`-`16383`).
 
-    int14ToLSB(8192);      // 0
+```js
+int14ToLSB(8192);            // 0
+```
 
 Out-of-range input values will return spurious results.
 */
@@ -210,10 +213,12 @@ export function int14ToLSB(n) {
 /**
 int14ToMSB(n)
 
-Returns the most significant 7-bit data byte of an unsigned 14-bit integer in
-the range `0`-`16383`
+Returns the most significant 7-bit data byte of an unsigned 14-bit integer (in
+the range `0`-`16383`).
 
-    int14ToMSB(8192);      // 64
+```js
+int14ToMSB(8192);      // 64
+```
 
 Out-of-range input values will return spurious results.
 */
