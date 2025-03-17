@@ -43,8 +43,6 @@ function listenToPorts(port) {
 const ports = {};
 
 function fire(e) {
-    console.log('IN', e.timeStamp);
-
     // Normalise noteon 0 to noteoff
     normalise(e.data);
 
