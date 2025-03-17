@@ -3,7 +3,7 @@ import Stream          from 'fn/stream/stream.js';
 import { MIDIInputs }  from './ports.js';
 import { overload, remove, toArgsLength } from './utils.js';
 import { toStatus, toControlNumber, toNoteNumber } from './data.js';
-import { createMessage, normalise }       from './message.js';
+import { createMessage, normalise }         from './message.js';
 import { print, printGroup, printGroupEnd } from './print.js';
 
 
@@ -43,35 +43,37 @@ function listenToPorts(port) {
 const ports = {};
 
 function fire(e) {
+    console.log('IN', e.timeStamp);
+
     // Normalise noteon 0 to noteoff
     normalise(e.data);
 
     // Fire port-specific listeners, if port is defined and there are any
     if (e.target && e.target.id) {
         const portRoot = ports[e.target.id];
-        if (portRoot) { fireRoute(0, portRoot, e); }
+        if (portRoot) { fireRoute(0, portRoot, e.data); }
     }
 
     // Fire port-generic listeners, if there are any
     const allRoot = ports['undefined'];
-    if (allRoot) { fireRoute(0, allRoot, e); }
+    if (allRoot) { fireRoute(0, allRoot, e.data); }
 }
 
 function push(message, stream) {
-    stream.push(message);
+    Stream.push(stream, message);
     return message;
 }
 
-function fireRoute(i, tree, e) {
-	var name   = e.data[i++];
+function fireRoute(i, tree, data) {
+	var name   = data[i++];
 	var branch = tree[name];
 
 	if (name === undefined) {
-		branch && branch.reduce(push, e.data);
+		branch && branch.reduce(push, data);
 	}
 	else {
-		branch && fireRoute(i, branch, e.data);
-		tree.undefined && tree.undefined.reduce(push, e.data);
+		branch && fireRoute(i, branch, data);
+		tree.undefined && tree.undefined.reduce(push, data);
 	}
 }
 

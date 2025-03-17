@@ -55,7 +55,7 @@ assign(MIDIPorts.prototype, Stream.prototype, {
     start: function() {
         request().then((midi) => {
             let entry;
-            for (entry of midi[this.type]) {
+            for (entry of midi[this.type + 's']) {
                 //console.log(entry[0], entry[1].name);
                 Stream.push(this, entry[1]);
             }
