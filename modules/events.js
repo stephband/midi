@@ -51,29 +51,29 @@ function fire(e) {
     // Fire port-specific listeners, if port is defined and there are any
     if (e.target && e.target.id) {
         const portRoot = ports[e.target.id];
-        if (portRoot) { fireRoute(0, portRoot, e.data); }
+        if (portRoot) { fireRoute(0, portRoot, e); }
     }
 
     // Fire port-generic listeners, if there are any
     const allRoot = ports['undefined'];
-    if (allRoot) { fireRoute(0, allRoot, e.data); }
+    if (allRoot) { fireRoute(0, allRoot, e); }
 }
 
-function push(message, stream) {
-    Stream.push(stream, message);
-    return message;
+function push(e, stream) {
+    Stream.push(stream, e);
+    return e;
 }
 
-function fireRoute(i, tree, data) {
-	var name   = data[i++];
+function fireRoute(i, tree, e) {
+	var name   = e.data[i++];
 	var branch = tree[name];
 
 	if (name === undefined) {
-		branch && branch.reduce(push, data);
+		branch && branch.reduce(push, e);
 	}
 	else {
-		branch && fireRoute(i, branch, data);
-		tree.undefined && tree.undefined.reduce(push, data);
+		branch && fireRoute(i, branch, e);
+		tree.undefined && tree.undefined.reduce(push, e);
 	}
 }
 
@@ -268,11 +268,11 @@ const removeSelectorRoute = overload(toSelectorType, {
 
 
 /**
-events(selector)
+MIDIEvents(selector)
 
-Registers a handler `stream` for incoming MIDI events that match object `selector`.
-A selector is either an array (or array-like) in the form of a MIDI message
-`[status, data1, data2]`:
+Registers a handler `stream` for incoming MIDI events that match object
+`selector`. A selector is either an array (or array-like) in the form of a MIDI
+message `[status, data1, data2]`:
 
 ```js
 // Create stream of CH1 NOTEON events
@@ -327,13 +327,12 @@ function MIDIEvents(selector = {}) {
 }
 
 MIDIEvents.prototype = assign(create(Stream.prototype), {
-    start: function(output) {
+    start: function() {
         const selector = this.selector;
         const id   = selector.port || 'undefined';
         const root = ports[id] || (ports[id] = {});
 
         // Connect stream to output
-        //pipe(this, output);
         setSelectorRoute(this.selector, root, this);
         if (!init++) MIDIInputs.each(listenToPorts);
         return this;
