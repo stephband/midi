@@ -12,7 +12,7 @@ import {
     int14ToMSB,
     signedFloatToInt7,
     signedFloatToInt14
-} from '../modules/maths.js';
+} from '../modules/bytes.js';
 
 test('MIDI maths functions', function(run, log, fixture) {
 	run('bytesToInt14()', function(equals, done) {

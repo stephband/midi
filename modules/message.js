@@ -1,5 +1,8 @@
-import { signedFloatToInt14, bytesToSignedFloat, bytesToWeightedFloat, clamp  } from './maths.js';
-import { toStatus as toStatusByteByte, toChannel as byteToChannel, toType as byteToType, toNoteNumber, toControlNumber } from './data.js';
+import clamp from 'fn/clamp.js';
+import { signedFloatToInt14, bytesToSignedFloat, bytesToWeightedFloat  } from './bytes.js';
+import { toStatus as toStatusByteByte, toChannel as byteToChannel, toType as byteToType } from './status.js';
+import { toNoteNumber }    from './note.js';
+import { toControlNumber } from './control.js';
 
 /**
 createMessage(channel, type, name, value)

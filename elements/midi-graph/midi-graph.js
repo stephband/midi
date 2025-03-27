@@ -17,7 +17,7 @@ This module has external dependencies.
 
 import { noop, overload, parseInt } from '../../../fn/module.js';
 import { element, now } from '../../../dom/module.js';
-import { print } from '../../modules/print.js';
+import { log } from '../../modules/log.js';
 import { bytesToSignedFloat, toChannel, toNoteName, on, toType } from '../../module.js';
 
 var defaults = {
@@ -429,6 +429,6 @@ element('midi-graph', {
             });
         }
 
-        print('<midi-graph> initialised', this);
+        log('<midi-graph> initialised', this);
     }
 });

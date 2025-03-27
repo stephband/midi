@@ -18,7 +18,7 @@ There is a full-page MIDI monitor at [stephen.band/midi/monitor/](http://stephen
 
 import { element } from '../../../dom/module.js';
 import { toNoteName, on, toChannel, toType } from '../../module.js';
-import { print } from '../../modules/print.js';
+import { log } from '../../modules/log.js';
 
 var DEBUG = true;
 
@@ -251,6 +251,6 @@ element('midi-monitor', {
             requestRender();
         });
 
-        print('<midi-monitor> initialised', this);
+        log('<midi-monitor> initialised', this);
     }
 });

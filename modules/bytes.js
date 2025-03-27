@@ -1,7 +1,5 @@
 
-export function clamp(min, max, n) {
-    return n > max ? max : n < min ? min : n ;
-}
+import clamp from 'fn/clamp.js';
 
 /**
 bytesToInt14(lsb, msb)

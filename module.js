@@ -1,6 +1,6 @@
 
-import { print } from './modules/print.js';
-print('       - http://stephen.band/midi/');
+import { log } from './modules/log.js';
+log('       - http://stephen.band/midi/');
 
 export {
     bytesToInt14,
@@ -21,7 +21,7 @@ export {
     signedFloatToInt14,
     weightedFloatToInt7,
     weightedFloatToInt14
-} from './modules/maths.js';
+} from './modules/bytes.js';
 
 export {
     toControlNumber,

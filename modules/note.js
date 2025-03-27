@@ -40,6 +40,7 @@ toNoteNumber('D6');     // 86
 const rnotename   = /^([A-G][♭♯#b]?)(-?\d)$/;
 const rnoteroot   = /^[A-G][♭♯#b]?/;
 const rnoteoctave = /-?\d$/;
+const rhz         = /[Hh]z$/;
 
 /* noteNumbers exported because used by Scribe */
 export const noteNumbers = {
@@ -120,9 +121,51 @@ for (let n in drumNames) {
     noteNumbers[slugify(drumNames[n])] = parseInt(n, 10);
 }
 
+
+
+/**
+frequencyToNote(n, ref = 440)
+Returns note number as a 32bit float from frequency float `n`.
+**/
+
+const A4 = 69;
+
+export function frequencyToFloat(freq, ref = 440) {
+    var number = A4 + 12 * Math.log(freq / ref) / Math.log(2);
+
+    // Rounded it to nearest 32-bit value to avoid floating point errors
+    // and return whole semitone numbers where possible.
+    return Math.fround(number);
+}
+
+
+/**
+floatToFrequency(n, ref = 440)
+Returns frequency from note number float `n`.
+**/
+
+export function floatToFrequency(n, ref = 440) {
+    return ref * Math.pow(2, (n - A4) / 12);
+}
+
+
+/**
+toNoteNumber(n)
+Returns note number from a frequency string, note name or drum name.
+
+```js
+toNoteNumber('A4');       // 69
+toNoteNumber('440Hz');    // 69
+toNoteNumber('Cabasa');   // 69
+```
+**/
+
 export function toNoteNumber(name) {
     // Name is a number
     if (typeof name === 'number') return name;
+
+    // Name is a frequency string post-fixed with 'Hz'
+    if (rhz.test(name)) return frequencyToFloat(parseFloat(name));
 
     const r = rnotename.exec(name);
 

@@ -3,7 +3,6 @@ import noop            from 'fn/noop.js';
 import overload        from 'fn/overload.js';
 //import { MIDIOutputs } from './ports.js';
 import { createMessage } from './message.js';
-import { print, printGroup, printGroupEnd } from './print.js';
 
 const assign = Object.assign;
 

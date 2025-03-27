@@ -1,10 +1,13 @@
 
-import Stream          from 'fn/stream/stream.js';
-import { MIDIInputs }  from './ports.js';
-import { overload, remove, toArgsLength } from './utils.js';
-import { toStatus, toControlNumber, toNoteNumber } from './data.js';
+import overload         from 'fn/overload.js';
+import remove           from 'fn/remove.js';
+import Stream           from 'fn/stream/stream.js';
+import { MIDIInputs }   from './ports.js';
+import { toStatus }     from './status.js';
+import { toNoteNumber } from './note.js';
+import { toControlNumber } from './control.js';
 import { createMessage, normalise }         from './message.js';
-import { print, printGroup, printGroupEnd } from './print.js';
+import { log, logGroup, logGroupEnd } from './log.js';
 
 
 const A           = Array.prototype;
@@ -12,6 +15,10 @@ const assign      = Object.assign;
 const create      = Object.create;
 const performance = window.performance;
 
+
+function toArgsLength() {
+    return arguments.length;
+}
 
 function listen(port) {
     // It's suggested here that we need to keep a reference to midi inputs
@@ -30,7 +37,7 @@ function unlisten(port) {
 }
 
 function listenToPorts(port) {
-    if (DEBUG) print(port.type + ' ' + port.state, port.name);
+    if (DEBUG) log(port.type + ' ' + port.state, port.name);
     if (port.state === 'connected') listen(port)
     else unlisten(port);
 }
