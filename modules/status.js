@@ -48,7 +48,7 @@ toChannel(145);       // 2
 **/
 
 export function toChannel(status) {
-    return status % 16 + 1;
+    return (status & 15) + 1;
 }
 
 
@@ -64,5 +64,5 @@ toType(145);          // 'noteon'.
 */
 
 export function toType(status) {
-    return types[Math.floor(status / 16) - 8];
+    return types[(status >> 4) - 8];
 }

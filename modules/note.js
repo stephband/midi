@@ -16,7 +16,7 @@ normaliseNoteName('Eb6');      // 'E♭6'
 
 const rTextSymbol    = /b|#/g;
 const unicodeSymbols = { 'b': '♭', '#': '♯' };
-const mod12          = mod(12);
+const mod12          = (n) => mod(12, n);
 
 function replaceSymbol($0) {
     return unicodeSymbols[$0];
