@@ -245,8 +245,8 @@ export function toChannel(message) {
 
 /**
 toType(message)
-Returns message type as one of the strings `'noteoff'`, `'noteon'`, `'polytouch'`,
-`'control'`, `'program'`, `'channeltouch'` or `'pitch'`.
+Returns message type as one of the strings `'noteoff'`, `'noteon'`,
+`'polytouch'`, `'control'`, `'program'`, `'channeltouch'` or `'pitch'`.
 ```js
 toType([145,80,20]);          // 'noteon'
 ```
