@@ -327,12 +327,13 @@ events({ port: '0123', channel: 4, type: 'control', name: 64 }}, stream);
 
 let init = 0;
 
-function MIDIEvents(selector = {}) {
-    this.selector = selector;
-}
+class MIDIEvents extends Stream {
+    constructor(selector = {}) {
+        super();
+        this.selector = selector;
+    }
 
-MIDIEvents.prototype = assign(create(Stream.prototype), {
-    start: function() {
+    start() {
         const selector = this.selector;
         const id   = selector.port || 'undefined';
         const root = ports[id] || (ports[id] = {});
@@ -341,9 +342,9 @@ MIDIEvents.prototype = assign(create(Stream.prototype), {
         setSelectorRoute(this.selector, root, this);
         if (!init++) MIDIInputs.each(listenToPorts);
         return this;
-    },
+    }
 
-    stop: function() {
+    stop() {
         const selector = this.selector;
         const id   = selector.port || 'undefined';
         const root = ports[id] || (ports[id] = {});
@@ -351,7 +352,7 @@ MIDIEvents.prototype = assign(create(Stream.prototype), {
         removeSelectorRoute(this.selector, root, this);
         return Stream.stop(this);
     }
-});
+}
 
 export default function MIDI(selector) {
     return new MIDIEvents(selector);

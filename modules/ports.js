@@ -47,12 +47,13 @@ A stream of MIDI output ports. A port is pushed into the stream whenever its
 connection state changes.
 **/
 
-function MIDIPorts(type) {
-    this.type = type;
-}
+class MIDIPorts extends Stream {
+    constructor(type) {
+        super();
+        this.type = type;
+    }
 
-assign(MIDIPorts.prototype, Stream.prototype, {
-    start: function() {
+    start() {
         request().then((midi) => {
             let entry;
             for (entry of midi[this.type + 's']) {
@@ -60,10 +61,10 @@ assign(MIDIPorts.prototype, Stream.prototype, {
                 Stream.push(this, entry[1]);
             }
         });
-    },
+    }
 
-    stop: null
-});
+    stop() {}
+}
 
 export const MIDIInputs  = new MIDIPorts('input');
 export const MIDIOutputs = new MIDIPorts('output');
