@@ -25,24 +25,35 @@ function listen(port) {
     // hanging around to avoid garbage collection:
     // https://code.google.com/p/chromium/issues/detail?id=163795#c123
     //store.push(port);
+
+    // Port already has handler
+    if (port.onmidimessage) {
+        console.log('SHOULD NOT HAPPEN Port already listened', port.id, port.name);
+        return;
+    }
+
     port.onmidimessage = fire;
+    port.onstatechange = statechange;
+}
+
+function statechange(e) {
+    //console.log(e.type, port.state, port);
+    if (e.port.state !== 'connected') unlisten(e.port);
 }
 
 function unlisten(port) {
     // Free port up for garbage collection.
     //const i = store.indexOf(port);
     //if (i > -1) { store.splice(i, 1); }
-
     port.onmidimessage = null;
+    port.onstatechange = null;
 }
 
-function listenToPorts(port) {
-    if (DEBUG) log(port.type + ' ' + port.state, port.name);
+function listenToPort(port) {
+    if (DEBUG) log('listening to input', port.name);
     if (port.state === 'connected') listen(port)
     else unlisten(port);
 }
-
-
 
 
 // Incoming message routing
@@ -136,11 +147,11 @@ function toQuery(selector) {
 	return query;
 }
 
-function toSelectorType(object) {
+function toSelectorType(selector) {
     // Loose duck type checking for index 0, so that we may accept
     // objects as array selectors
-    return typeof object[0] === 'number' ? 'array' :
-        object.channel ? object.type :
+    return typeof selector[0] === 'number' ? 'array' :
+        selector.channel ? selector.type :
         'array' ;
 }
 
@@ -200,6 +211,8 @@ const setSelectorRoute = overload(toSelectorType, {
 
         selector.type = 'program';
         setSelectorRoute(selector, root, stream);
+
+        delete selector.type;
     },
 
     default: function(selector, root, stream) {
@@ -263,6 +276,8 @@ const removeSelectorRoute = overload(toSelectorType, {
 
         selector.type = 'program';
         removeSelectorRoute(selector, root, stream);
+
+        delete selector.type;
     },
 
     default: function(selector, root, stream) {
@@ -339,8 +354,14 @@ class MIDIEvents extends Stream {
         const root = ports[id] || (ports[id] = {});
 
         // Connect stream to output
-        setSelectorRoute(this.selector, root, this);
-        if (!init++) MIDIInputs.each(listenToPorts);
+        setSelectorRoute(selector, root, this);
+
+        // On first time only, start listening to ports
+        if (!init++) {
+            const inputs = new MIDIInputs();
+            inputs.each(listenToPort);
+        }
+
         return this;
     }
 
@@ -348,7 +369,6 @@ class MIDIEvents extends Stream {
         const selector = this.selector;
         const id   = selector.port || 'undefined';
         const root = ports[id] || (ports[id] = {});
-
         removeSelectorRoute(this.selector, root, this);
         return Stream.stop(this);
     }
