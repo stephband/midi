@@ -50,6 +50,7 @@ export const noteNumbers = {
 };
 
 const drumNames = {
+    // Roland extension to General MIDI
     27: 'High Q',
     28: 'Slap',
     29: 'Scratch Push',
@@ -58,22 +59,23 @@ const drumNames = {
     32: 'Square Click',
     33: 'Metronome Click',
     34: 'Metronome Bell',
-    35: 'Bass Drum 2',
-    36: 'Bass Drum 1',
+    // General MIDI
+    35: 'Low Bass Drum',
+    36: 'High Bass Drum',
     37: 'Side Stick',
     38: 'Snare Drum 1',
     39: 'Hand Clap',
     40: 'Snare Drum 2',
-    41: 'Low Tom 2',
+    41: 'Low Floor Tom',
     42: 'Closed Hi-hat',
-    43: 'Low Tom 1',
+    43: 'High Floor Tom',
     44: 'Pedal Hi-hat',
-    45: 'Mid Tom 2',
+    45: 'Low Tom',
     46: 'Open Hi-hat',
-    47: 'Mid Tom 1',
-    48: 'High Tom 2',
+    47: 'Low Mid Tom',
+    48: 'High Mid Tom',
     49: 'Crash Cymbal 1',
-    50: 'High Tom 1',
+    50: 'High Tom',
     51: 'Ride Cymbal 1',
     52: 'Chinese Cymbal',
     53: 'Ride Bell',
@@ -105,6 +107,7 @@ const drumNames = {
     79: 'Open Cuica',
     80: 'Mute Triangle',
     81: 'Open Triangle',
+    // Roland extension to General MIDI
     82: 'Shaker',
     83: 'Jingle Bell',
     84: 'Belltree',
