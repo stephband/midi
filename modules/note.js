@@ -1,6 +1,7 @@
 
 import nothing from '../../fn/modules/nothing.js';
 import mod     from '../../fn/modules/mod.js';
+import slugify from '../../fn/modules/slugify.js';
 
 
 /**
@@ -53,72 +54,68 @@ const drumNames = {
     // Roland extension to General MIDI
     27: 'High Q',
     28: 'Slap',
-    29: 'Scratch Push',
-    30: 'Scratch Pull',
+    29: 'Scratch push',
+    30: 'Scratch pull',
     31: 'Sticks',
-    32: 'Square Click',
-    33: 'Metronome Click',
-    34: 'Metronome Bell',
+    32: 'Square click',
+    33: 'Metronome click',
+    34: 'Metronome bell',
     // General MIDI
-    35: 'Low Bass Drum',
-    36: 'High Bass Drum',
-    37: 'Side Stick',
-    38: 'Snare Drum 1',
-    39: 'Hand Clap',
-    40: 'Snare Drum 2',
-    41: 'Low Floor Tom',
-    42: 'Closed Hi-hat',
-    43: 'High Floor Tom',
-    44: 'Pedal Hi-hat',
-    45: 'Low Tom',
-    46: 'Open Hi-hat',
-    47: 'Low Mid Tom',
-    48: 'High Mid Tom',
-    49: 'Crash Cymbal 1',
-    50: 'High Tom',
-    51: 'Ride Cymbal 1',
-    52: 'Chinese Cymbal',
+    35: 'Low bass drum',
+    36: 'High bass drum',
+    37: 'Side stick',
+    38: 'Snare drum 1',
+    39: 'Hand clap',
+    40: 'Snare drum 2',
+    41: 'Low floor tom',
+    42: 'Closed hi-hat',
+    43: 'High floor tom',
+    44: 'Pedal hi-hat',
+    45: 'Low tom',
+    46: 'Open hi-hat',
+    47: 'Low mid tom',
+    48: 'High mid tom',
+    49: 'Crash cymbal 1',
+    50: 'High tom',
+    51: 'Ride cymbal 1',
+    52: 'Chinese cymbal',
     53: 'Ride Bell',
     54: 'Tambourine',
-    55: 'Splash Cymbal',
+    55: 'Splash cymbal',
     56: 'Cowbell',
-    57: 'Crash Cymbal 2',
+    57: 'Crash cymbal 2',
     58: 'Vibra Slap',
-    59: 'Ride Cymbal 2',
-    60: 'High Bongo',
-    61: 'Low Bongo',
-    62: 'Mute High Conga',
-    63: 'Open High Conga',
-    64: 'Low Conga',
-    65: 'High Timbale',
-    66: 'Low Timbale',
-    67: 'High Agogo',
-    68: 'Low Agogo',
+    59: 'Ride cymbal 2',
+    60: 'High bongo',
+    61: 'Low bongo',
+    62: 'Mute high conga',
+    63: 'Open high conga',
+    64: 'Low conga',
+    65: 'High timbale',
+    66: 'Low timbale',
+    67: 'High agogo',
+    68: 'Low agogo',
     69: 'Cabasa',
     70: 'Maracas',
-    71: 'Short Whistle',
-    72: 'Long Whistle',
-    73: 'Short Guiro',
-    74: 'Long Guiro',
+    71: 'Short whistle',
+    72: 'Long whistle',
+    73: 'Short guiro',
+    74: 'Long guiro',
     75: 'Claves',
-    76: 'High Wood Block',
-    77: 'Low Wood Block',
-    78: 'Mute Cuica',
-    79: 'Open Cuica',
-    80: 'Mute Triangle',
-    81: 'Open Triangle',
+    76: 'High wood block',
+    77: 'Low wood block',
+    78: 'Mute cuica',
+    79: 'Open cuica',
+    80: 'Mute triangle',
+    81: 'Open triangle',
     // Roland extension to General MIDI
     82: 'Shaker',
-    83: 'Jingle Bell',
+    83: 'Jingle bell',
     84: 'Belltree',
     85: 'Castanets',
-    86: 'Mute Surdo',
-    87: 'Open Surdo'
+    86: 'Mute surdo',
+    87: 'Open surdo'
 };
-
-function slugify(string) {
-    return string.toLowerCase().replace(/\s+/g, '-');
-}
 
 for (let n in drumNames) {
     noteNumbers[slugify(drumNames[n])] = parseInt(n, 10);
@@ -228,7 +225,7 @@ toNoteOctave(69);     // 4
 export function toNoteOctave(n) {
     return typeof n === 'number' ?
         Math.floor(n / 12) - 1 :
-        Number(noteNumbers[(rnoteoctave.exec(name) || nothing)[0]]) ;
+        noteNumbers[(rnoteoctave.exec(name) || nothing)[0]] ;
 }
 
 /**
