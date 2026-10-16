@@ -15,8 +15,8 @@ normaliseNoteName('Eb6');      // 'E♭6'
 ```
 */
 
-const rTextSymbol    = /b|#/g;
-const unicodeSymbols = { 'b': '♭', '#': '♯' };
+const rTextSymbol    = /bb|##|b|#/g;
+const unicodeSymbols = { 'bb': '𝄫', '##': '𝄪', 'b': '♭', '#': '♯' };
 const mod12          = (n) => mod(12, n);
 
 function replaceSymbol($0) {
@@ -38,16 +38,20 @@ toNoteNumber('D6');     // 86
 ```
 */
 
-const rnotename   = /^([A-G][♭♯#b]?)(-?\d)$/;
-const rnoteroot   = /^[A-G][♭♯#b]?/;
+const rnotename   = /^([A-G](?:bb|##|[𝄫𝄪♭♯#b])?)(-?\d)$/u;
+const rnoteroot   = /^[A-G](?:bb|##|[𝄫𝄪♭♯#b])?/u;
 const rnoteoctave = /-?\d$/;
 const rhz         = /[Hh]z$/;
 
 /* noteNumbers exported because used by Scribe */
 export const noteNumbers = {
-    'C♭':-1, 'Cb':-1, 'C':  0, 'C♯': 1, 'C#': 1, 'D♭': 1, 'Db': 1, 'D':  2, 'D♯': 3, 'D#': 3, 'E♭': 3, 'Eb': 3,
-    'E':  4, 'F♭': 4, 'Fb': 4, 'E♯': 5, 'E#': 5, 'F':  5, 'F♯': 6, 'F#': 6, 'G♭': 6, 'Gb': 6, 'G':  7,
-    'G♯': 8, 'G#': 8, 'A♭': 8, 'Ab': 8, 'A':  9, 'A♯': 10,'A#': 10,'B♭': 10,'Bb': 10,'B': 11, 'B♯': 12, 'B#': 12
+    'C𝄫':-2, 'Cbb':-2, 'C♭':-1, 'Cb':-1, 'C':  0, 'C♯': 1, 'C#': 1, 'C𝄪': 2, 'C##': 2,
+    'D𝄫': 0, 'Dbb': 0, 'D♭': 1, 'Db': 1, 'D':  2, 'D♯': 3, 'D#': 3, 'D𝄪': 4, 'D##': 4,
+    'E𝄫': 2, 'Ebb': 2, 'E♭': 3, 'Eb': 3, 'E':  4, 'E♯': 5, 'E#': 5, 'E𝄪': 6, 'E##': 6,
+    'F𝄫': 3, 'Fbb': 3, 'F♭': 4, 'Fb': 4, 'F':  5, 'F♯': 6, 'F#': 6, 'F𝄪': 7, 'F##': 7,
+    'G𝄫': 5, 'Gbb': 5, 'G♭': 6, 'Gb': 6, 'G':  7, 'G♯': 8, 'G#': 8, 'G𝄪': 9, 'G##': 9,
+    'A𝄫': 7, 'Abb': 7, 'A♭': 8, 'Ab': 8, 'A':  9, 'A♯': 10,'A#': 10,'A𝄪': 11,'A##': 11,
+    'B𝄫': 9, 'Bbb': 9, 'B♭': 10,'Bb': 10,'B':  11,'B♯': 12,'B#': 12,'B𝄪': 13,'B##': 13
 };
 
 const drumNames = {
