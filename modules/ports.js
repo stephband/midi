@@ -1,15 +1,15 @@
 
 import nothing from 'fn/nothing.js';
-import noop    from 'fn/noop.js';
 import remove  from 'fn/remove.js';
 import Stream  from 'fn/stream/stream.js';
 import { log, logGroup, logGroupEnd } from './log.js';
 
-const assign = Object.assign;
+
 const inputs = [];
-const output = [];
+
 
 let promise;
+
 
 function request(options) {
     if (promise) return promise;
