@@ -1,4 +1,4 @@
-import { test } from '../../fn/module.js';
+import { test } from 'fn/module.js';
 import {
 
 } from '../modules/midi.js';

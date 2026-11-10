@@ -1,7 +1,7 @@
 
-import nothing from '../../fn/modules/nothing.js';
-import mod     from '../../fn/modules/mod.js';
-import slugify from '../../fn/modules/slugify.js';
+import nothing from 'fn/modules/nothing.js';
+import mod     from 'fn/modules/mod.js';
+import slugify from 'fn/modules/slugify.js';
 
 
 /**
